@@ -231,8 +231,10 @@ ol.steps{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
 const LS = "neutral-dive-coach-v1";
 
 /* ---------- reference data ---------- */
-const SUITS = {skin:"Skin / rash guard", shorty3:"3 mm shorty", full3:"3 mm full", full5:"5 mm full", full7:"7 mm full", semidry:"7 mm semi-dry", dry:"Drysuit"};
-const SUIT_PCT = {skin:[.02,0], shorty3:[.04,0], full3:[.06,0], full5:[.10,0], full7:[.10,1.5], semidry:[.10,1], dry:[.10,3]};
+const SUITS = {skin:"Skin / rash guard", shorty3:"3 mm shorty", js3:"3 mm long-sleeve shorty (Neosport)", fj3:"3 mm farmer john (Neosport)", fj3sh:"Neosport farmer john + long-sleeve shorty", full3:"3 mm full", full5:"5 mm full", full7:"7 mm full", semidry:"7 mm semi-dry", dry:"Drysuit"};
+const SUIT_PCT = {skin:[.02,0], shorty3:[.04,0], js3:[.047,0], fj3:[.05,0], fj3sh:[.08,0], full3:[.06,0], full5:[.10,0], full7:[.10,1.5], semidry:[.10,1], dry:[.10,3]};
+const BOOTS = {none:"No boots (full-foot fins)", b3:"3 mm or thinner", b5:"5 mm", b65:"6.5 mm (Pelagic)"};
+const BOOT_KG = {none:0, b3:.25, b5:.4, b65:.55};
 const TANKS = {
   al80:{n:"AL80 (11.1 L)", s:"AL80", L:11.1, steel:false},
   al63:{n:"AL63 (9 L)", s:"AL63", L:9.0, steel:false},
@@ -487,11 +489,15 @@ const DEFAULT_CUES = ["Breathe from the diaphragm","Tuck your butt, knees bent",
 
 /* ---------- state ---------- */
 let memOnly = false;
-function blank(){ return {v:1, units:"metric", profile:{heightCm:null, weightKg:null}, cues:DEFAULT_CUES.slice(), dives:[], draft:null, example:false, sigFav:DEFAULT_SIGFAV.slice(), sigLink:"", skills:{queue:[], log:[], custom:[]}, emergency:{contacts: DEFAULT_CONTACTS.map(c=>Object.assign({}, c)), me:{name:"", blood:"", allergies:"", meds:"", cert:"", kin:"", kinPhone:"", insurer:"", policy:"", doctor:"", notes:""}}, backup:{at:null, dives:0}, trip:{name:"", items:{}}, learnings:SEED_LEARNINGS.map(x=>Object.assign({},x)), seedL:SEED_V, certs:defaultCerts()}; }
+function defaultWbase(){ return {suit:"shorty3", tank:"al80", water:"salt", bcd:"back", boots:"", pockets:3.2, trim:4/2.20462, date:"2026-11-12", note:"Boat blocks about 0.8 kg: 2 per weight pocket (3.2 kg / 7 lb) plus 2 x 2 lb trim. Near perfect, if anything slightly light"}; }
+function blank(){ return {wbase:defaultWbase(), v:1, units:"metric", profile:{heightCm:null, weightKg:null}, cues:DEFAULT_CUES.slice(), dives:[], draft:null, example:false, sigFav:DEFAULT_SIGFAV.slice(), sigLink:"", skills:{queue:[], log:[], custom:[]}, emergency:{contacts: DEFAULT_CONTACTS.map(c=>Object.assign({}, c)), me:{name:"", blood:"", allergies:"", meds:"", cert:"", kin:"", kinPhone:"", insurer:"", policy:"", doctor:"", notes:""}}, backup:{at:null, dives:0}, trip:{name:"", items:{}}, learnings:SEED_LEARNINGS.map(x=>Object.assign({},x)), seedL:SEED_V, certs:defaultCerts()}; }
 function migrate(o){
+  if(o.wbase===undefined) o.wbase = defaultWbase();
+  if(o.wbase && Math.abs((o.wbase.pockets||0) - 3.5/2.20462) < 0.01) o.wbase.pockets = 7/2.20462;
   if(!Array.isArray(o.sigFav)) o.sigFav = DEFAULT_SIGFAV.slice();
   if(typeof o.sigLink!=="string") o.sigLink = "";
   if(!o.profile) o.profile = {heightCm:null, weightKg:null};
+  if(o.profile && o.profile.weightKg==null && !o.bwSeed){ o.profile.weightKg = 176/2.20462; o.bwSeed = 1; }
   if(!o.skills || !Array.isArray(o.skills.log)) o.skills = {queue:[], log:[], custom:[]};
   if(o.draft && !o.draft.gas) o.draft.gas = ((o.draft.fo2Label||0)>21 || (o.draft.fo2||0)>21) ? "nitrox" : "air";
   if(o.draft && !o.draft.skillRes) o.draft.skillRes = {};
@@ -574,13 +580,17 @@ function hasIssue(d, issue){
 }
 
 /* ---------- starting estimate ---------- */
+/* salt to fresh: about 2.5% of diver plus gear weight, at least 1.5 kg */
+function freshOff(bw){ return Math.max(1.5, Math.round(0.025*(bw+25)*2)/2); }
+/* both units, rounded to what dive boats stock: whole lb, half kg */
+function both(kg){ return `${Math.round(kg*2.20462)} lb / ${Math.round(kg*2)/2} kg`; }
 function estimate(cfg){
   const bw = S.profile.weightKg; if(!bw) return null;
   const [pct, add] = SUIT_PCT[cfg.suit] || [.06,0];
   let kg = bw*pct + add;
   if(TANKS[cfg.tank] && TANKS[cfg.tank].steel) kg -= 2;
   if(cfg.bcd==="bpw") kg -= 2;
-  if(cfg.water==="fresh") kg -= 2;
+  if(cfg.water==="fresh") kg -= freshOff(bw);
   return Math.max(0, Math.round(kg*2)/2);
 }
 
@@ -709,7 +719,7 @@ function context(k){
     const h = divesFor(k).slice(-10);
     h.forEach(d=>{
       const r = rmvOf(d);
-      lines.push(`- ${d.date} ${d.site||""}: lead belt ${d.weights.belt} / pockets ${d.weights.pockets} / trim ${d.weights.trim} / ankle ${d.weights.ankle} kg (total ${r1(totalW(d.weights))}); tank position ${d.tankPos}; max ${d.maxDepth??"?"} m, avg ${d.avgDepth??"?"} m, ${d.time??"?"} min; 5 m check: ${d.check}; conditions: current ${d.cond&&d.cond.current||"?"}, vis ${d.cond&&d.cond.vis||"?"}, temp ${d.cond&&d.cond.temp!=null?d.cond.temp+" C":"?"}, ${d.cond&&d.cond.entry||"?"} entry, camera ${d.cond&&d.cond.camera||"?"}; felt: ${(d.feel||[]).map(x=>FEEL_T[x]).join(", ")||"nothing noted"}${r!=null?`; RMV ${r.toFixed(1)} L/min`:""}${d.notes?`; notes: ${d.notes}`:""}.`);
+      lines.push(`- ${d.date} ${d.site||""}: lead belt ${d.weights.belt} / pockets ${d.weights.pockets} / trim ${d.weights.trim} / ankle ${d.weights.ankle} kg (total ${r1(totalW(d.weights))}); tank position ${d.tankPos}; boots ${d.boots?BOOTS[d.boots]:"not logged"}; fins ${d.fins||"not logged"}; max ${d.maxDepth??"?"} m, avg ${d.avgDepth??"?"} m, ${d.time??"?"} min; 5 m check: ${d.check}; conditions: current ${d.cond&&d.cond.current||"?"}, vis ${d.cond&&d.cond.vis||"?"}, temp ${d.cond&&d.cond.temp!=null?d.cond.temp+" C":"?"}, ${d.cond&&d.cond.entry||"?"} entry, camera ${d.cond&&d.cond.camera||"?"}; felt: ${(d.feel||[]).map(x=>FEEL_T[x]).join(", ")||"nothing noted"}${r!=null?`; RMV ${r.toFixed(1)} L/min`:""}${d.notes?`; notes: ${d.notes}`:""}.`);
     });
     if((S.learnings||[]).length) lines.push("Diver's own learnings: " + S.learnings.map(l=>`${l.date} ${l.title}: ${l.text}`).join(" | "));
     const lr = latestRec(k);
@@ -779,7 +789,7 @@ function newDraft(){
   const last = sorted()[0];
   const d = {id:uid(), stage:"plan", date:today(), site:"", suit:"shorty3", tank:"al80", water:"salt", bcd:"jacket", fins:"", tankPos:"std", gas:"air", fo2:21, fo2Label:null, planDepth:null, planTime:null, weights:{belt:0,pockets:0,trim:0,ankle:0}, startP:200, endP:null, maxDepth:null, avgDepth:null, time:null, check:null, feel:[], rating:null, notes:"", cues:{}, skillRes:{}, sigRot:null, cond:defaultCond(last), surfTime:null, deco:false};
   const realLast = sorted().find(x=>!x.example); if(realLast) d.site = realLast.site || "";
-  if(last){ ["suit","tank","water","bcd","fins","tankPos","startP"].forEach(k=> d[k]=last[k]);
+  if(last){ ["suit","tank","water","bcd","fins","boots","tankPos","startP"].forEach(k=> d[k]=last[k]);
     d.weights = Object.assign({}, last.weights); applyRecToDraft(d); }
   else { const e = estimate(d); if(e!=null) d.weights.belt = e; }
   return d;
@@ -796,20 +806,34 @@ function sigRotation(d){
 function applyRecToDraft(d){
   d.xfer = null; d.applied = false;
   const h = divesFor(keyOf(d));
-  if(h.length){ const l = h[h.length-1]; d.weights = Object.assign({}, l.weights); d.tankPos = l.tankPos; d.fins = l.fins; return; }
-  const all = sorted(); if(!all.length) return;
-  const base = all.find(x=>x.check==="eye") || all[0];
+  if(h.length){ const l = h[h.length-1]; d.weights = Object.assign({}, l.weights); d.tankPos = l.tankPos; if(!d.fins) d.fins = l.fins; const bd = bootsDelta(l.boots, d.boots); if(bd) d.weights = shiftLead(d.weights, bd); return; }
+  const base = pickBase(); if(!base) return;
   const t = transferFrom(base, d);
   d.weights = shiftLead(Object.assign({}, base.weights), t.delta);
-  d.tankPos = base.tankPos; d.fins = base.fins;
-  d.xfer = {date:base.date, site:base.site, confirmed:base.check==="eye", key:base.key, lines:t.lines, delta:t.delta};
+  d.tankPos = base.tankPos; if(!d.fins) d.fins = base.fins;
+  d.xfer = {date:base.date, site:base.site, confirmed:base.check==="eye", key:base.key, lines:t.lines, delta:t.delta, known:!!base.known};
 }
 const half = x => Math.round(x*2)/2;
+function bootsDelta(a,b){ if(!a||!b||a===b) return 0; return half((BOOT_KG[b]||0)-(BOOT_KG[a]||0)); }
+function kitHtml(a){ return a.length? `<div class="caution" style="margin-top:8px">${a.map(n=>`<p class="small" style="margin:2px 0">${esc(n)}</p>`).join("")}</div>` : ""; }
+function finsNorm(f){ return String(f||"").trim().toLowerCase(); }
+/* trim notes for boots and fins changes, relative to the dive the weights came from */
+function kitNotes(ref, d, withBoots){
+  const out = []; if(!ref) return out;
+  if(ref.boots && d.boots && ref.boots!==d.boots){
+    const kg = bootsDelta(ref.boots, d.boots), up = (BOOT_KG[d.boots]||0) > (BOOT_KG[ref.boots]||0);
+    out.push(`Boots changed to ${BOOTS[d.boots]}${withBoots? (kg? `: ${kg>0?"added":"removed"} ${U.w(Math.abs(kg))} ${U.wu()} below`:": no lead change") : ""}. Your feet will ${up?"float more":"sink more"}, so do the slack-leg test at the stop.`);
+  }
+  else if(!ref.boots && d.boots && withBoots) out.push(`Your earlier dives do not record boots, so no boot adjustment was made. Log boots from now on.`);
+  const a = finsNorm(ref.fins), b = finsNorm(d.fins);
+  if(b && a!==b) out.push(`Fins changed to ${d.fins.trim()}: no lead change, but check trim on this dive.${/seawing|nova/.test(b)?" Seawing fins are positively buoyant.":""}`);
+  return out;
+}
 function transferFrom(base, d){
   const lines = [], bw = S.profile.weightKg || 80; let delta = 0;
   const say = (kg, why)=>{ if(!kg) return; delta += kg; lines.push(`${why}: ${kg>0?"add":"remove"} ${U.w(Math.abs(kg))} ${U.wu()}`); };
   if(base.water!==d.water){
-    const off = Math.max(1.5, half(0.025*(bw+25)));
+    const off = freshOff(bw);
     say(d.water==="fresh"? -off : off, d.water==="fresh"? "Salt to fresh water" : "Fresh to salt water");
   }
   if(base.suit!==d.suit){
@@ -820,6 +844,7 @@ function transferFrom(base, d){
   if(bs!==ns) say(ns? -2 : 2, ns? "Aluminum to steel tank" : "Steel to aluminum tank");
   const bp = base.bcd==="bpw", np = d.bcd==="bpw";
   if(bp!==np) say(np? -2 : 2, np? "To backplate and wing" : "From backplate to BCD");
+  const bd = bootsDelta(base.boots, d.boots); if(bd) say(bd, `Boots: ${BOOTS[base.boots]} to ${BOOTS[d.boots]}`);
   const pc = base.rec && base.rec.change;
   if(base.check!=="eye" && pc && (pc.type==="add"||pc.type==="remove")) say(pc.type==="add"? pc.kg : -pc.kg, "Coach's pending change from that dive");
   return {delta, lines};
@@ -1046,8 +1071,8 @@ function planView(d){
     <label class="f">Exposure suit${select("suit",SUITS,d.suit)}</label>
     <div class="grid2"><label class="f">Tank${select("tank",TANKS,d.tank)}</label>
     <label class="f">BCD${select("bcd",BCDS,d.bcd)}</label></div>
-    <div class="grid2"><label class="f">Fins<input type="text" id="f_fins" data-f="fins" value="${esc(d.fins)}" placeholder="e.g. Jet fins"></label>
-    <span></span></div>
+    <div class="grid2"><label class="f">Fins<input type="text" id="f_fins" data-f="fins" value="${esc(d.fins)}" placeholder="e.g. Seawing Supernova"></label>
+    <label class="f">Boots${select("boots",Object.assign({"":"Not set"},BOOTS),d.boots||"")}</label></div>
     <label class="f">Gas</label>${seg("gas",[["air","Air"],["nitrox","Nitrox"]],d.gas||"air")}
     <div id="planGas"></div>
   </div>
@@ -1096,14 +1121,15 @@ function updatePlanCoach(){
   if(h.length){
     const lr = latestRec(k), c = lr && lr.rec.change;
     const btn = c ? (d.applied ? `<p class="small"><span class="pill good">Applied</span> Weights below include this change.</p>` : `<button type="button" class="btn slim" data-act="applyRec">Apply this change to my gear</button>`) : "";
-    el.innerHTML = `<h3>For this setup</h3>` + recCard(k, true) + btn;
+    el.innerHTML = `<h3>For this setup</h3>` + recCard(k, true) + btn + kitHtml(kitNotes(h[h.length-1], d, true));
   }
   else if(d.xfer){
     const x = d.xfer;
     el.innerHTML = `<h3>For this setup</h3><div class="coachcard"><span class="eyebrow">New setup · carried over</span>
       <div class="gear">Start at ${U.w(totalW(d.weights))} ${U.wu()} total</div>
-      <p class="small">From your ${esc(x.date)}${x.site?` ${esc(x.site)}`:""} dive (${x.confirmed?"weight confirmed at the 5 m check":"not yet confirmed at the 5 m check"}).</p>
+      <p class="small">${x.known? `From your known weighting (${esc(keyLabel(x.key))}), set on the Coach tab.` : `From your ${esc(x.date)}${x.site?` ${esc(x.site)}`:""} dive (${x.confirmed?"weight confirmed at the 5 m check":"not yet confirmed at the 5 m check"}).`}</p>
       ${x.lines.length? `<ul class="xfer">${x.lines.map(l=>`<li>${esc(l)}</li>`).join("")}</ul>` : `<p class="small">No adjustment needed for this change.</p>`}
+      ${kitHtml(kitNotes(pickBase(), d, false))}
       <p class="small muted">Already applied to the weights below. Rules of thumb only: the 5 m check on this dive sets the real number.</p></div>`;
   }
   else {
@@ -1223,9 +1249,91 @@ function debriefView(d){
 }
 
 /* --- Coach tab --- */
+
+/* --- known weighting and the weight calculator --- */
+function wbaseDive(){
+  const b = S.wbase; if(!b || !(b.pockets||b.trim)) return null;
+  const d = {date:b.date||"", site:"your known weighting", suit:b.suit, tank:b.tank, water:b.water, bcd:b.bcd, boots:b.boots||null, fins:"", tankPos:"std", check:"eye", weights:{belt:0, pockets:b.pockets||0, trim:b.trim||0, ankle:0}, known:true};
+  d.key = keyOf(d); return d;
+}
+function pickBase(){
+  const all = sorted(), real = all.filter(x=>!x.example && !x.quick);
+  return real.find(x=>x.check==="eye") || wbaseDive() || all.find(x=>x.check==="eye") || all[0] || null;
+}
+let WC = null;
+function wcInit(){ const l = sorted().find(x=>!x.example); WC = {suit:"fj3sh", tank:(l&&l.tank)||(S.wbase&&S.wbase.tank)||"al80", water:"salt", bcd:(l&&l.bcd)||(S.wbase&&S.wbase.bcd)||"back", boots:"b65"}; }
+function wcSel(field, map, cur, attr){ return `<select ${attr}="${field}">${Object.entries(map).map(([k,v])=>`<option value="${k}" ${k===(cur||"")?"selected":""}>${esc(typeof v==="string"?v:v.n)}</option>`).join("")}</select>`; }
+function wtTable(){
+  const bw = S.profile.weightKg;
+  const rows = [["skin","No wetsuit"],["shorty3","3 mm shorty"],["full3","3 mm full"],["full5","5 mm full"],["full7","7 mm full"],["js3","Neosport long-sleeve shorty"],["fj3sh","Neosport john + shorty"]];
+  const cfg = (suit, water)=>({suit, water, tank:WC.tank, bcd:WC.bcd});
+  const kb = wbaseDive(), rk = kb && bw ? estimate(kb) : null;
+  const off = rk!=null ? Math.round((totalW(kb.weights) - rk)*2)/2 : 0;
+  const useOff = off && WC.cal!==false;
+  const cell = kg => `<b>${Math.round(kg*2.20462)} lb</b><br><span class="muted">${Math.round(kg*2)/2} kg</span>`;
+  const val = (k,w)=>{ const e = estimate(cfg(k,w)); return e==null? 0 : Math.max(0, e + (useOff? off : 0)); };
+  const body = !bw ? `<p class="small muted">Enter your body weight above to fill this table.</p>` :
+   `${off? `<label class="cue"><input type="checkbox" id="wc_cal" ${useOff?"checked":""}><span>Adjust to my known weighting (${off>0?"+":"−"}${both(Math.abs(off))}). Your real shorty number is ${both(totalW(kb.weights))}, the body-weight rule says ${both(rk)}.</span></label>`:""}
+    <div class="panel tbl"><table><thead><tr><th>Suit</th><th class="n">Salt</th><th class="n">Fresh</th></tr></thead><tbody>${rows.map(([k,t])=>`<tr><td>${t}</td><td class="n">${cell(val(k,"salt"))}</td><td class="n">${cell(val(k,"fresh"))}</td></tr>`).join("")}</tbody></table></div>
+    <p class="small muted" style="margin-top:6px">Body weight ${both(bw)}, ${esc((TANKS[WC.tank]||{}).s||WC.tank)}, ${esc(BCDS[WC.bcd]||WC.bcd)}. Change tank or BCD above and the table follows. Total lead including trim pockets.</p>`;
+  const tips = `<div class="panel guide" style="margin-top:10px"><h4>Easy to forget</h4><ul>
+    <li><b>Tank:</b> an aluminum tank gets about 2 kg (4 to 5 lb) lighter as you breathe it down. That is why the check is at 5 m with about 50 bar left, not at the start.</li>
+    <li><b>Steel tank or a metal backplate</b> on a boat rig: about 2 kg (4 to 5 lb) less lead each. Pick them above.</li>
+    <li><b>Rental BCD:</b> a jacket BCD with its own foam floats differently from your Hydros. Treat it as a new setup and do the 5 m check.</li>
+    <li><b>Ditchable lead:</b> keep most of it in the release pockets. Trim pockets are not ditchable, so do not let them carry more than a few pounds.</li>
+    <li><b>New neoprene</b> floats most. Expect to drop some lead over the first several dives.</li>
+    <li><b>Boots and fins</b> change trim more than total weight. Do the slack-leg test after any change.</li>
+    <li><b>Camera or light</b> on one side causes a roll. Balance it with trim weight on the other side.</li>
+    <li><b>Block sizes:</b> boats in Thailand and the Philippines usually stock 1 and 2 kg blocks. US boats stock 1 to 5 lb. Round up to the nearest block and fine-tune at the 5 m check.</li>
+    <li><b>Lungs:</b> a relaxed breath at the check. A big held breath hides about 1 to 2 kg (2 to 4 lb).</li></ul></div>`;
+  return `<div class="section"><h3>Quick table by suit</h3>${body}${tips}</div>`;
+}
+function calcView(){
+  if(!WC) wcInit();
+  const b = S.wbase || {}, kb = wbaseDive();
+  const k = keyOf(WC), h = divesFor(k).filter(x=>!x.example), hc = h.filter(x=>x.check==="eye");
+  let base, how;
+  if(h.length){ base = hc[hc.length-1] || h[h.length-1]; how = `Your ${esc(base.date)}${base.site?` ${esc(base.site)}`:""} dive in this exact setup${base.check==="eye"?", confirmed at the 5 m check":", not yet confirmed at the 5 m check"}.`; }
+  else { base = pickBase(); how = base? (base.known? `Your known weighting: ${esc(keyLabel(base.key))}.` : `Your ${esc(base.date)}${base.site?` ${esc(base.site)}`:""} dive (${esc(keyLabel(base.key))}).`) : ""; }
+  let out = "";
+  if(base){
+    const t = transferFrom(base, WC), tot = Math.max(0, totalW(base.weights) + t.delta);
+    const trim = Math.min(base.weights.trim||0, tot), rest = r1(tot - trim);
+    const notes = kitNotes(base, WC, false).filter(x=>x.startsWith("Boots"));
+    if(!base.boots && WC.boots) notes.push("The reference does not record boots, so they are not counted. Set boots on your known weighting to include them.");
+    out = `<div class="coachcard"><span class="eyebrow">Starting weight</span>
+      <div class="gear">${both(tot)} total</div>
+      <p class="small">Trim pockets ${both(trim)}. Weight pockets ${both(rest)}.</p>
+      <p class="small muted">From: ${how}</p>
+      ${t.lines.length? `<ul class="xfer">${t.lines.map(l=>`<li>${esc(l)}</li>`).join("")}</ul>` : `<p class="small">Same setup, so no adjustment.</p>`}
+      ${notes.map(n=>`<p class="small">${esc(n)}</p>`).join("")}
+      <p class="small muted">Rules of thumb only. Carry one extra small weight on the first dive and let the 5 m check set the real number.</p></div>`;
+  } else {
+    const e = estimate(WC);
+    out = `<div class="coachcard"><span class="eyebrow">Starting weight</span>${e!=null? `<div class="gear">About ${both(e)} total</div><p class="small muted">From your body weight. Enter a known weighting below for a better number.</p>` : `<p>Enter your body weight above, or a known weighting below.</p>`}</div>`;
+  }
+  const est = estimate(WC);
+  return `<div class="section"><h3>Weight calculator</h3><div class="panel stack">
+    <p class="small muted">What lead to start with for a setup, without starting a dive.</p>
+    <label class="f">Your body weight (${U.wu()})<input type="number" inputmode="decimal" id="wc_bw" value="${S.profile.weightKg==null?"":U.w(S.profile.weightKg)}" placeholder="needed for the table"></label>
+    <label class="f">Exposure suit${wcSel("suit",SUITS,WC.suit,"data-wc")}</label>
+    <div class="grid2"><label class="f">Tank${wcSel("tank",TANKS,WC.tank,"data-wc")}</label><label class="f">BCD${wcSel("bcd",BCDS,WC.bcd,"data-wc")}</label></div>
+    <div class="grid2"><label class="f">Boots${wcSel("boots",BOOTS,WC.boots,"data-wc")}</label><label class="f">Water${wcSel("water",{salt:"Salt",fresh:"Fresh"},WC.water,"data-wc")}</label></div>
+  </div></div>
+  <div class="section">${out}${base && est!=null? `<p class="small muted" style="margin-top:8px">Body-weight rule of thumb for the same setup: about ${both(est)}.</p>`:""}</div>
+  ${wtTable()}
+  <div class="section"><details class="fa"${kb?"":" open"}><summary><b>Your known weighting</b><span class="small muted">${kb? `${U.w(totalW(kb.weights))} ${U.wu()}`:"Edit"}</span></summary><div class="panel stack" style="margin-top:8px">
+    <p class="small muted">A setup where your weight is right. Used whenever you have no confirmed logged dive to work from.</p>
+    <label class="f">Exposure suit${wcSel("suit",SUITS,b.suit,"data-wb")}</label>
+    <div class="grid2"><label class="f">Tank${wcSel("tank",TANKS,b.tank,"data-wb")}</label><label class="f">BCD${wcSel("bcd",BCDS,b.bcd,"data-wb")}</label></div>
+    <div class="grid2"><label class="f">Boots${wcSel("boots",Object.assign({"":"Not recorded"},BOOTS),b.boots,"data-wb")}</label><label class="f">Water${wcSel("water",{salt:"Salt",fresh:"Fresh"},b.water,"data-wb")}</label></div>
+    <div class="grid2"><label class="f">Weight pockets (${U.wu()})<input type="number" inputmode="decimal" step="0.5" data-wb="pockets" value="${U.w(b.pockets||0)}"></label><label class="f">Trim pockets (${U.wu()})<input type="number" inputmode="decimal" step="0.5" data-wb="trim" value="${U.w(b.trim||0)}"></label></div>
+    <label class="f">Note<input type="text" data-wb="note" value="${esc(b.note||"")}" placeholder="e.g. slightly light"></label>
+  </div></details></div>`;
+}
 function viewCoach(){
   const keys = [...new Set(sorted().filter(d=>!d.quick).map(d=>d.key))];
-  if(!keys.length) return `<div class="section"><h1>Coach</h1><p class="muted">Log a dive and the coaching for that setup appears here.</p></div>${learnView()}`;
+  if(!keys.length) return `<div class="section"><h1>Coach</h1><p class="muted">Log a dive and the coaching for that setup appears here.</p></div>${calcView()}${learnView()}`;
   if(!coachKey || !keys.includes(coachKey)) coachKey = keys[0];
   const h = divesFor(coachKey);
   const rows = h.slice(-8).reverse().map(d=>{
@@ -1245,6 +1353,7 @@ function viewCoach(){
   <div class="section"><h3>This setup, recent dives</h3>
     <div class="panel tbl"><table><thead><tr><th>Date</th><th class="n">Lead ${U.wu()}</th><th class="n">Trim</th><th>5 m</th><th class="n">${U.ru()}</th></tr></thead><tbody>${rows}</tbody></table></div>
   </div>
+  ${calcView()}
   ${learnView()}
   <div class="section"><h3>Ask Claude</h3>${aiPart}</div>`;
 }
@@ -1639,11 +1748,158 @@ const MK25 = [
  +'<div class="tip">A second stage that keeps flowing however you set the knob is usually a first stage with creeping intermediate pressure. That is a service issue and it will not be fixed on the boat.</div>',
  "service interval intermediate pressure creep rinse dust cap maintenance leak"]
 ];
+/* --- Shearwater Peregrine guide (backup computer, non air-integrated) --- */
+const PER_URL = "https://cdn.shopify.com/s/files/1/0838/3732/1530/files/Peregrine_Manual-metric_2021.pdf?v=1710186733";
+const PER = [
+["buttons","Buttons and basics","Two buttons, MENU and FUNC",
+ '<div class="btnmap">'
+ +'<span class="b">Both</span><span>Press MENU and FUNC together to turn it on.</span>'
+ +'<span class="b">MENU (left)</span><span>On the main screen: opens the menu and steps through it. Inside a menu: moves to the next item or the next option.</span>'
+ +'<span class="b">FUNC (right)</span><span>On the main screen: steps through the info screens. Inside a menu: selects, edits or saves.</span></div>'
+ +'<ul><li>Hints above each button tell you what the next press does.</li>'
+ +'<li>Menus close after 10 seconds without a press, and unsaved edits are discarded. Info screens also drop back after 10 seconds, except the Tissues screen.</li>'
+ +'<li><b>Turn Off</b> puts it to sleep and keeps your tissue loading. Right after a dive it shows <b>End Dive</b> instead. The dive closes on its own after the End Dive Delay (60 s by default).</li>'
+ +'<li>It wakes on its own at about 0.9 m, but Shearwater says to turn it on yourself before every dive.</li></ul>'
+ +'<div class="tip">Turn it on during the buddy check, next to the Mk2i. A backup that wakes up underwater has missed your surface pressure and your descent.</div>',
+ "buttons menu func turn on off end dive timeout"],
+["modes","Dive modes","Air, Nitrox, 3 GasNx, Gauge",
+ '<ul><li><b>Air.</b> The default. Oxygen fixed at 21%.</li>'
+ +'<li><b>Nitrox.</b> One gas, set before the dive. No switching underwater.</li>'
+ +'<li><b>3 GasNx.</b> Up to three gases, 21 to 99% oxygen, with gas switching, deco stops and the Dive Planner. More than you need for recreational diving.</li>'
+ +'<li><b>Gauge.</b> Depth and time only. No nitrogen tracking.</li></ul>'
+ +'<p>Change mode at <span class="path">System Setup &gt; Mode Setup &gt; Dive Mode</span>. System Setup is only available on the surface.</p>'
+ +'<div class="tip">Switching into or out of Gauge clears the tissue loading. Never do it during a dive trip, or the backup no longer knows your nitrogen history.</div>',
+ "air nitrox 3 gasnx gauge mode setup dive mode"],
+["gas","Nitrox and MOD","Setting the mix to match the Mk2i",
+ '<ol><li>Set the mode to Nitrox: <span class="path">System Setup &gt; Mode Setup &gt; Dive Mode</span>.</li>'
+ +'<li>In the same menu, set <b>Gas O2%</b> to the <b>tested</b> percentage on the cylinder, the same number you enter on the Mk2i.</li>'
+ +'<li><b>MOD PPO2</b> defaults to 1.40 (range 1.0 to 1.69). Keep it at 1.40 to match the Mk2i working limit.</li></ol>'
+ +'<p>The active gas sits bottom left: <b>Air</b> for 21%, or <b>Nx</b> plus the percentage, for example Nx32. It flashes red past the MOD.</p>'
+ +'<div class="tip">If you dive nitrox and leave the Peregrine on Air, it will show shorter no-deco times than the Mk2i. That errs on the safe side, but the two will disagree all dive. Set both to the same mix so a disagreement means something.</div>',
+ "nitrox o2 oxygen percent mod ppo2 1.4 gas mix"],
+["conservatism","Conservatism","Presets and matching your primary",
+ '<p><span class="path">System Setup &gt; Deco Setup</span>. The model is Buhlmann ZHL-16C with gradient factors, the same family the Mk2i uses.</p>'
+ +'<ul><li><b>Low:</b> 45/95</li><li><b>Med:</b> 40/85 (default)</li><li><b>High:</b> 35/75</li>'
+ +'<li><b>Custom:</b> lets you set GF Low and GF High directly.</li></ul>'
+ +'<p>To make it a true backup, set it to the same gradient factors as the Mk2i. If the Mk2i uses a preset you cannot match exactly, choose Custom here and enter the same two numbers.</p>'
+ +'<div class="tip">Rule for two computers: plan and ascend on whichever one is more conservative at that moment. Check the Mk2i conservatism setting first. It is still an open item on your list.</div>',
+ "gradient factor gf low high conservatism buhlmann custom match mk2i"],
+["stops","Safety stop and deco","Stop options and how the counter behaves",
+ '<p><span class="path">System Setup &gt; Deco Setup &gt; Safety Stop</span>: Off, 3, 4 or 5 minutes, Adapt, or CntUp (counts up).</p>'
+ +'<ul><li><b>Adapt</b> gives 3 minutes, or 5 minutes if the dive went deeper than 30 m or no-deco time dropped below 5 minutes.</li>'
+ +'<li>The counter appears once you pass 11 m. It counts down between about 2.4 and 8.3 m and pauses, in yellow, outside that band. Going back below 11 m resets it.</li>'
+ +'<li>When the stop is complete, it says so.</li>'
+ +'<li>Deco stops, if you ever go into deco, are in 3 m steps. There is no lockout after a missed stop, so the discipline is yours.</li></ul>'
+ +'<div class="tip">Set the same stop length as the Mk2i (3 minutes in your setup checklist), or Adapt if you want the longer stop after deep dives. Your 5 m weight check happens during this stop.</div>',
+ "safety stop adapt count up deco stop 3 minutes lockout"],
+["alerts","Alerts and ascent rate","What the colors, arrows and buzzes mean",
+ '<ul><li><b>Colors:</b> white is normal, yellow is a warning, flashing red is critical.</li>'
+ +'<li><b>Messages</b> appear in yellow across the bottom row. Press either button to clear one. Vibration repeats every 10 seconds until you do.</li>'
+ +'<li><b>Ascent rate:</b> one arrow per 3 m/min. White means under 9 m/min, yellow 9 to 18, flashing red above 18. A Fast Ascent warning fires when you hold faster than 10 m/min.</li></ul>'
+ +'<p><span class="path">System Setup &gt; Alerts Setup</span>:</p>'
+ +'<ul><li>Depth: on at 40 m by default.</li><li>Time: off by default (60 min if switched on).</li><li>Low NDL: on at 5 min.</li><li>Vibration: on or off. Test it from the main menu before a dive.</li></ul>'
+ +'<div class="tip">Set the depth alert to your actual plan limit for the trip. A buzz at 40 m is too late to be useful on a 30 m dive.</div>',
+ "alert alarm vibration ascent rate arrows fast ascent depth time ndl colors"],
+["screens","Screens and the bottom row","What you see and what to show",
+ '<ul><li><b>Top:</b> depth, dive time (surface interval on the surface), ascent arrows, battery when low.</li>'
+ +'<li><b>Middle:</b> no-deco time, then the safety stop or deco stop, plus the nitrogen bar.</li>'
+ +'<li><b>Bottom row:</b> the active gas is always on the left. The center and right slots are yours to choose at <span class="path">System Setup &gt; Bottom Row</span>.</li></ul>'
+ +'<p>FUNC steps through the info screens: max and average depth, temperature, CNS, PPO2, GF99, Surface GF, time to surface, tissues, battery, last dive and more.</p>'
+ +'<div class="tip">Put <b>Max depth</b> and <b>Avg depth</b> in the bottom row. Those two plus dive time are exactly what the debrief here asks for, so you can read them straight off the backup if the Mk2i is busy or flat.</div>',
+ "screen display bottom row info screens max depth average depth gf99 tts cns"],
+["plan","No-deco planner","Times by depth before you get wet",
+ '<p><span class="path">NDL Planner</span> is in the main menu on the surface. Pick a surface interval (none up to a day) and it lists no-deco minutes by depth for the gas you have set.</p>'
+ +'<p>The full Dive Planner only appears in 3 GasNx mode.</p>'
+ +'<div class="tip">Run it on the second dive of the day with the real surface interval. It already includes your nitrogen from the first dive.</div>',
+ "ndl planner no deco plan surface interval repetitive"],
+["log","Log, Bluetooth and firmware","Shearwater Cloud on your phone",
+ '<ul><li><b>On the computer:</b> <span class="path">Dive Log &gt; Display Log</span> on the surface shows profile, depth, time, temperature and more.</li>'
+ +'<li><b>To your phone:</b> choose <b>Start Bluetooth</b> from the main menu, open the Shearwater Cloud app, connect, then <b>Download Dives</b>.</li>'
+ +'<li><b>Firmware:</b> through Shearwater Cloud with Bluetooth on. It can take up to 15 minutes and the screen may flicker.</li>'
+ +'<li><b>Log rate</b> defaults to one sample every 10 seconds (System Setup).</li></ul>'
+ +'<div class="tip">A firmware update clears the tissue loading. Update at home before a trip, never between dives.</div>',
+ "log bluetooth shearwater cloud download firmware update app"],
+["care","Charging and care","Battery, storage, clock",
+ '<ul><li><b>Charging:</b> wireless (Qi) on the supplied dock, lying flat. About 2 hours. Charge in a room between about 15 and 25 C.</li>'
+ +'<li><b>Battery:</b> roughly 30 hours of diving at medium brightness. Brightness options: Cave, Low, Med, High, Auto.</li>'
+ +'<li><b>If the battery runs flat</b>, the tissue loading is lost. Charge it every night of a dive trip, alongside the Mk2i.</li>'
+ +'<li><b>Storage:</b> charge to full, top it up every 3 months, keep it dry and out of sun.</li>'
+ +'<li><b>Rinse</b> in fresh water. No pressure jets or detergents.</li>'
+ +'<li><b>Clock</b> drifts about 4 minutes a month. Set it in System Setup before a trip so logs line up with the Mk2i.</li></ul>',
+ "charge charging qi wireless battery storage rinse clock brightness"],
+["backup","Diving it as a backup","Two computers, one plan",
+ '<ul><li><b>Same settings:</b> same mode, same tested O2%, same gradient factors, same safety stop.</li>'
+ +'<li><b>Start the trip together.</b> A computer added part-way through a dive series has no nitrogen history and will be too optimistic.</li>'
+ +'<li><b>Turn both on</b> at the buddy check. Peregrine on one wrist, Mk2i on the other.</li>'
+ +'<li><b>When they disagree,</b> follow the more conservative one. A large gap means a setting differs. Find it on the boat.</li>'
+ +'<li><b>If the Mk2i fails,</b> the Peregrine is already tracking. Finish the dive on it and keep using it for the rest of the day.</li>'
+ +'<li><b>No tank pressure:</b> the Peregrine is not air-integrated. Your SPG (or the Mk2i pod) is the only gas reading.</li></ul>'
+ +'<div class="tip">Log dives here from the Mk2i as usual. Use the Peregrine numbers only when the Mk2i is missing one.</div>',
+ "backup two computers primary disagree failure spg mk2i"],
+["setup","Setup checklist","Confirm once before the liveaboard",
+ '<ol><li>Units: meters and Celsius (Display Setup).</li>'
+ +'<li>Date and clock set.</li>'
+ +'<li>Salinity: Salt for the trip (it only changes the depth shown).</li>'
+ +'<li>Mode: Nitrox with today\'s tested O2%, or Air.</li>'
+ +'<li>MOD PPO2: 1.40.</li>'
+ +'<li>Conservatism: same gradient factors as the Mk2i.</li>'
+ +'<li>Safety stop: 3 minutes, or Adapt.</li>'
+ +'<li>Depth alert: your trip limit. Low NDL alert: on.</li>'
+ +'<li>Bottom row: Max depth and Avg depth.</li>'
+ +'<li>Firmware updated at home, battery charged.</li></ol>'
+ +'<div class="tip">After setup, dive both computers on one easy dive and compare no-deco times at the same depth. They should be close. If they are not, recheck O2% and gradient factors.</div>',
+ "checklist setup units salinity salt clock mode alerts bottom row"]
+];
+
+/* --- Exposure kit and fins guide --- */
+const KIT_URL = "https://scubapro.johnsonoutdoors.com/us/shop/fins/seawing-supernova-fin";
+const KIT = [
+["suit","Neosport 3 mm two-piece","Shorty, farmer john, or both",
+ '<p>The top is a long-sleeve shorty (short legs). The bottom is a sleeveless farmer john. Three ways to wear them, each logged as its own setup so the weight coaching stays separate:</p>'
+ +'<ul><li><b>Long-sleeve shorty alone</b>: log <b>3 mm long-sleeve shorty (Neosport)</b>. A bit more neoprene than your short-sleeve shorty.</li>'
+ +'<li><b>Farmer john alone</b>: legs and torso covered, arms bare. Log <b>3 mm farmer john (Neosport)</b>.</li>'
+ +'<li><b>Both</b>, shorty over the farmer john: 6 mm over your torso and thighs, 3 mm on arms and lower legs. That is more neoprene than a 5 mm full suit. Log <b>Neosport farmer john + long-sleeve shorty</b>.</li></ul>'
+ +'<p><b>Weight:</b> every layer floats, and the full combination is a big jump from your short-sleeve shorty. The Weight calculator on the Coach tab starts from your known weighting (shorty, AL80) and adds the difference. The 5 m check on the first dive sets the real number.</p>'
+ +'<p><b>New neoprene</b> is at its most buoyant. Over the first several dives it compresses a little, so you will probably remove some lead along the way. The coach catches this from your 5 m checks.</p>'
+ +'<div class="tip">Wear the shorty over the farmer john, not under it. The overlap at the waist is where the warmth comes from.</div>',
+ "neosport wetsuit farmer john shorty jacket two piece layer 3mm 6mm weight"],
+["boots","Fourth Element Pelagic 6.5 mm","Warm boots with a real footbed",
+ '<ul><li>6.5 mm neoprene with a side zip, a supportive footbed with heel and arch support, and a fin strap retainer at the heel.</li>'
+ +'<li><b>Buoyancy:</b> thick boots float, and they float at your feet. The app counts about half a kilo extra lead for these against no boots, and flags trim to check.</li>'
+ +'<li><b>Your left heel:</b> the hot spot you logged came from a bootie seam under the fin strap. New boots, new seams. Check the heel after the first two dives and cover early if it rubs.</li>'
+ +'<li><b>Heat:</b> 6.5 mm is warm for 28 to 30 C water. Put them on last before the giant stride, not on a sunny deck.</li>'
+ +'<li><b>Care:</b> rinse inside and out, dry them inside out and out of the sun, and rinse the zip so salt does not seize it.</li></ul>',
+ "pelagic boots fourth element 6.5mm footbed heel blister hot spot zip"],
+["fins","Scubapro Seawing Supernova","Open heel, positive buoyancy, modular",
+ '<ul><li><b>Positively buoyant</b> (Monprene). With thick boots, your feet now have more lift than before.</li>'
+ +'<li><b>Open heel with a bungee strap.</b> Size the foot pocket to the 6.5 mm boot, not your bare foot.</li>'
+ +'<li><b>Two-piece:</b> blade and foot pocket click together with a Socket-Lock. Keep the multi-tool and spare lock plates in the save-a-dive kit.</li>'
+ +'<li><b>Blade:</b> it changes its angle on its own between about 40 and 50 degrees depending on how hard you kick, and the twin tips are shaped for frog and back kicks.</li>'
+ +'<li>A full-foot pocket is sold separately if you ever want to dive warm water without boots.</li></ul>'
+ +'<div class="tip">Frog kick and back kick are where these fins are designed to shine. Queue the back kick skill on your first dives with them.</div>',
+ "supernova seawing fins scubapro positive buoyant open heel bungee socket lock frog back kick"],
+["trim","Trim with the new kit","Floaty feet: what to watch for",
+ '<p>Positive fins plus thick boots put extra lift at your feet. Your earlier pattern was legs that sank and a hamstring held working to keep them up, so this change may help.</p>'
+ +'<ol><li>On the first dive, at the safety stop, do the <b>slack-leg test</b>: hover, relax your legs completely, and watch which way you rotate.</li>'
+ +'<li><b>Level</b>: the new kit fixed it. Log Level trim.</li>'
+ +'<li><b>Feet rise:</b> log <b>Head down, feet floating</b>. The coach suggests the trim change for the next dive.</li>'
+ +'<li><b>Feet still sink:</b> log <b>Head up, feet sinking</b>, and the coach does the same the other way.</li></ol>'
+ +'<div class="tip">One change per dive. If you change suit, boots and fins on the same dive, the first 5 m check is all three at once. That is fine for the lead number, but log what you wore so the next change is readable.</div>',
+ "trim feet float sink slack leg test head down positive fins boots"],
+["log","Logging this kit","Where it goes in the Plan screen",
+ '<ul><li><b>Exposure suit:</b> pick the combination you are wearing. Each one keeps its own weight history.</li>'
+ +'<li><b>Boots:</b> pick 6.5 mm. Changing boots shifts your lead by the difference and adds a trim note.</li>'
+ +'<li><b>Fins:</b> type Seawing Supernova. A fin change does not change lead, but the Plan screen reminds you to check trim.</li></ul>'
+ +'<div class="tip">The Weight calculator on the Coach tab shows the starting number for any combination without starting a dive.</div>',
+ "log plan suit boots fins setup weight calculator"]
+];
 const GUIDES = [
   {id:"mk2i", name:"Garmin Descent Mk2i", blurb:"Dive computer and T1 tank pod", secs:MK, url:MK_URL, urlText:"Open Garmin's owner's manual (PDF)"},
   {id:"s620", name:"Scubapro S620 Ti", blurb:"Second stage: knob and VIVA lever", secs:S620, url:S620_URL, urlText:"Open Scubapro's product page"},
   {id:"hydros", name:"Scubapro Hydros Pro", blurb:"Back-inflate BCD: fit, weights, trim", secs:HYD, url:HYD_URL, urlText:"Open Scubapro's product page"},
-  {id:"mk25", name:"Scubapro MK25 EVO", blurb:"First stage: ports, cold water, service", secs:MK25, url:MK25_URL, urlText:"Open Scubapro's product page"}
+  {id:"mk25", name:"Scubapro MK25 EVO", blurb:"First stage: ports, cold water, service", secs:MK25, url:MK25_URL, urlText:"Open Scubapro's product page"},
+  {id:"peregrine", name:"Shearwater Peregrine", blurb:"Backup dive computer: setup, menus, matching the Mk2i", secs:PER, url:PER_URL, urlText:"Open Shearwater's Peregrine manual (PDF)"},
+  {id:"kit", name:"Suit, boots and fins", blurb:"Neosport two-piece, Pelagic boots, Seawing Supernova", secs:KIT, url:KIT_URL, urlText:"Open Scubapro's Supernova page"}
 ];
 let MKS = {guide:null, sec:null};
 function stripTags(h){ return String(h).replace(/<[^>]*>/g," ").replace(/&nbsp;/g," ").replace(/&amp;/g,"&").replace(/\s+/g," ").trim(); }
@@ -2035,6 +2291,7 @@ document.addEventListener("input", e=>{
   if(el.dataset && el.dataset.f && S.draft && el.id!=="coachKey"){
     setField(S.draft, el.dataset.f, el.value, el.dataset.t); save();
     if(S.draft.stage==="plan" && (el.tagName==="SELECT" || el.dataset.f.startsWith("w."))) updatePlanCoach();
+    else if(S.draft.stage==="plan" && el.dataset.f==="fins") updatePlanCoach();
     else if(S.draft.stage==="plan") updatePlanGas();
     if(S.draft.stage==="plan" && el.tagName==="SELECT"){ applyRecToDraft(S.draft); render(); }
     return;
@@ -2079,6 +2336,10 @@ document.addEventListener("change", e=>{
   }
   if(el.dataset && el.dataset.cue!=null && S.draft){ S.draft.cues[el.dataset.cue] = el.checked; save(); return; }
   if(el.id==="coachKey"){ coachKey = el.value; render(); }
+  if(el.id==="wc_cal"){ WC.cal = el.checked; render(); return; }
+  if(el.id==="wc_bw"){ const n = num(el.value); S.profile.weightKg = n==null? null : U.wIn(n); save(); render(); return; }
+  if(el.dataset && el.dataset.wc){ WC[el.dataset.wc] = el.value; render(); return; }
+  if(el.dataset && el.dataset.wb){ const f = el.dataset.wb; S.wbase = S.wbase || defaultWbase(); if(f==="pockets"||f==="trim"){ const n = num(el.value); S.wbase[f] = n==null? 0 : U.wIn(n); } else S.wbase[f] = el.value; S.wbase.date = today(); save(); render(); return; }
   if(el.id==="cvFrom"){ CV.from = el.value; convert(); }
   if(el.id==="importFile" && el.files && el.files[0]){
     const r = new FileReader();
@@ -2202,7 +2463,7 @@ document.addEventListener("click", async e=>{
     case "lKind": learnKind = v; render(); break;
     case "addLearn": { const t=($("#lTitle").value||"").trim(), x=($("#lText").value||"").trim(), c=($("#lCue").value||"").trim(); if(t||x){ S.learnings.push({id:uid(), date:today(), kind:learnKind, title:t||x.slice(0,50), text:x, cue:c}); save(); toast("Learning saved"); render(); } break; }
     case "delLearn": if(armed==="L"+v){ S.learnings = S.learnings.filter(l=>l.id!==v); armed=null; save(); } else { armed="L"+v; } render(); break;
-    case "reset": if(armed==="reset"){ const u=S.units, p=S.profile, c=S.cues, em=S.emergency, sf=S.sigFav, sl=S.sigLink, o0=S.learnings, ce=S.certs; S = blank(); S.units=u; S.profile=p; S.cues=c; S.emergency=em; S.sigFav=sf; S.sigLink=sl; S.learnings=(o0||[]); if(ce) S.certs=ce; armed=null; save(); toast("All dives erased"); } else armed="reset"; render(); break;
+    case "reset": if(armed==="reset"){ const u=S.units, p=S.profile, c=S.cues, em=S.emergency, sf=S.sigFav, sl=S.sigLink, o0=S.learnings, ce=S.certs, wb=S.wbase; S = blank(); if(wb) S.wbase=wb; S.units=u; S.profile=p; S.cues=c; S.emergency=em; S.sigFav=sf; S.sigLink=sl; S.learnings=(o0||[]); if(ce) S.certs=ce; armed=null; save(); toast("All dives erased"); } else armed="reset"; render(); break;
     case "export":
       if(!ai.downloads) return;
       try{ await ai.downloads.save({filename:`neutral-backup-${today()}.json`, data: JSON.stringify(S, null, 2)}); markBackup(); toast("Backup saved"); render(); }
