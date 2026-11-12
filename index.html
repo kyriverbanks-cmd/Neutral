@@ -1,0 +1,2147 @@
+<!doctype html><html><head><meta charset=utf8><link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icons/icon-180.png"><link rel="icon" type="image/png" href="icons/icon-192.png"><meta name="theme-color" content="#0F2A31"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Neutral Dive Coach</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Neutral">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Source+Sans+3:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --ground:#E7EFEE; --surface:#F7FBFA; --ink:#0F2A31; --muted:#58727A; --line:#C6D6D6;
+  --accent:#D4501C; --accent-ink:#FFFFFF; --deep:#1D5E68; --deep-soft:#D5E6E6; --chip:#DCE7E6;
+  --good:#2C7A4B; --good-soft:#D8EEDF; --warn:#9A6414; --warn-soft:#F5E7CC; --bad:#B42318; --bad-soft:#F8DCD8;
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --body:"Source Sans 3",-apple-system,"Segoe UI",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0A1A20; --surface:#10262E; --ink:#DCEBEC; --muted:#8EA8AD; --line:#23424B;
+    --accent:#FF7A45; --accent-ink:#1B0A02; --deep:#74C3CB; --deep-soft:#15353D; --chip:#17363F;
+    --good:#62C58D; --good-soft:#143526; --warn:#E2B35C; --warn-soft:#3A2D12; --bad:#F2766B; --bad-soft:#3E1B18;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0A1A20; --surface:#10262E; --ink:#DCEBEC; --muted:#8EA8AD; --line:#23424B;
+  --accent:#FF7A45; --accent-ink:#1B0A02; --deep:#74C3CB; --deep-soft:#15353D; --chip:#17363F;
+  --good:#62C58D; --good-soft:#143526; --warn:#E2B35C; --warn-soft:#3A2D12; --bad:#F2766B; --bad-soft:#3E1B18;
+}
+*{box-sizing:border-box}
+html,body{background:var(--ground)}
+body{color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;-webkit-tap-highlight-color:transparent}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:560px;margin:0 auto;padding-inline:16px;padding-block:0 110px}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--ground);display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0 10px;border-bottom:1px solid var(--line)}
+.brand{font-family:var(--display);font-weight:700;font-size:28px;letter-spacing:.14em;line-height:1;display:flex;align-items:baseline;gap:8px}
+.brand small{font-family:var(--body);font-weight:600;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.brand i{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--accent);transform:translateY(-3px)}
+.unitbtn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 9px;font-family:var(--mono);font-size:11px;cursor:pointer;white-space:nowrap;flex:none}
+h1,h2,h3{font-family:var(--display);font-weight:600;letter-spacing:.02em;text-wrap:balance;margin:0}
+h1{font-size:30px;line-height:1.05}
+h2{font-size:22px}
+h3{font-size:17px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+p{margin:0}
+.muted{color:var(--muted)}
+.small{font-size:13.5px}
+.stack{display:flex;flex-direction:column;gap:14px}
+.section{display:flex;flex-direction:column;gap:10px;margin-top:22px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+@media (max-width:380px){.grid4{grid-template-columns:1fr 1fr}}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600;color:var(--muted);min-width:0}
+input[type=text],input[type=number],input[type=date],select,textarea{width:100%;background:var(--ground);border:1px solid var(--line);border-radius:8px;padding:9px 10px;font-size:16px;color:var(--ink);min-width:0}
+input[type=number]{font-family:var(--mono);font-size:15px}
+textarea{min-height:70px;resize:vertical}
+.seg{display:flex;background:var(--ground);border:1px solid var(--line);border-radius:9px;padding:3px;gap:3px;flex-wrap:wrap}
+.seg button{flex:1;border:0;background:transparent;border-radius:6px;padding:8px 6px;font-size:14px;font-weight:600;color:var(--muted);cursor:pointer;min-width:0}
+.seg button.on{background:var(--deep);color:var(--surface)}
+.btn{border:0;border-radius:9px;padding:13px 16px;font-weight:700;font-size:16px;cursor:pointer;background:var(--accent);color:var(--accent-ink);width:100%}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.slim{width:auto;padding:8px 12px;font-size:14px;white-space:nowrap;flex:none}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.spread{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.stepper{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:14px}
+.stepper button{border:0;border-top:3px solid var(--line);background:none;padding:8px 2px 0;text-align:left;cursor:pointer;color:var(--muted);font-family:var(--display);font-size:17px;font-weight:600;letter-spacing:.04em}
+.stepper button.on{border-color:var(--accent);color:var(--ink)}
+.stepper button.done{border-color:var(--deep)}
+.stepper span{display:block;font-family:var(--body);font-size:11.5px;font-weight:600;letter-spacing:0;text-transform:uppercase}
+.coachcard{border-left:4px solid var(--accent);background:var(--surface);border-radius:4px 10px 10px 4px;padding:14px;display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.eyebrow{font-size:11.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+.gear{font-family:var(--display);font-size:23px;font-weight:600;line-height:1.15}
+.pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:2px 9px;font-size:12.5px;font-weight:700;white-space:nowrap}
+.pill.good{background:var(--good-soft);color:var(--good)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.bad{background:var(--bad-soft);color:var(--bad)}
+.pill.info{background:var(--deep-soft);color:var(--deep)}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{border:1px solid var(--line);background:var(--chip);border-radius:999px;padding:7px 12px;font-size:14px;font-weight:600;cursor:pointer;color:var(--ink)}
+.chip.on{background:var(--deep);border-color:var(--deep);color:var(--surface)}
+.chip.static{cursor:default;padding:3px 9px;font-size:12.5px}
+.chkgroup{display:flex;flex-direction:column}
+.chk{display:grid;grid-template-columns:44px 1fr;gap:10px;align-items:start;padding:11px 0;border-top:1px solid var(--line);cursor:pointer;background:none;border-left:0;border-right:0;border-bottom:0;text-align:left;width:100%}
+.chk:first-child{border-top:0}
+.letter{width:40px;height:40px;border-radius:8px;border:2px solid var(--line);display:grid;place-items:center;font-family:var(--display);font-size:24px;font-weight:700;color:var(--muted)}
+.chk.on .letter{background:var(--deep);border-color:var(--deep);color:var(--surface)}
+.chk.locked{opacity:.4;cursor:not-allowed}
+.chk b{display:block;font-size:15.5px}
+.chk .d{font-size:13.5px;color:var(--muted)}
+.cue{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-top:1px solid var(--line)}
+.cue:first-child{border-top:0}
+.cue input{width:20px;height:20px;margin-top:2px;accent-color:var(--deep);flex:none}
+.cue .src{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.checkopts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.opt{border:1px solid var(--line);background:var(--ground);border-radius:9px;padding:10px;text-align:left;cursor:pointer}
+.opt b{display:block;font-size:15px}
+.opt span{font-size:12.5px;color:var(--muted)}
+.opt.on{border:2px solid var(--deep);background:var(--deep-soft);padding:9px}
+.stat{display:flex;flex-direction:column;gap:2px}
+.stat .v{font-family:var(--mono);font-size:22px;font-weight:500;font-variant-numeric:tabular-nums}
+.stat .k{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.dive{border-top:1px solid var(--line);padding:12px 0;display:flex;flex-direction:column;gap:6px}
+.dive:first-child{border-top:0}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+td.n{font-family:var(--mono);text-align:right}
+th.n{text-align:right}
+.banner{margin-top:12px;background:var(--warn-soft);color:var(--ink);border-radius:9px;padding:10px 12px;font-size:14px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.aibox{white-space:pre-wrap;font-size:15px;background:var(--ground);border:1px solid var(--line);border-radius:8px;padding:12px;min-height:44px}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--surface);border-top:1px solid var(--line);padding:6px 2px calc(6px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:repeat(9,1fr)}
+.tabs button{border:0;background:none;padding:6px 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:9.5px;font-weight:700;letter-spacing:0;color:var(--muted);cursor:pointer}
+.tabs svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tabs button.on{color:var(--accent)}
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--ground);padding:9px 16px;border-radius:999px;font-weight:600;font-size:14px;z-index:20}
+.big{font-family:var(--mono);font-size:30px;font-weight:500;font-variant-numeric:tabular-nums;line-height:1.1}
+.chart svg{width:100%;height:auto;display:block}
+hr{border:0;border-top:1px solid var(--line);margin:4px 0}
+@media (prefers-reduced-motion:no-preference){.chip,.opt,.chk .letter,.seg button{transition:background .15s,color .15s,border-color .15s}}
+.sig{border-top:1px solid var(--line);padding:12px 0;display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:start}
+.sig:first-child{border-top:0}
+.sig b{font-size:16px}
+.sig .how{grid-column:1 / -1;font-size:14.5px}
+.sig .note{grid-column:1 / -1;font-size:13px;color:var(--warn)}
+.star{border:1px solid var(--line);background:var(--ground);border-radius:999px;padding:4px 10px;font-size:12.5px;font-weight:700;cursor:pointer;color:var(--muted);white-space:nowrap}
+.star.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.flash{min-height:170px;display:flex;flex-direction:column;justify-content:center;gap:10px;text-align:center}
+.flash .q{font-family:var(--display);font-size:28px;font-weight:600;line-height:1.1}
+a.lnk{color:var(--deep);font-weight:700}
+.alarm{border:2px solid var(--bad);background:var(--bad-soft);color:var(--bad);border-radius:9px;padding:10px 12px;font-weight:700;display:flex;flex-direction:column;gap:2px}
+.alarm span{font-weight:400;font-size:13.5px;color:var(--ink)}
+.caution{border:1px solid var(--warn);background:var(--warn-soft);border-radius:9px;padding:10px 12px;font-size:14px}
+.okline{border:1px solid var(--good);background:var(--good-soft);border-radius:9px;padding:8px 12px;font-size:14px;color:var(--ink)}
+@keyframes alarmBlink{0%,100%{background:var(--bad-soft);color:var(--bad)}50%{background:var(--bad);color:var(--surface)}}
+@keyframes alarmBlinkSpan{0%,100%{color:var(--ink)}50%{color:var(--surface)}}
+@media (prefers-reduced-motion:no-preference){.alarm{animation:alarmBlink 1.1s ease-in-out infinite}.alarm span{animation:alarmBlinkSpan 1.1s ease-in-out infinite}}
+.section.spread{flex-direction:row}
+.chk.ref{cursor:default}
+.chk.ref .letter{color:var(--deep);border-color:var(--deep)}
+.xfer{margin:4px 0 0;padding-left:18px;font-size:14.5px}
+.stat .k small{display:block;text-transform:none;letter-spacing:0;font-weight:400;font-size:12px}
+.term{border-top:1px solid var(--line);padding:11px 0;display:grid;grid-template-columns:92px 1fr;gap:2px 12px}
+.term:first-child{border-top:0}
+.term .a{font-family:var(--mono);font-weight:500;font-size:15px;color:var(--deep);grid-row:span 2}
+.term .full{font-weight:700;font-size:15.5px}
+.term .def{font-size:14px;color:var(--muted)}
+.skill{border-top:1px solid var(--line);padding:12px 0;display:flex;flex-direction:column;gap:6px}
+.skill:first-child{border-top:0}
+.skill .how{font-size:14.5px}
+.skill .note{font-size:13px;color:var(--warn)}
+.hist{font-size:13.5px;display:flex;flex-direction:column;gap:4px;padding-left:2px}
+.sitechips{display:flex;gap:6px;flex-wrap:wrap}
+.sitechips .chip{padding:4px 10px;font-size:13px}
+.tried{border-top:1px solid var(--line);padding:10px 0;display:flex;flex-direction:column;gap:8px}
+.tried:first-child{border-top:0}
+.sos{border:0;background:var(--bad);color:#fff;border-radius:999px;padding:6px 12px;font-weight:700;font-size:13px;letter-spacing:.06em;cursor:pointer;flex:none}
+.hdr-r{display:flex;gap:6px;align-items:center;flex:none}
+@media (max-width:420px){.brand small{display:none}}
+@media (max-width:400px){.brand{font-size:24px;letter-spacing:.1em}}
+.nofly{display:flex;flex-direction:column;gap:4px}
+.nofly .big{font-size:24px}
+.call{display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center;border-top:1px solid var(--line);padding:10px 0}
+.call:first-child{border-top:0}
+.call a{font-family:var(--mono);font-weight:500;color:var(--bad);text-decoration:none;white-space:nowrap;font-size:15px}
+.call .who{font-weight:700}
+.call .sub{grid-column:1 / -1;font-size:12.5px;color:var(--muted)}
+ol.steps{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:14px;height:0;border-top:2px dashed var(--bad);vertical-align:middle;margin-right:4px}
+.legend i.c{border-top:1.5px solid var(--muted)}
+.toc{display:flex;flex-direction:column}
+.toc button{display:grid;grid-template-columns:26px 1fr;gap:10px;align-items:baseline;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:11px 0;cursor:pointer;color:var(--ink);width:100%}
+.toc button:first-child{border-top:0}
+.toc .n{font-family:var(--mono);font-size:13px;color:var(--accent)}
+.toc b{font-size:15.5px}
+.toc span.d{grid-column:2;font-size:13px;color:var(--muted)}
+.guide h4{font-family:var(--display);font-size:18px;letter-spacing:.03em;margin:14px 0 4px}
+.guide p{margin:6px 0}
+.guide ul,.guide ol{margin:6px 0;padding-left:20px;display:flex;flex-direction:column;gap:5px}
+.guide .path{font-family:var(--mono);font-size:13.5px;background:var(--chip);border-radius:5px;padding:1px 5px}
+.guide .tip{border-left:3px solid var(--deep);background:var(--deep-soft);border-radius:0 8px 8px 0;padding:9px 12px;font-size:14px;margin:10px 0}
+.cvseg .seg{flex-wrap:nowrap}.cvseg .seg button{flex:1 1 auto;padding:8px 4px;font-size:13.5px}
+.btnmap{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;font-size:14.5px}
+.btnmap .b{font-family:var(--mono);font-weight:500;color:var(--deep);white-space:nowrap}
+.fa{border-top:1px solid var(--line)}
+.fa:first-child{border-top:0}
+.fa summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center;padding:12px 0}
+.fa summary::-webkit-details-marker{display:none}
+.fa summary b{font-size:16px}
+.fa summary .d{grid-column:1;font-size:13px;color:var(--muted)}
+.fa summary::after{content:"+";grid-column:2;grid-row:1 / span 2;font-family:var(--mono);font-size:20px;color:var(--bad)}
+.fa[open] summary::after{content:"\2212"}
+.fa .body{display:flex;flex-direction:column;gap:8px;padding:0 0 14px;font-size:14.5px}
+.fa .body h4{font-family:var(--display);font-size:16px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:6px 0 0}
+.fa .redflag{border-left:3px solid var(--bad);background:var(--bad-soft);border-radius:0 8px 8px 0;padding:8px 10px;font-size:14px}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><i></i>NEUTRAL<small>dive coach</small></div>
+    <div class="hdr-r"><button class="sos" type="button" data-act="sos">SOS</button><button class="unitbtn" id="unitBtn" type="button"></button></div>
+  </header>
+  <div id="bannerSlot"></div>
+  <main id="view"></main>
+</div>
+<nav class="tabs" id="tabs">
+  <button type="button" data-tab="dive"><svg viewBox="0 0 24 24"><path d="M3 15c2 2 4 2 6 0s4-2 6 0 4 2 6 0"/><path d="M12 3v8m-3-3 3 3 3-3"/></svg>Dive</button>
+  <button type="button" data-tab="coach"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/></svg>Coach</button>
+  <button type="button" data-tab="log"><svg viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5z"/><path d="M8 11h8M8 15h8M8 7h5"/></svg>Log</button>
+  <button type="button" data-tab="signals"><svg viewBox="0 0 24 24"><path d="M8 13V5a1.5 1.5 0 0 1 3 0v6"/><path d="M11 10V4a1.5 1.5 0 0 1 3 0v6"/><path d="M14 10V5.5a1.5 1.5 0 0 1 3 0V14a7 7 0 0 1-7 7h-.5A6.5 6.5 0 0 1 4 16.5L3.5 13a1.5 1.5 0 0 1 2.8-1L8 14"/></svg>Signals</button>
+  <button type="button" data-tab="nitrox"><svg viewBox="0 0 24 24"><rect x="8" y="6" width="8" height="15" rx="3"/><path d="M10 6V3h4v3M8 11h8"/></svg>Nitrox</button>
+  <button type="button" data-tab="terms"><svg viewBox="0 0 24 24"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3M9 7.5h6M9 11h6"/></svg>Convert</button>
+  <button type="button" data-tab="skills"><svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.4 6.8 19.1l1-5.8L3.5 9.2l5.9-.9z"/></svg>Skills</button>
+  <button type="button" data-tab="gear"><svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="3"/><path d="M9 6V3.5h6V6M9 18v2.5h6V18M18 10h2M18 14h2"/></svg>Gear</button>
+  <button type="button" data-tab="me"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>Me</button>
+</nav>
+
+<script>
+(function(){
+"use strict";
+const LS = "neutral-dive-coach-v1";
+
+/* ---------- reference data ---------- */
+const SUITS = {skin:"Skin / rash guard", shorty3:"3 mm shorty", full3:"3 mm full", full5:"5 mm full", full7:"7 mm full", semidry:"7 mm semi-dry", dry:"Drysuit"};
+const SUIT_PCT = {skin:[.02,0], shorty3:[.04,0], full3:[.06,0], full5:[.10,0], full7:[.10,1.5], semidry:[.10,1], dry:[.10,3]};
+const TANKS = {
+  al80:{n:"AL80 (11.1 L)", s:"AL80", L:11.1, steel:false},
+  al63:{n:"AL63 (9 L)", s:"AL63", L:9.0, steel:false},
+  st12:{n:"Steel 12 L", s:"St 12L", L:12, steel:true},
+  st15:{n:"Steel 15 L", s:"St 15L", L:15, steel:true},
+  hp100:{n:"Steel HP100", s:"HP100", L:12.9, steel:true}
+};
+const BCDS = {jacket:"Jacket BCD", back:"Back-inflate (incl. Hydros Pro)", bpw:"Backplate and wing (metal plate)"};
+const FEEL = [
+  {g:"Overall", k:"good", t:"Good dive, no issues"},
+  {g:"Weight", k:"weightOk", t:"Weight felt right"},
+  {g:"Weight", k:"tooHeavy", t:"Seemed too heavy"},
+  {g:"Weight", k:"tooLight", t:"Seemed too light"},
+  {g:"Weight", k:"floaty", t:"Hard to descend"},
+  {g:"Weight", k:"bcdAir", t:"Lots of BCD adjusting"},
+  {g:"Weight", k:"stopHard", t:"Hard to hold safety stop"},
+  {g:"Trim", k:"trimOk", t:"Level trim"},
+  {g:"Trim", k:"headUp", t:"Head up, feet sinking"},
+  {g:"Trim", k:"headDown", t:"Head down, feet floating"},
+  {g:"Trim", k:"rollL", t:"Rolling left"},
+  {g:"Trim", k:"rollR", t:"Rolling right"},
+  {g:"Comfort", k:"fastAir", t:"Used air fast"},
+  {g:"Comfort", k:"stressed", t:"Rushed or anxious"},
+  {g:"Comfort", k:"relaxed", t:"Relaxed, easy breathing"},
+  {g:"Comfort", k:"cold", t:"Cold"},
+  {g:"Body", k:"cramp", t:"Leg cramp"},
+  {g:"Body", k:"maskLeak", t:"Mask leak"},
+  {g:"Body", k:"blister", t:"Hot spot or blister"}
+];
+const FEEL_G = Object.fromEntries(FEEL.map(f=>[f.k,f.g]));
+const FEEL_OK = {good:true, weightOk:true, trimOk:true, relaxed:true};
+const GROUP_OK = {Weight:"weightOk", Trim:"trimOk", Comfort:"relaxed"};
+const FEEL_T = Object.fromEntries(FEEL.map(f=>[f.k,f.t]));
+const SKILL = {
+  headUp:"Knees bent, heels up, butt tucked. Look forward, not down.",
+  headDown:"Lift your chin and look ahead. Hold the legs level, not lifted.",
+  bcdAir:"Add air in small bursts, then wait three breaths before adding more.",
+  floaty:"Exhale fully on descent and dump from the lowest point of the BCD.",
+  stopHard:"Watch gas: hold the stop with your lungs, not the inflator.",
+  fastAir:"Long, slow exhale. Breathe from the diaphragm.",
+  stressed:"On the surface: stop, breathe, think. Slow the pre-dive down.",
+  tooHeavy:"Check your breathing first: shallow breaths keep lungs empty and feel heavy.",
+  cold:"Cold drives air use. Consider a hood or the next suit up.",
+  rollL:"Before entry, check the pockets and trim weights are balanced.",
+  rollR:"Before entry, check the pockets and trim weights are balanced.",
+  cramp:"Relax the ankles between kicks. If the legs work to stay up, do the slack-leg test and move weight up.",
+  maskLeak:"Strap high and snug, not tight. Check the reg isn't pulling the mouth corner. Exhale through the mouth.",
+  blister:"Cover it before the next dive, or sit out if it's open. Check the fin strap isn't pressing a seam."
+};
+const BWRAF = [
+  ["B","BCD","Inflate and deflate (power and oral), dumps work, no leaks, LPI connected, tank band tight"],
+  ["W","Weights","Amount right, belt or integrated pockets secure, you know how to dump them"],
+  ["R","Releases","All clips, straps, tank band, weight releases, and you know how your buddy's come off"],
+  ["A","Air","Valve fully open, breathe both regs while watching the SPG (needle shouldn't drop), octopus accessible"],
+  ["F","Final OK","Mask, fins, computer on and set, hoses tucked, signals confirmed, thumbs-up"]
+];
+const SORTED = [
+  ["S","Signal","Give your buddy the “I'm going down” signal and get the OK back"],
+  ["O","Orientate","Look down, get your bearings, note the bottom or the line"],
+  ["R","Regulator","Second stage in, take a couple of breaths. Confirm you're breathing from it"],
+  ["T","Time","Start your computer or note the time"],
+  ["E","Equalize","First equalization, and lift the inflator hose ready to dump"],
+  ["D","Descend","Begin a controlled descent"]
+];
+const TERMS = [
+  ["ata","Atmospheres absolute","Total pressure on you: 1 ata at the surface plus 1 for every 10 m of seawater (33 ft)."],
+  ["AGE","Arterial gas embolism","Gas bubbles in the arteries, usually from holding your breath on ascent. A medical emergency."],
+  ["AL80","Aluminum 80","The common rental tank: 80 cubic feet at 3000 psi, about 11.1 L. Gets buoyant as it empties."],
+  ["bar","Bar","Metric pressure unit. 1 bar is about 1 atmosphere, or 14.5 psi."],
+  ["BCD","Buoyancy control device","The inflatable jacket or wing you add or dump air from to control buoyancy."],
+  ["BPW","Backplate and wing","A metal or plastic plate with a harness and a separate air bladder. Heavier than a jacket BCD."],
+  ["BWRAF","BCD, Weights, Releases, Air, Final OK","The pre-dive buddy check."],
+  ["CNS %","Central nervous system oxygen toxicity","Your computer's running tally of oxygen exposure on the dive day. Keep it well under 100%."],
+  ["DAN","Divers Alert Network","Dive safety organization with a 24-hour emergency hotline and dive insurance."],
+  ["DCI","Decompression illness","Umbrella term covering both DCS and AGE."],
+  ["DCS","Decompression sickness","Nitrogen bubbles forming in the body after ascent. \u201cThe bends.\u201d"],
+  ["DSMB","Delayed surface marker buoy","An inflatable tube sent up from depth to mark your position before you surface."],
+  ["EAD","Equivalent air depth","The depth on air that would give the same nitrogen load as your nitrox dive. Shallower than your real depth."],
+  ["EAN / EANx","Enriched air nitrox","Breathing gas with more than 21% oxygen. EAN32 means 32% O\u2082."],
+  ["EFR","Emergency First Response","PADI-affiliated first aid and CPR course. Primary Care covers life threats, Secondary Care covers injury and illness assessment. Required for Rescue Diver."],
+  ["FO\u2082","Fraction of oxygen","The oxygen share of the gas as a decimal. EAN32 is FO\u2082 0.32."],
+  ["HP100","High-pressure steel 100","Steel tank, about 100 cubic feet at 3442 psi (12.9 L). Stays negative when empty."],
+  ["LPI","Low-pressure inflator","The hose and button that feeds tank air into your BCD."],
+  ["MOD","Maximum operating depth","The deepest you can go on a gas before ppO\u2082 passes your limit (1.4 working, 1.6 contingency)."],
+  ["NDL","No-decompression limit","Time you can stay at a depth and still ascend directly without required stops."],
+  ["OOA","Out of air","No gas to breathe. Signal, get your buddy's octopus, ascend together."],
+  ["Octo","Octopus","Your spare second-stage regulator, for a buddy who is out of air."],
+  ["OTU","Oxygen toxicity unit","Measures whole-body oxygen exposure over several days. Matters on long nitrox trips."],
+  ["ppO\u2082","Partial pressure of oxygen","How much of the total pressure comes from oxygen: FO\u2082 \u00d7 ata. Too high risks oxygen toxicity and seizures."],
+  ["psi","Pounds per square inch","Imperial pressure unit. A full AL80 is about 3000 psi."],
+  ["RMV","Respiratory minute volume","Gas you breathe per minute, adjusted to surface pressure, in liters or cubic feet. Works for any tank size."],
+  ["SAC","Surface air consumption","Like RMV but in bar or psi per minute, so it only compares dives on the same tank size."],
+  ["SAMPLE","Symptoms, Allergies, Medications, Preexisting conditions, Last meal, Events","EFR illness assessment questions. Full checklist on the SOS page."],
+  ["SMB","Surface marker buoy","An inflatable marker that shows boats where you are."],
+  ["SORTED","Signal, Orientate, Regulator, Time, Equalize, Descend","The five-point surface routine before descending."],
+  ["SPG","Submersible pressure gauge","The gauge showing how much gas is left in your tank."]
+];
+const SKILL_CATS = ["Buoyancy and trim","Finning","Mask and regulator","Air sharing","Gear and navigation","Control and fun"];
+const SKILLS = [
+  ["hover","Buoyancy and trim","Hover motionless, 60 s","Horizontal, no finning, no sculling with hands. Fine-tune with breathing only.",""],
+  ["trimhold","Buoyancy and trim","Horizontal trim hold","Knees bent about 90 degrees, back slightly arched, arms forward. Hold level for 60 s.",""],
+  ["stopnoref","Buoyancy and trim","Safety stop without a line","Hold 5 m (15 ft) within 1 m for 3 min using only your computer.",""],
+  ["slowasc","Buoyancy and trim","Slow controlled ascent","From 10 m, ascend at 9 m/min or slower with small dumps. Stay horizontal.",""],
+  ["oralinf","Buoyancy and trim","Oral inflation at depth","Take the reg out, give two small breaths into the BCD, reg back in and clear.","Shallow, over sand, buddy watching."],
+  ["frog","Finning","Frog kick","Knees bent, fins turned out, sweep back and snap together. Glide between kicks.",""],
+  ["backkick","Finning","Back kick","Push the water forward with the fin tips to move backward without losing trim.","Stiffer fins make this easier."],
+  ["heli","Finning","Helicopter turn","Rotate in place using fin sweeps only. No hands, no depth change.",""],
+  ["modflutter","Finning","Modified flutter kick","Short kicks from the knee with fins held high, for silty or reef-close areas.",""],
+  ["maskclear","Mask and regulator","Partial flood and clear","Let in some water, look up slightly, press the top of the frame, exhale through the nose.",""],
+  ["maskrr","Mask and regulator","Remove and replace mask","Keep breathing steadily through the mouth, remove the mask, replace it, clear it.","Shallow, holding position, buddy briefed."],
+  ["nomask","Mask and regulator","No-mask breathing, 1 min","Mask off, breathe calmly through the reg for a full minute, then replace and clear.","Shallow, holding a line or on sand, buddy briefed."],
+  ["regrec","Mask and regulator","Regulator recovery (arm sweep)","Lean right, sweep your arm from hip forward, recover the reg, purge or exhale to clear.","Exhale a small stream while the reg is out."],
+  ["octoswap","Mask and regulator","Switch to your octopus","Find your alternate by feel, breathe from it, then switch back.",""],
+  ["share","Air sharing","Stationary air share","Signal out of air, take the donor's octopus, grip the BCD strap, settle breathing.","Agree the drill before the dive."],
+  ["shareasc","Air sharing","Shared-air ascent","Air share, then a slow ascent face to face, holding on, with a short stop.","Only within your training. Shallow, buddy briefed."],
+  ["dsmb","Gear and navigation","Deploy a DSMB","At the stop, clear the line, partly inflate, release with the line clear of your gear.","Never clip the reel to yourself."],
+  ["weightrr","Gear and navigation","Weights off and on at the surface","BCD inflated, remove the belt or pockets, hold them, replace and secure.",""],
+  ["bcdrr","Gear and navigation","BCD off and on at the surface","Inflate, loosen, slide out keeping the reg in, then back in and secure.",""],
+  ["compass","Gear and navigation","Compass reciprocal","Swim a heading for 20 kick cycles, turn 180 degrees, return to the start.",""],
+  ["roll","Control and fun","Barrel roll","Roll a full turn on your long axis and finish level at the same depth.","Keep the reg in and watch your depth."],
+  ["backflip","Control and fun","Backward flip","Tuck and rotate backward in place, then return to trim at the same depth.","Watch ears and depth."],
+  ["fwdflip","Control and fun","Forward flip","Tuck forward and rotate a full turn, finishing level at the same depth.","Watch ears and depth."],
+  ["inverted","Control and fun","Inverted hover, 15 s","Head down, motionless, fins clear of everything, then return to level.","Stay well off the bottom."]
+];
+const SKILL_RES = {nailed:["good","Nailed it"], ok:["info","Getting there"], hard:["bad","Struggled"]};
+const SKILL_SUGGEST = {headUp:["trimhold","hover"], headDown:["trimhold","hover"], bcdAir:["hover","stopnoref"], floaty:["slowasc","hover"], stopHard:["stopnoref","slowasc"], tooHeavy:["hover"], fastAir:["hover","frog"], stressed:["hover","maskclear"], rollL:["trimhold","heli"], rollR:["trimhold","heli"]};
+const TRIP = [
+  ["Six weeks out", [
+    "Regulator and BCD service current, or booked",
+    "Cylinder inspection dates valid if you own tanks",
+    "Certification and insurance not expiring during the trip",
+    "Dive insurance active, policy number saved in the SOS page",
+    "Passport valid, visa sorted"
+  ]],
+  ["Two weeks out", [
+    "Dive computer firmware updated",
+    "Tank pod battery checked, spare CR123A (3 V lithium, not rechargeable) packed",
+    "Watch charger packed",
+    "Mask, fins, suit checked for splits and worn straps",
+    "Spares kit: mouthpiece, O-rings, cable ties, mask strap, fin straps"
+  ]],
+  ["Packing", [
+    "Backup depth gauge or second computer",
+    "Surface marker and reel or spool",
+    "Save a Neutral backup before you leave",
+    "Photo of gear serial numbers and the dive kit for insurance",
+    "Wetsuit matched to the actual water temperature, not the brochure",
+    "Skin kit: waterproof dressings, antiseptic, blister patches, tape, moisturizer, thermometer",
+    "Standby antibiotic and the doctor's instructions for when to start it, if prescribed"
+  ]],
+  ["On arrival", [
+    "Look up the nearest chamber and the local emergency number, then edit the SOS contacts",
+    "Add the dive operator and boat number to the SOS contacts",
+    "Confirm the operator carries oxygen and knows where the nearest chamber is",
+    "Tell someone on shore your dive plan and return time",
+    "First dive: treat it as a new setup and do the 5 m weight check",
+    "Ask the crew where the nearest clinic is along the route, and how long to reach it"
+  ]],
+  ["Each dive day", [
+    "Analyze your own gas and set the computer to the tested value",
+    "Check tank pod working pressure matches today's cylinder",
+    "Water and food before the boat, not after",
+    "Check the flying-after-diving card before booking the flight home",
+    "Skin check morning and evening; fresh-water rinse, dry and moisturize after the last dive",
+    "Stop rule: spreading redness, warmth, swelling, red streaks or fever means no more diving and call the doctor"
+  ]]
+];
+const DEFAULT_CONTACTS = [
+  {id:"k1", who:"Thailand ambulance (EMS)", num:"1669", sub:"National emergency medical line"},
+  {id:"k2", who:"DAN emergency, within Thailand", num:"1-800-01-8092", sub:"Diving medical emergencies, 24 h. Source: DAN contact page, Sept 2026"},
+  {id:"k3", who:"DAN global emergency", num:"+1-919-684-9111", sub:"Works from anywhere, 24 h. Calls from abroad may cost"},
+  {id:"k4", who:"Bangkok Hospital Pattaya, hyperbaric", num:"+66 38 259 986", sub:"Treats DCS and AGE. Closest to Rayong. Confirm hours before a trip"},
+  {id:"k5", who:"SSS chamber, Koh Tao", num:"+66 81 081 9777", sub:"24 h emergency"},
+  {id:"k6", who:"SSS chamber, Phuket", num:"+66 81 081 9000", sub:"24 h emergency"},
+  {id:"k7", who:"Dive operator / boat", num:"", sub:"Add before each trip"}
+];
+const PH_CONTACTS = [
+  {id:"p1", who:"Philippines emergency (police, fire, ambulance)", num:"911", sub:"National hotline, from any phone"},
+  {id:"p2", who:"Philippine Coast Guard", num:"+63 2 8527 8482", sub:"Sea rescue and evacuation. Also +63 2 8527 3877. Text +63 917 724 3682"},
+  {id:"p3", who:"DAN global emergency", num:"+1-919-684-9111", sub:"24 h. DAN lists no Philippines line, so use this one. Collect calls accepted"},
+  {id:"p4", who:"Philippine Red Cross", num:"143", sub:"Ambulance and disaster response"},
+  {id:"p5", who:"Chamber, Manila: Lung Center (PCSSD)", num:"+63 915 827 0768", sub:"Quezon City. Landline +63 2 8924 6101, ask for local 1952"},
+  {id:"p6", who:"Chamber, Batangas: St. Patrick's Hospital", num:"+63 917 815 2010", sub:"Batangas City, nearest to Anilao. Landline +63 43 723 7089"},
+  {id:"p7", who:"Chamber, Cebu: TIEZA building (PCSSD)", num:"+63 928 242 6237", sub:"Mandaue City, serves the Visayas. Alternate listed +63 932 434 9532"},
+  {id:"p8", who:"Chamber, Coron: Sea Dive Resort", num:"+63 920 458 1360", sub:"Coron, Palawan"},
+  {id:"p9", who:"Liveaboard operator / boat", num:"", sub:"Add before the trip, with their emergency plan and nearest chamber"}
+];
+function emRegion(){ return S.emergency.region==="ph"? "ph" : "th"; }
+function emList(){ if(!Array.isArray(S.emergency.ph)) S.emergency.ph = PH_CONTACTS.map(c=>({...c})); return emRegion()==="ph"? S.emergency.ph : S.emergency.contacts; }
+function defaultCond(last){ return {current:null, vis:null, temp:null, entry: last&&last.cond? last.cond.entry : null, camera: last&&last.cond? last.cond.camera : null}; }
+const CUR_T = {none:"No current", light:"Light", mod:"Moderate", strong:"Strong"};
+const VIS_T = {lt5:"Under 5 m", "5to15":"5 to 15 m", "15to30":"15 to 30 m", gt30:"Over 30 m"};
+const VIS_TI = {lt5:"Under 15 ft", "5to15":"15 to 50 ft", "15to30":"50 to 100 ft", gt30:"Over 100 ft"};
+const SIG_CATS = ["Basics","Air","Problems","Surface","Marine life"];
+const SIGNALS = [
+  ["ok","Basics","OK / Are you OK?","Thumb and index finger form a circle, other three fingers straight up. Asked as a question, answered with the same sign.","Always answer an OK. No answer is treated as a problem."],
+  ["up","Basics","Up / End the dive","Closed fist, thumb pointing up.","Underwater, thumbs-up means ascend, not OK. Keep the BWRAF thumbs-up on the surface."],
+  ["down","Basics","Down / Descend","Closed fist, thumb pointing down.",""],
+  ["stop","Basics","Stop / Hold","Flat hand, palm facing your buddy, held still. Some divers use a raised clenched fist.","Agree which version you use."],
+  ["problem","Basics","Something's wrong","Flat hand, palm down, rocked side to side. Then point to the source (ear, mask, gear).",""],
+  ["level","Basics","Level off / Stay at this depth","Flat hand, palm down, moved slowly side to side in a horizontal line.",""],
+  ["slow","Basics","Slow down","Flat hand, palm down, pressed slowly downward.",""],
+  ["look","Basics","Look","Index and middle finger in a V pointed at your eyes, then point at what to look at.",""],
+  ["together","Basics","Buddy up / Stay together","Two index fingers held side by side.",""],
+  ["lead","Basics","You lead, I follow","Point at your buddy, then forward; point at yourself, then behind.",""],
+  ["check","Air","Check your air","Tap your gauge or wrist, or point two fingers at your open palm, then point at your buddy.",""],
+  ["pressure","Air","Pressure report","Show remaining pressure with fingers, commonly one finger per 10 bar or 100 psi, touching the open palm.","Methods vary widely. Agree the count with your buddy before the dive."],
+  ["half","Air","Half tank / Turn the dive","One hand flat and vertical, laid across the open palm of the other hand to form a T.","Agree whether this means half or turn pressure."],
+  ["low","Air","Low on air / Reserve","Clenched fist held against the chest.","Start a controlled ascent with your buddy."],
+  ["ooa","Air","Out of air","Flat hand slicing back and forth across the throat.","Emergency. Buddy donates the octopus immediately."],
+  ["share","Air","Share air / I need your octopus","Fingers bunched at the mouth (or regulator tapped at the mouth), then point at the buddy's octopus.",""],
+  ["ear","Problems","Can't equalize / Ear problem","Point at the ear, then the something's-wrong sign.","Ascend a little and try again. Never force it."],
+  ["cold","Problems","Cold","Arms crossed, hands rubbing the upper arms.",""],
+  ["cramp","Problems","Cramp","Point at the leg, then make the something's-wrong sign or grab the calf.",""],
+  ["breath","Problems","Out of breath / Breathing hard","Hand moved rapidly in and out in front of the chest.","Stop, hold on, rest, breathe slowly."],
+  ["narc","Problems","Dizzy / Narcosis","Index finger circled beside the temple.","Ascend a few meters together."],
+  ["sok","Surface","OK at the surface","Both arms curved over the head, fingertips touching the top. One hand on top of the head if the other is busy.","Large signals carry to the boat. Small OK signs don't."],
+  ["help","Surface","Help / Pick me up","Arm waved side to side overhead.","A distress signal. Never wave just to say hello."],
+  ["turtle","Marine life","Turtle","One flat hand on the back of the other, thumbs rotating like flippers.",""],
+  ["shark","Marine life","Shark","Flat hand held vertically on the forehead like a fin.",""],
+  ["ray","Marine life","Ray","Both hands flat, thumbs crossed, fingers waving like wings.",""],
+  ["octo","Marine life","Octopus","Fingers hanging down from a cupped hand, wiggled.",""]
+];
+const SIG_BY = Object.fromEntries(SIGNALS.map(x=>[x[0],x]));
+const DEFAULT_SIGFAV = ["ok","up","problem","low","ooa","pressure","half"];
+const SEED_LEARNINGS = [
+  {id:"l-bottomref", date:"2026-10-05", kind:"learning", title:"The bottom moves more than I do",
+   text:"Part of my buoyancy concern was hugging the bottom. As the bottom contour changed I felt I had to keep adjusting my breathing. Watching the computer depth showed I was holding fairly steady: when I thought I was rising, the bottom was often dropping away.",
+   cue:"Hold depth on the computer, not the bottom. Give the bottom room and let it move.", sv:1},
+  {id:"l-control1", date:"2026-10-05", kind:"progress", title:"Buoyancy control is solid",
+   text:"Very good buoyancy control on this dive. Rolled over and changed positions easily without losing depth.", cue:"", sv:1},
+  {id:"l-bcdrule", date:"2026-10-05", kind:"learning", title:"Lungs fine-tune, the BCD shifts the mean",
+   text:"Set-and-forget only holds at one depth. Following terrain changes depth, so small BCD adjustments are correct. The trigger is having to hold a breath or force an exhale to stay level, or a depth change of more than 2 to 3 m that will last. Too much is adjusting at a constant depth, or add then dump within a minute or two. Shallow water needs more frequent small corrections.",
+   cue:"One small puff or dump, then wait 3 to 4 breaths before judging.", sv:2},
+  {id:"l-shallowrmv", date:"2026-10-05", kind:"progress", title:"Best air use: holding one depth",
+   text:"Best RMV yet on a shallow dive once I held a single depth instead of following the bottom. One dive, and I was in a slow buddy-watching role, so confirm it over more dives. For life near the terrain: set a working depth just above the tallest features and make close looks a deliberate down-and-back.", cue:"", sv:2},
+  {id:"l-cramps", date:"2026-10-05", kind:"learning", title:"Cramps come from muscles held short",
+   text:"Foot and calf cramps from holding pointed toes; the newer hamstring cramp from bent-knee trim held all dive plus more flutter kicking than usual. Point on the flutter stroke, relax the ankle between kicks. Neutral ankles keep the fins flat in frog trim. Good trim should be passive: if the legs work to stay up, the weight is too far toward the feet. Release a cramp by pulling the fin tip toward the shin.",
+   cue:"Slack-leg test in a hover: do the legs sink? Relax ankles between kicks.", sv:2},
+  {id:"l-mask", date:"2026-10-05", kind:"learning", title:"Mask leak at the mouth crease",
+   text:"Leak where the fold runs between mouth and cheek. Likely causes: the reg pulling the mouth corner, smiling or reacting through the reg, or a strap tight enough to deform the skirt. Silicone on the upper lip helps. Venting on exhale means nose-exhaling: breathe out through the mouth. Fit test with the reg in: mask on without the strap, gentle inhale through the nose, it should stay.",
+   cue:"Strap high on the crown, snug not tight. Exhale through the mouth.", sv:2},
+  {id:"l-heel", date:"2026-10-05", kind:"learning", title:"Left heel hot spot from the bootie seam",
+   text:"Blister forming just right of center on the left heel, worst in frog kick. Likely the bootie seam under the fin strap. Try moving the strap slightly higher, wear thin dive socks (recheck fit), and tape or patch the spot on dry skin before suiting up.",
+   cue:"Tape the left heel and check strap position before frog kicking.", sv:2},
+  {id:"l-skin", date:"2026-10-05", kind:"learning", title:"Cuts and blisters: cover, rinse, watch",
+   text:"Warm seawater carries bacteria that infect broken skin. Cover any cut or blister with a waterproof dressing before diving, or sit the dive out if it is open. After the dive: fresh water, soap, dry, antiseptic, clean dressing. Spreading redness, warmth, swelling, red streaks or fever means same-day medical care.",
+   cue:"Any open cut or blister? Cover it or sit out.", sv:2}
+];
+const SEED_V = 2;
+const DEFAULT_CUES = ["Breathe from the diaphragm","Tuck your butt, knees bent","Defog your mask","Tank valve fully open","Computer set to the right gas"];
+
+/* ---------- state ---------- */
+let memOnly = false;
+function blank(){ return {v:1, units:"metric", profile:{heightCm:null, weightKg:null}, cues:DEFAULT_CUES.slice(), dives:[], draft:null, example:false, sigFav:DEFAULT_SIGFAV.slice(), sigLink:"", skills:{queue:[], log:[], custom:[]}, emergency:{contacts: DEFAULT_CONTACTS.map(c=>Object.assign({}, c)), me:{name:"", blood:"", allergies:"", meds:"", cert:"", kin:"", kinPhone:"", insurer:"", policy:"", doctor:"", notes:""}}, backup:{at:null, dives:0}, trip:{name:"", items:{}}, learnings:SEED_LEARNINGS.map(x=>Object.assign({},x)), seedL:SEED_V, certs:defaultCerts()}; }
+function migrate(o){
+  if(!Array.isArray(o.sigFav)) o.sigFav = DEFAULT_SIGFAV.slice();
+  if(typeof o.sigLink!=="string") o.sigLink = "";
+  if(!o.profile) o.profile = {heightCm:null, weightKg:null};
+  if(!o.skills || !Array.isArray(o.skills.log)) o.skills = {queue:[], log:[], custom:[]};
+  if(o.draft && !o.draft.gas) o.draft.gas = ((o.draft.fo2Label||0)>21 || (o.draft.fo2||0)>21) ? "nitrox" : "air";
+  if(o.draft && !o.draft.skillRes) o.draft.skillRes = {};
+  if(o.draft && !o.draft.cond) o.draft.cond = defaultCond(null);
+  if(!o.emergency || !Array.isArray(o.emergency.contacts)) o.emergency = {contacts: DEFAULT_CONTACTS.map(c=>Object.assign({}, c))};
+  if(!o.backup) o.backup = {at:null, dives:0};
+  if(!o.trip) o.trip = {name:"", items:{}};
+  if(!Array.isArray(o.learnings)) o.learnings = [];
+  { const had = o.seedL||0; if(had<SEED_V){ SEED_LEARNINGS.filter(x=>x.sv>had).forEach(x=>{ if(!o.learnings.some(l=>l.id===x.id)) o.learnings.push(Object.assign({},x)); }); o.seedL = SEED_V; } }
+  if(!o.emergency.me) o.emergency.me = {name:"", blood:"", allergies:"", meds:"", cert:"", kin:"", kinPhone:"", insurer:"", policy:"", doctor:"", notes:""};
+  if(!o.certs) o.certs = defaultCerts();
+  return o;
+}
+function defaultCerts(){ return {aow:true, specs:["Enriched Air Nitrox","Peak Performance Buoyancy","Deep","Wreck","Search and Recovery"], prior:100, efr:null, rescue:false, applied:false, plan:"EFR, Rescue and the application with my instructor after the liveaboard, December 2026"}; }
+function allSkills(){ return SKILLS.concat((S.skills.custom||[]).map(c=>[c.id,"My skills",c.name,c.how||"",""])); }
+function skillBy(id){ return allSkills().find(x=>x[0]===id); }
+function skillLog(id){ return S.skills.log.filter(l=>l.skill===id).sort((a,b)=> a.date<b.date?1:a.date>b.date?-1:0); }
+function load(){ try{ const r = localStorage.getItem(LS); if(r){ const o = JSON.parse(r); if(o && o.v===1) return migrate(o); } }catch(e){ memOnly = true; } return null; }
+function save(){ try{ localStorage.setItem(LS, JSON.stringify(S)); }catch(e){ memOnly = true; } }
+let S = null;
+let tab = "dive", coachKey = null, ai = {sample:null, downloads:null}, armed = null, learnKind = "learning";
+
+function uid(){ return Math.random().toString(36).slice(2,9) + Date.now().toString(36).slice(-4); }
+function today(){ const d=new Date(); return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10); }
+function daysAgo(n){ const d=new Date(Date.now()-n*864e5); return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10); }
+
+function seedExamples(){
+  const base = {suit:"shorty3", tank:"al80", water:"salt", bcd:"jacket", fins:"Split fins", tankPos:"std", fo2:32, planDepth:18, planTime:45, example:true};
+  const mk = (o)=>{ const d = Object.assign({id:uid()}, base, o); d.key = keyOf(d); return d; };
+  const d1 = mk({date:daysAgo(9), site:"Example: reef wall", weights:{belt:6,pockets:0,trim:0,ankle:0}, startP:200, endP:60, maxDepth:18, avgDepth:11, time:48, check:"sank", feel:["tooHeavy","bcdAir"], rating:3, notes:"Kept adding air all dive."});
+  const d2 = mk({date:daysAgo(8), site:"Example: sandy slope", weights:{belt:5,pockets:0,trim:0,ankle:0}, startP:200, endP:70, maxDepth:16, avgDepth:10, time:50, check:"eye", feel:["headUp"], rating:4, notes:""});
+  const d3 = mk({date:daysAgo(6), site:"Example: wreck", weights:{belt:4,pockets:0,trim:1,ankle:0}, startP:200, endP:80, maxDepth:20, avgDepth:12, time:47, check:"eye", feel:["good"], rating:5, notes:"Level at the stop."});
+  [d1,d2,d3].forEach((d,i,arr)=>{ S.dives.push(d); d.rec = recommend(d, arr[i-1]||null, S.dives.slice(0,i)); });
+  S.example = true;
+}
+
+/* ---------- units ---------- */
+const imp = ()=> S.units==="imperial";
+const r1 = n => Math.round(n*10)/10;
+const U = {
+  w: kg => kg==null? "" : imp()? r1(kg*2.20462) : r1(kg),
+  wIn: v => imp()? v/2.20462 : v,
+  wu: () => imp()? "lb":"kg",
+  wtxt: kg => imp()? `${Math.max(1,Math.round(kg*2.20462))} lb` : `${kg} kg`,
+  d: m => m==null? "" : imp()? Math.round(m*3.28084) : r1(m),
+  dIn: v => imp()? v/3.28084 : v,
+  du: () => imp()? "ft":"m",
+  p: b => b==null? "" : imp()? Math.round(b*14.5038/10)*10 : Math.round(b),
+  pIn: v => imp()? v/14.5038 : v,
+  pu: () => imp()? "psi":"bar",
+  rmv: l => imp()? (l*0.0353147).toFixed(2) : l.toFixed(1),
+  ru: () => imp()? "cu ft/min":"L/min"
+};
+
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s??"").replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const num = v => { const n = parseFloat(v); return isFinite(n)? n : null; };
+function keyOf(d){ return [d.suit,d.tank,d.water,d.bcd].join("|"); }
+function keyLabel(k){ const [s,t,w,b]=k.split("|"); return `${SUITS[s]||s} · ${(TANKS[t]||{}).s||t} · ${w==="fresh"?"Fresh":"Salt"} · ${BCDS[b]||b}`; }
+function totalW(w){ return w? (w.belt||0)+(w.pockets||0)+(w.trim||0)+(w.ankle||0) : 0; }
+function divesFor(k){ return S.dives.filter(d=>d.key===k && !d.quick).sort((a,b)=> a.date<b.date?-1: a.date>b.date?1:0); }
+function sorted(){ return S.dives.slice().sort((a,b)=> a.date<b.date?1: a.date>b.date?-1:0); }
+function rmvOf(d){
+  const t = TANKS[d.tank]; if(!t || !d.startP || d.endP==null || !d.time || d.avgDepth==null) return null;
+  const used = d.startP - d.endP; if(used<=0) return null;
+  const ata = d.avgDepth/(d.water==="fresh"?10.3:10) + 1;
+  return used * t.L / d.time / ata;
+}
+function median(a){ if(!a.length) return null; const s=a.slice().sort((x,y)=>x-y); const m=Math.floor(s.length/2); return s.length%2? s[m] : (s[m-1]+s[m])/2; }
+function toast(msg){ const t=document.createElement("div"); t.className="toast"; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(), 2200); }
+
+function hasIssue(d, issue){
+  const f = new Set(d.feel||[]);
+  if(issue==="rose") return d.check==="rose" || f.has("stopHard");
+  if(issue==="sank") return d.check==="sank";
+  if(issue==="tooLight") return f.has("tooLight") || d.check==="rose";
+  if(issue==="check") return d.check==="none";
+  return f.has(issue);
+}
+
+/* ---------- starting estimate ---------- */
+function estimate(cfg){
+  const bw = S.profile.weightKg; if(!bw) return null;
+  const [pct, add] = SUIT_PCT[cfg.suit] || [.06,0];
+  let kg = bw*pct + add;
+  if(TANKS[cfg.tank] && TANKS[cfg.tank].steel) kg -= 2;
+  if(cfg.bcd==="bpw") kg -= 2;
+  if(cfg.water==="fresh") kg -= 2;
+  return Math.max(0, Math.round(kg*2)/2);
+}
+
+/* ---------- rule-based coach ---------- */
+function recommend(d, prev, history){
+  const f = new Set(d.feel||[]); const W = d.weights||{};
+  const out = {issue:null, change:null, gear:"", why:"", skills:[], evalText:"", evalTone:"info", ts:Date.now()};
+
+  let applied = false;
+  // 1. evaluate the previous change, if one was recommended in this setup
+  if(prev && prev.rec && prev.rec.change){
+    const c = prev.rec.change, pw = prev.weights||{};
+    applied = false;
+    if(c.type==="add") applied = totalW(W) - totalW(pw) >= c.kg*0.6;
+    if(c.type==="remove") applied = totalW(pw) - totalW(W) >= c.kg*0.6;
+    if(c.type==="move") applied = c.to==="trim" ? (W.trim||0) > (pw.trim||0) : (W.trim||0) < (pw.trim||0);
+    if(c.type==="tank") applied = d.tankPos !== prev.tankPos;
+    const fixed = !hasIssue(d, prev.rec.issue);
+    if(!applied){ out.evalText = `Last recommendation (${c.label}) wasn't applied on this dive.`; out.evalTone="warn"; }
+    else if(fixed){ out.evalText = `Last change (${c.label}) worked: the issue didn't repeat. Keep it.`; out.evalTone="good"; }
+    else { out.evalText = `Last change (${c.label}) was applied but the issue repeated.`; out.evalTone="warn"; }
+  }
+
+  const wasRemoved = !!(prev && prev.rec && prev.rec.change && prev.rec.change.type==="remove" && applied);
+
+  // 2. safety first: under-weighted at reserve
+  if(d.check==="rose" || f.has("stopHard")){
+    out.issue = "rose";
+    out.change = {type:"add", kg:1, label:`add ${U.wtxt(1)}`};
+    out.gear = wasRemoved ? `Put back the ${U.wtxt(1)} you removed.` : `Add ${U.wtxt(1)}.`;
+    out.why = d.check==="rose"
+      ? "You rose at the 5 m check with little gas and an empty BCD. That is under-weighted, and it matters most on the dive where you surface low on gas."
+      : "The safety stop was a fight. An aluminum tank is at its most buoyant near reserve, so this is where weighting has to hold.";
+  }
+  // 3. objective check says too heavy
+  else if(d.check==="sank"){
+    out.issue = "sank";
+    out.change = {type:"remove", kg:1, label:`remove ${U.wtxt(1)}`};
+    out.gear = `Remove ${U.wtxt(1)}.`;
+    out.why = "You sank at the 5 m check with reserve gas and an empty BCD. Extra lead means extra air in the BCD, more drag, and more inflator work all dive.";
+  }
+  // 4. subjective only, no check
+  else if(d.check==="none" && f.has("tooLight")){
+    out.issue = "tooLight";
+    out.change = {type:"add", kg:1, label:`add ${U.wtxt(1)}`};
+    out.gear = `Add ${U.wtxt(1)}, then confirm with the weight check.`;
+    out.why = "Feeling light without a check is treated conservatively: add first, then prove the number at 5 m.";
+  }
+  else if(d.check==="none" && (f.has("tooHeavy") || f.has("bcdAir") || f.has("floaty"))){
+    out.issue = "check";
+    out.gear = "No weight change yet. Do the 5 m weight check at the end of the next dive.";
+    out.why = "Feeling heavy, floaty, or busy on the inflator is often breathing and BCD technique rather than lead. The check separates the two.";
+  }
+
+  // 5. trim, only when weight isn't being changed
+  if(!out.change && out.issue!=="check"){
+    if(f.has("headUp")){
+      out.issue = "headUp";
+      if((W.belt||0) + (W.pockets||0) >= 1){ out.change = {type:"move", kg:1, to:"trim", label:`move ${U.wtxt(1)} to trim pockets`}; out.gear = `Move ${U.wtxt(1)} from the belt or pockets to the trim pockets.`; }
+      else { out.change = {type:"tank", dir:"up", label:"raise the tank"}; out.gear = "Raise the tank about 5 cm in the cam band."; }
+      out.why = "Feet sinking means your mass sits below your center of buoyancy. Shifting weight toward the shoulders levels you without changing the total.";
+    } else if(f.has("headDown")){
+      out.issue = "headDown";
+      if((W.trim||0) >= 1){ out.change = {type:"move", kg:1, to:"belt", label:`move ${U.wtxt(1)} out of trim pockets`}; out.gear = `Move ${U.wtxt(1)} from the trim pockets down to the belt or pockets.`; }
+      else { out.change = {type:"tank", dir:"down", label:"lower the tank"}; out.gear = "Lower the tank about 5 cm in the cam band."; }
+      out.why = "Head-down attitude means mass is too far forward. Moving it toward the hips levels you without changing the total.";
+    } else if(f.has("rollL") || f.has("rollR")){
+      const side = f.has("rollL") ? ["left","right"] : ["right","left"];
+      out.issue = f.has("rollL") ? "rollL" : "rollR";
+      out.gear = `Shift ${imp()? "1 lb":"0.5 kg"} from the ${side[0]} side to the ${side[1]}.`;
+      out.why = "A roll almost always comes from uneven pockets, a camera or light clipped on one side, or a tank sitting off-center.";
+    }
+  }
+
+  // 6. nothing to change
+  if(!out.gear){
+    const run = (history||[]).filter(x=>x.key===d.key).concat([d]).slice(-3);
+    let streak = 0; for(let i=run.length-1;i>=0;i--){ if(run[i].check==="eye") streak++; else break; }
+    out.gear = "Keep the same weight and setup.";
+    out.why = d.check==="eye"
+      ? (streak>=2 ? `Weight confirmed at the 5 m check ${streak} dives in a row. This setup is dialed.` : "The 5 m check came out at eye level. One more confirming dive and this setup is locked in.")
+      : "No issues logged. Do the 5 m check next time to confirm the number.";
+  }
+  if(out.change && (f.has("headUp")||f.has("headDown")) && (out.issue==="rose"||out.issue==="sank"||out.issue==="tooLight")){
+    out.why += " Trim comes next, once the total weight is settled. One change per dive.";
+  }
+
+  // 7. skill cues
+  const skills = [];
+  (d.feel||[]).forEach(k=>{ if(SKILL[k] && !skills.includes(SKILL[k])) skills.push(SKILL[k]); });
+  const r = rmvOf(d);
+  const past = (history||[]).map(rmvOf).filter(x=>x!=null);
+  const base = median(past);
+  if(r!=null && base!=null && past.length>=2 && r > base*1.25 && !skills.includes(SKILL.fastAir)){
+    const c = d.cond||{}, causes = [];
+    if(c.current==="strong"||c.current==="mod") causes.push(`${CUR_T[c.current].toLowerCase()} current`);
+    if(c.temp!=null && c.temp<24) causes.push("cold water");
+    if(f.has("cold")) causes.push("feeling cold");
+    if(c.camera==="yes") causes.push("a camera rig");
+    const pct = Math.round((r/base-1)*100);
+    skills.push(causes.length? `Air use was ${pct}% above your usual, with ${causes.join(" and ")}. Likely conditions, not technique. Compare on a calm dive.` : `Air use was ${pct}% above your usual in easy conditions. ${SKILL.fastAir}`);
+  }
+  if((f.has("rollL")||f.has("rollR")) && d.cond && d.cond.camera==="yes") skills.push("A camera or light clipped to one side is the usual cause of a roll. Center it or balance with trim weight.");
+  out.skills = skills.slice(0,3);
+  return out;
+}
+
+function latestRec(k){ const h = divesFor(k); return h.length? {dive:h[h.length-1], rec:h[h.length-1].rec} : null; }
+
+/* ---------- AI ---------- */
+(async function initCaps(){
+  try{
+    if(window.claude && window.claude.use){
+      const [s, dl] = await Promise.all([window.claude.use("sample"), window.claude.use("downloads")]);
+      ai.sample = s; ai.downloads = dl;
+    }
+  }catch(e){}
+  if(tab==="coach" || tab==="me") render();
+})();
+
+function context(k){
+  const p = S.profile, lines = [];
+  lines.push(`Diver: experienced recreational diver.${p.heightCm?` Height ${p.heightCm} cm.`:""}${p.weightKg?` Weight ${r1(p.weightKg)} kg.`:""} Preferred units: ${S.units}.`);
+  if(k){
+    lines.push(`Setup: ${keyLabel(k)}.`);
+    const h = divesFor(k).slice(-10);
+    h.forEach(d=>{
+      const r = rmvOf(d);
+      lines.push(`- ${d.date} ${d.site||""}: lead belt ${d.weights.belt} / pockets ${d.weights.pockets} / trim ${d.weights.trim} / ankle ${d.weights.ankle} kg (total ${r1(totalW(d.weights))}); tank position ${d.tankPos}; max ${d.maxDepth??"?"} m, avg ${d.avgDepth??"?"} m, ${d.time??"?"} min; 5 m check: ${d.check}; conditions: current ${d.cond&&d.cond.current||"?"}, vis ${d.cond&&d.cond.vis||"?"}, temp ${d.cond&&d.cond.temp!=null?d.cond.temp+" C":"?"}, ${d.cond&&d.cond.entry||"?"} entry, camera ${d.cond&&d.cond.camera||"?"}; felt: ${(d.feel||[]).map(x=>FEEL_T[x]).join(", ")||"nothing noted"}${r!=null?`; RMV ${r.toFixed(1)} L/min`:""}${d.notes?`; notes: ${d.notes}`:""}.`);
+    });
+    if((S.learnings||[]).length) lines.push("Diver's own learnings: " + S.learnings.map(l=>`${l.date} ${l.title}: ${l.text}`).join(" | "));
+    const lr = latestRec(k);
+    if(lr) lines.push(`Rule-based recommendation for next dive: ${lr.rec.gear} Reason: ${lr.rec.why}`);
+  }
+  const sl = S.skills.log.slice(-10);
+  if(sl.length) lines.push("Recent skill practice: " + sl.map(l=>{ const x = skillBy(l.skill); return `${l.date} ${x?x[2]:l.skill}: ${SKILL_RES[l.r][1]}${l.note?` (${l.note})`:""}`; }).join("; ") + ".");
+  lines.push("The 5 m check: at the end of the dive, 5 m, about 50 bar left, BCD empty, normal breath. 'sank' = overweighted, 'eye' = correct, 'rose' = underweighted, 'none' = not done.");
+  return lines.join("\n");
+}
+function aiErr(e){
+  const c = e && e.code;
+  if(c==="not_granted") return "AI access was declined for this session. The rule-based coach still works.";
+  if(c==="rate_limited") return "Too many requests. Try again in a minute.";
+  if(c==="cancelled") return "";
+  return "Couldn't reach Claude (no signal?). The rule-based coach above still applies.";
+}
+let aiCtl = null;
+async function runAI(kind){
+  const out = $("#aiOut"); if(!out || !ai.sample) return;
+  const k = coachKey;
+  let prompt;
+  if(kind==="coach"){
+    prompt = `You are a buoyancy and trim coach reviewing a diver's log.\n\n${context(k)}\n\nGive coaching for the next dive in this setup. Format exactly three short lines:\nGear change: (at most one change, or "none")\nSkill focus: (one or two concrete cues)\nPattern: (what the history shows)\nRules: never recommend removing weight if the most recent dive rose at the 5 m check or had a hard safety stop. If you disagree with the rule-based recommendation, say why. Under 110 words. Plain text, no markdown, no em dashes.`;
+  } else {
+    const q = ($("#aiQ").value||"").trim(); if(!q){ $("#aiQ").focus(); return; }
+    prompt = `You are an experienced dive instructor answering a diver's question.\n\nContext:\n${context(k)}\n\nQuestion: ${q}\n\nAnswer directly and practically, under 150 words, plain text, no markdown, no em dashes. If the question describes possible decompression illness, lung overexpansion injury, or another emergency, lead with: stop diving, breathe 100% oxygen if available, and contact DAN or emergency services.`;
+  }
+  aiCtl && aiCtl.abort(); aiCtl = new AbortController();
+  out.textContent = "Thinking…"; $("#aiStop").hidden = false;
+  try{
+    await ai.sample(prompt, {signal: aiCtl.signal, cache: kind==="coach", onText: ({text})=>{ out.textContent = text; }});
+  }catch(e){
+    const msg = aiErr(e); out.textContent = (e && e.text ? e.text + "\n\n" : "") + msg;
+  }finally{ const b=$("#aiStop"); if(b) b.hidden = true; }
+}
+
+/* ---------- rendering ---------- */
+function render(){
+  $("#unitBtn").textContent = imp()? "ft · psi · lb" : "m · bar · kg";
+  document.querySelectorAll("#tabs button").forEach(b=> b.classList.toggle("on", b.dataset.tab===tab));
+  let banner = "";
+  if(S.example) banner += `<div class="banner"><span>You're looking at three example dives.</span><button class="btn slim ghost" data-act="clearEx" type="button">Clear examples</button></div>`;
+  { const since = S.dives.filter(x=>!x.example).length - (S.backup.dives||0); const old = S.backup.at && (Date.now()-S.backup.at > 30*864e5);
+    if(tab!=="emergency" && (since>=5 || (since>=1 && old))) banner += `<div class="banner"><span>${since} dive${since>1?"s":""} since your last backup.</span><button class="btn slim ghost" data-act="backupNow" type="button">Back up now</button></div>`; }
+  if(memOnly) banner += `<div class="banner"><span>This browser isn't saving data. Export a backup from Me before closing.</span></div>`;
+  $("#bannerSlot").innerHTML = banner;
+  const v = {dive:viewDive, coach:viewCoach, log:viewLog, nitrox:viewNitrox, me:viewMe, signals:viewSignals, terms:viewTerms, skills:viewSkills, emergency:viewEmergency, gear:viewGear}[tab]();
+  $("#view").innerHTML = v;
+  if(tab==="nitrox") calcNitrox();
+  if(tab==="terms") convert();
+  if(tab==="dive" && S.draft && S.draft.stage==="plan") updatePlanCoach();
+}
+
+function seg(field, opts, cur, attr="data-f"){
+  return `<div class="seg" role="group">${opts.map(([v,t])=>`<button type="button" ${attr}="${field}" data-v="${v}" class="${String(cur)===String(v)?"on":""}">${esc(t)}</button>`).join("")}</div>`;
+}
+function select(field, map, cur){
+  return `<select id="f_${field}" data-f="${field}">${Object.entries(map).map(([k,v])=>`<option value="${k}" ${k===cur?"selected":""}>${esc(typeof v==="string"?v:v.n)}</option>`).join("")}</select>`;
+}
+function numIn(field, val, conv, step="any", ph=""){
+  return `<input type="number" inputmode="decimal" id="f_${field}" data-f="${field}" data-t="${conv}" step="${step}" value="${val===""||val==null?"":val}" placeholder="${ph}">`;
+}
+
+/* --- Dive tab --- */
+function newDraft(){
+  const last = sorted()[0];
+  const d = {id:uid(), stage:"plan", date:today(), site:"", suit:"shorty3", tank:"al80", water:"salt", bcd:"jacket", fins:"", tankPos:"std", gas:"air", fo2:21, fo2Label:null, planDepth:null, planTime:null, weights:{belt:0,pockets:0,trim:0,ankle:0}, startP:200, endP:null, maxDepth:null, avgDepth:null, time:null, check:null, feel:[], rating:null, notes:"", cues:{}, skillRes:{}, sigRot:null, cond:defaultCond(last), surfTime:null, deco:false};
+  const realLast = sorted().find(x=>!x.example); if(realLast) d.site = realLast.site || "";
+  if(last){ ["suit","tank","water","bcd","fins","tankPos","startP"].forEach(k=> d[k]=last[k]);
+    d.weights = Object.assign({}, last.weights); applyRecToDraft(d); }
+  else { const e = estimate(d); if(e!=null) d.weights.belt = e; }
+  return d;
+}
+function recentSites(){ const out=[]; sorted().forEach(x=>{ if(!x.example && x.site && !out.includes(x.site)) out.push(x.site); }); return out.slice(0,6); }
+function sigRotation(d){
+  const pool = SIGNALS.map(x=>x[0]).filter(id=>!S.sigFav.includes(id));
+  if(!d.sigRot || d.sigRot.some(id=>S.sigFav.includes(id))){
+    const p = pool.slice(); for(let i=p.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [p[i],p[j]]=[p[j],p[i]]; }
+    d.sigRot = p.slice(0,3); save();
+  }
+  return d.sigRot;
+}
+function applyRecToDraft(d){
+  d.xfer = null; d.applied = false;
+  const h = divesFor(keyOf(d));
+  if(h.length){ const l = h[h.length-1]; d.weights = Object.assign({}, l.weights); d.tankPos = l.tankPos; d.fins = l.fins; return; }
+  const all = sorted(); if(!all.length) return;
+  const base = all.find(x=>x.check==="eye") || all[0];
+  const t = transferFrom(base, d);
+  d.weights = shiftLead(Object.assign({}, base.weights), t.delta);
+  d.tankPos = base.tankPos; d.fins = base.fins;
+  d.xfer = {date:base.date, site:base.site, confirmed:base.check==="eye", key:base.key, lines:t.lines, delta:t.delta};
+}
+const half = x => Math.round(x*2)/2;
+function transferFrom(base, d){
+  const lines = [], bw = S.profile.weightKg || 80; let delta = 0;
+  const say = (kg, why)=>{ if(!kg) return; delta += kg; lines.push(`${why}: ${kg>0?"add":"remove"} ${U.w(Math.abs(kg))} ${U.wu()}`); };
+  if(base.water!==d.water){
+    const off = Math.max(1.5, half(0.025*(bw+25)));
+    say(d.water==="fresh"? -off : off, d.water==="fresh"? "Salt to fresh water" : "Fresh to salt water");
+  }
+  if(base.suit!==d.suit){
+    const est = k => bw*(SUIT_PCT[k]||[.06,0])[0] + (SUIT_PCT[k]||[.06,0])[1];
+    say(half(est(d.suit)-est(base.suit)), `${SUITS[base.suit]} to ${SUITS[d.suit]}`);
+  }
+  const bs = (TANKS[base.tank]||{}).steel, ns = (TANKS[d.tank]||{}).steel;
+  if(bs!==ns) say(ns? -2 : 2, ns? "Aluminum to steel tank" : "Steel to aluminum tank");
+  const bp = base.bcd==="bpw", np = d.bcd==="bpw";
+  if(bp!==np) say(np? -2 : 2, np? "To backplate and wing" : "From backplate to BCD");
+  const pc = base.rec && base.rec.change;
+  if(base.check!=="eye" && pc && (pc.type==="add"||pc.type==="remove")) say(pc.type==="add"? pc.kg : -pc.kg, "Coach's pending change from that dive");
+  return {delta, lines};
+}
+function shiftLead(w, delta){
+  if(!delta) return w;
+  const main = (w.pockets||0) > (w.belt||0) ? "pockets" : "belt";
+  if(delta>0){ w[main] = (w[main]||0) + delta; return w; }
+  let left = -delta;
+  for(const k of [main, main==="belt"?"pockets":"belt", "ankle", "trim"]){ const take = Math.min(w[k]||0, left); w[k] = r1((w[k]||0) - take); left = r1(left - take); if(left<=0) break; }
+  return w;
+}
+function applyChange(d, c){
+  const w = d.weights;
+  if(c.type==="add") shiftLead(w, c.kg);
+  else if(c.type==="remove") shiftLead(w, -c.kg);
+  else if(c.type==="move" && c.to==="trim"){ const k = (w.pockets||0) > (w.belt||0) ? "pockets" : "belt"; const m = Math.min(c.kg, w[k]||0); w[k] = r1(w[k]-m); w.trim = r1((w.trim||0)+m); }
+  else if(c.type==="move"){ const m = Math.min(c.kg, w.trim||0); w.trim = r1(w.trim-m); w.belt = r1((w.belt||0)+m); }
+  else if(c.type==="tank"){ d.tankPos = c.dir==="up" ? (d.tankPos==="low"?"std":"high") : (d.tankPos==="high"?"std":"low"); }
+  d.applied = true;
+}
+
+function noFly(){
+  const real = S.dives.filter(x=>x.surfacedAt).sort((a,b)=>b.surfacedAt-a.surfacedAt);
+  if(!real.length) return null;
+  const last = real[0];
+  const repet = real.some(x=> x!==last && last.surfacedAt - x.surfacedAt < 48*3600e3);
+  const deco = real.some(x=> x.deco && last.surfacedAt - x.surfacedAt < 48*3600e3);
+  const hrs = deco? 24 : repet? 18 : 12;
+  const until = last.surfacedAt + hrs*3600e3, left = until - Date.now();
+  return {last, hrs, until, left, repet, deco};
+}
+function fmtLeft(ms){ const h = Math.floor(ms/3600e3), m = Math.floor(ms%3600e3/6e4); return h? `${h} h ${m} min` : `${m} min`; }
+function noFlyCard(){
+  const n = noFly(); if(!n) return "";
+  if(n.left <= 0 && n.left > -7*864e5) return `<div class="okline nofly"><b>Clear to fly</b><span class="small">Your minimum ${n.hrs} h surface interval has passed. Symptoms after landing still count: call DAN.</span></div>`;
+  if(n.left <= 0) return "";
+  const when = new Date(n.until).toLocaleString([], {weekday:"short", hour:"2-digit", minute:"2-digit"});
+  const why = n.deco? "Decompression dive logged. DAN says substantially longer than 18 h. 24 h shown as a floor, not a limit." : n.repet? "Repetitive or multi-day diving: DAN minimum 18 h." : "Single no-deco dive: DAN minimum 12 h.";
+  return `<div class="coachcard nofly" style="border-left-color:var(--bad)"><span class="eyebrow" style="color:var(--bad)">No flying or altitude</span>
+    <span class="big mono">${fmtLeft(n.left)}</span><span>Earliest: <b>${esc(when)}</b></span>
+    <span class="small">${why}</span>
+    <span class="small muted">Includes driving over mountain passes. The guidelines were tested at an 8,000 ft cabin: flying yourself higher, or unpressurized, calls for more margin. These are minimums, not guarantees.</span></div>`;
+}
+let EM = {edit:false, meEdit:false};
+function viewEmergency(){
+  const last = sorted().find(x=>!x.example);
+  const tel = n => "tel:" + n.replace(/[^0-9+]/g,"");
+  const R = emRegion(), list = emList();
+  const contacts = EM.edit
+    ? list.map(c=>`<div class="stack" style="border-top:1px solid var(--line);padding:10px 0;gap:6px">
+        <input type="text" data-ct="${c.id}|who" value="${esc(c.who)}" placeholder="Name">
+        <input type="tel" data-ct="${c.id}|num" value="${esc(c.num)}" placeholder="Phone number">
+        <input type="text" data-ct="${c.id}|sub" value="${esc(c.sub)}" placeholder="Note">
+        <button type="button" class="btn slim ghost" data-act="ctDel" data-v="${c.id}">Remove</button></div>`).join("")
+    : list.map(c=>`<div class="call"><span class="who">${esc(c.who)}</span>${c.num?`<a href="${tel(c.num)}" target="_top">${esc(c.num)}</a>`:`<span class="small muted">No number</span>`}${c.sub?`<span class="sub">${esc(c.sub)}</span>`:""}</div>`).join("");
+  return `<div class="section spread"><h1 style="color:var(--bad)">Emergency</h1><button type="button" class="btn slim ghost" data-tab="${backTab==="emergency"?"dive":backTab}">Close</button></div>
+  <div class="section"><div class="spread"><h3>Call</h3><div class="seg" style="flex:none" role="group" aria-label="Country"><button type="button" class="${R==="th"?"on":""}" data-act="emRegion" data-v="th">Thailand</button><button type="button" class="${R==="ph"?"on":""}" data-act="emRegion" data-v="ph">Philippines</button></div></div>
+    <div class="panel">${contacts}</div>
+    ${R==="ph"? `<p class="small muted">Chamber numbers come from Philippine dive community lists dated 2023 to 2024. Confirm the nearest working chamber with the liveaboard before departure.</p>` : ""}
+    <div class="row">${EM.edit? `<button type="button" class="btn slim" data-act="ctSave">Save contacts</button><button type="button" class="btn slim ghost" data-act="ctAdd">Add contact</button>` : `<button type="button" class="btn slim ghost" data-act="ctEdit">Edit contacts</button>`}</div>
+    <p class="small muted">Tap a number to call. Check the numbers before each trip.</p></div>
+  <div class="section"><div class="spread"><h3>My details</h3><button type="button" class="btn slim ghost" data-act="meEdit">${EM.meEdit?"Done":"Edit"}</button></div>
+    <div class="panel">${EM.meEdit
+      ? `<div class="stack">${[["name","Name"],["blood","Blood type"],["allergies","Allergies"],["meds","Medications"],["cert","Certification level"],["kin","Next of kin"],["kinPhone","Next of kin phone"],["insurer","Dive insurance"],["policy","Policy number"],["doctor","Doctor"],["notes","Anything a medic should know"]].map(([f,lab])=>`<label class="f">${lab}<input type="text" data-me="${f}" value="${esc(S.emergency.me[f]||"")}"></label>`).join("")}
+         <button type="button" class="btn slim" data-act="meSave">Save my details</button></div>`
+      : (Object.values(S.emergency.me).some(Boolean)
+        ? [["name","Name"],["blood","Blood type"],["allergies","Allergies"],["meds","Medications"],["cert","Certification"],["kin","Next of kin"],["kinPhone","Next of kin phone"],["insurer","Insurance"],["policy","Policy"],["doctor","Doctor"],["notes","Notes"]].filter(([f])=>S.emergency.me[f]).map(([f,lab])=>`<div class="call"><span class="who">${lab}</span>${f==="kinPhone"? `<a href="tel:${esc((S.emergency.me[f]||"").replace(/[^0-9+]/g,""))}" target="_top">${esc(S.emergency.me[f])}</a>` : `<span>${esc(S.emergency.me[f])}</span>`}</div>`).join("")
+        : `<p class="small muted">Empty. Tap Edit and fill this in. If you cannot speak for yourself, this is what someone else reads out.</p>`)}
+    </div>
+    <p class="small muted">Stored only on this phone.</p></div>
+  <div class="section"><h3>Suspected DCS or AGE: first aid</h3><div class="panel"><ol class="steps">
+    <li><b>Get them out and lying flat.</b> Recovery position if unconscious or vomiting.</li>
+    <li><b>100% oxygen, now,</b> at the highest flow the kit allows. Don't stop if symptoms improve.</li>
+    <li><b>Check airway and breathing.</b> Start CPR if they're not breathing normally.</li>
+    <li><b>Call EMS, then DAN.</b> Get them to the nearest medical facility.</li>
+    <li><b>Water if fully conscious.</b> No alcohol, no carbonated drinks.</li>
+    <li><b>Never put them back in the water.</b> No in-water recompression.</li>
+    <li><b>Record the dive:</b> depths, times, gas. Send the dive computer with them.</li>
+    <li><b>Watch the buddy too.</b> Same profile, same risk.</li>
+  </ol></div></div>
+  <div class="section"><h3>Warning signs</h3><div class="panel stack small">
+    <p><span class="pill bad">AGE</span> <b>Within minutes of surfacing:</b> unconsciousness, confusion, chest pain, trouble breathing, weakness or numbness on one side, blurred vision, bloody froth from the mouth.</p>
+    <p><span class="pill warn">DCS</span> <b>Usually within hours, up to 24 h or more:</b> joint pain, unusual fatigue, numbness or tingling, skin itch, rash or marbling, dizziness, headache, weakness.</p>
+    <p class="muted">Don't wait to see if it passes. Denial is the most common delay.</p>
+  </div></div>
+  <div class="section" id="efr-sss"><h3>Bleeding, shock, spinal injury</h3><div class="panel"><div class="chkgroup">
+    <div class="chk ref"><span class="letter">S</span><span><b>Serious bleeding</b><span class="d">Gloves or another barrier first. Firm direct pressure on the wound. Pressure bandage over the dressing. If blood soaks through, add bandages on top. Leave the first one in place.</span></span></div>
+    <div class="chk ref"><span class="letter">S</span><span><b>Shock</b><span class="d">Keep body temperature up: cover them and insulate them from the ground or deck. Elevate the legs, unless you suspect a spinal injury.</span></span></div>
+    <div class="chk ref"><span class="letter">S</span><span><b>Spinal injury</b><span class="d">Hold the head still to prevent movement. Tell them not to move. Log roll onto the back only if you need to, for breathing or CPR.</span></span></div>
+  </div><p class="small muted" style="margin-top:6px">EFR Primary Care, after airway, breathing and CPR are handled.</p></div></div>
+  <div class="section" id="efr-sample"><h3>Illness assessment: SAMPLE</h3><div class="panel"><div class="chkgroup">
+    <div class="chk ref"><span class="letter">S</span><span><b>Symptoms</b><span class="d">What do you feel? Where does it hurt?</span></span></div>
+    <div class="chk ref"><span class="letter">A</span><span><b>Allergies</b><span class="d">Any allergies to medicine, food or anything else?</span></span></div>
+    <div class="chk ref"><span class="letter">M</span><span><b>Medications</b><span class="d">What do you take? Anything today?</span></span></div>
+    <div class="chk ref"><span class="letter">P</span><span><b>Preexisting conditions</b><span class="d">Do you have a medical condition? What type?</span></span></div>
+    <div class="chk ref"><span class="letter">L</span><span><b>Last meal</b><span class="d">Did you eat recently? What, and when?</span></span></div>
+    <div class="chk ref"><span class="letter">E</span><span><b>Events</b><span class="d">What led to feeling unwell? What were you doing when it started? When and where did the first symptoms occur? Have you been exercising? For a diver, include the dive profile below.</span></span></div>
+  </div><p class="small muted" style="margin-top:6px">EFR Secondary Care. Write the answers down and hand them to EMS.</p></div></div>
+  <div class="section" id="fa-more"><h3>Dive-trip emergencies</h3><div class="panel">
+    <details class="fa" id="fa-cpr"><summary><b>CPR, adult</b><span class="d">Not breathing normally</span></summary><div class="body">
+      <ol class="steps">
+        <li><b>Check the scene is safe,</b> then tap and shout. No response and not breathing normally (gasping counts as not breathing): call EMS, send someone for oxygen and an AED.</li>
+        <li><b>30 compressions:</b> center of the chest, hands stacked, arms straight. 5 to 6 cm (2 to 2.4 in) deep at 100 to 120 per minute. Let the chest rise fully each time.</li>
+        <li><b>2 breaths:</b> tilt the head, lift the chin, about 1 second each, chest visibly rises. Use a pocket mask if you have one.</li>
+        <li><b>Repeat 30:2.</b> If you can't or won't give breaths, do continuous compressions.</li>
+        <li><b>AED as soon as it arrives.</b> Switch it on and follow the voice. Dry the chest first; on a wet deck, move them to a dry spot.</li>
+        <li><b>Don't stop</b> until they breathe normally, help takes over, or you are exhausted. Swap compressors every 2 minutes if you can.</li>
+      </ol>
+      <p class="small muted">After drowning, give 5 breaths first (see Near-drowning).</p>
+    </div></details>
+    <details class="fa" id="fa-drown"><summary><b>Near-drowning</b><span class="d">Pulled from the water, coughing or unresponsive</span></summary><div class="body">
+      <ol class="steps">
+        <li><b>Get them out without becoming a second victim.</b> Reach or throw before you go.</li>
+        <li><b>Not breathing normally:</b> call EMS, give <b>5 rescue breaths first,</b> then CPR at 30:2. The problem is lack of oxygen, so breaths matter more here than in a cardiac arrest.</li>
+        <li><b>Vomiting is common.</b> Roll them onto their side, clear the mouth, roll back and continue.</li>
+        <li><b>Breathing:</b> recovery position, 100% oxygen, keep them warm, monitor breathing until help arrives.</li>
+        <li><b>A diver:</b> also treat for AGE or DCS. Oxygen, lie flat, record the dive profile.</li>
+      </ol>
+      <div class="redflag"><b>Hospital, even if they seem fine,</b> if they needed breaths, lost consciousness, or have ongoing cough, foamy sputum, breathlessness, chest pain or confusion. Breathing can get worse over the next several hours.</div>
+    </div></details>
+    <details class="fa" id="fa-marine"><summary><b>Marine stings and punctures</b><span class="d">Jellyfish, venomous spines, urchins, bites, coral</span></summary><div class="body">
+      <h4>Jellyfish</h4>
+      <ol class="steps">
+        <li><b>Out of the water.</b> Watch breathing.</li>
+        <li><b>Vinegar on the area for at least 30 seconds.</b> This is the rule for box jellyfish, which live in Thai and Philippine waters.</li>
+        <li><b>Remove tentacles</b> with tweezers or a gloved hand. Don't rub, and don't rinse with fresh water.</li>
+        <li><b>Hot water</b> for pain: as hot as they can stand without scalding, about 45 °C (113 °F), for 20 minutes or more. Use a cold pack if there's no hot water.</li>
+      </ol>
+      <div class="redflag"><b>Call EMS</b> for trouble breathing, chest pain, collapse, or a sting covering a large area. Be ready for CPR. Severe back or belly pain, sweating, vomiting or anxiety 20 to 40 minutes after a small sting can be Irukandji syndrome, also an emergency.</div>
+      <h4>Venomous spines</h4>
+      <p class="small muted">Stonefish, scorpionfish, lionfish, stingray, crown-of-thorns</p>
+      <ol class="steps">
+        <li><b>Hot water immersion,</b> as hot as tolerable (test it with an unaffected hand), 30 to 90 minutes, until the pain eases. Heat breaks down the venom.</li>
+        <li><b>Remove loose spines</b> you can see. Don't dig for deep ones.</li>
+        <li><b>Stingray:</b> control the bleeding. Never pull out a barb stuck in the chest, belly or neck.</li>
+        <li><b>Stonefish:</b> always see a doctor. Antivenom exists.</li>
+        <li><b>Clean the wound</b> and watch for infection over the following days.</li>
+      </ol>
+      <h4>Sea urchin</h4>
+      <p>Pull out protruding spines with tweezers, then hot water soak. Leave deep or broken-off spines for a doctor, especially near a joint.</p>
+      <h4>Blue-ringed octopus, cone snail, sea snake</h4>
+      <ol class="steps">
+        <li><b>Call EMS.</b> The bite or sting may be painless but still deadly.</li>
+        <li><b>Pressure immobilization:</b> firm, wide bandage over the bite, then wrap the whole limb, then splint it. Keep them still.</li>
+        <li><b>Be ready to breathe for them.</b> The venom can paralyze breathing while they stay aware. Rescue breaths may be needed for hours.</li>
+      </ol>
+      <h4>Coral cuts and scrapes</h4>
+      <p>Scrub and rinse thoroughly, apply antiseptic, cover. Watch for redness, swelling or pus over the next days.</p>
+      <h4>Allergic reaction</h4>
+      <div class="redflag">Swelling of the face, lips or throat, wheezing, hives or collapse after any sting: <b>epinephrine auto-injector</b> if they have one, call EMS, keep them sitting up if breathing is hard, or lying with legs raised if faint.</div>
+    </div></details>
+    <details class="fa" id="fa-cold"><summary><b>Hypothermia</b><span class="d">Cold after long or repeated dives</span></summary><div class="body">
+      <p><b>Signs:</b> shivering, numb hands, slurred speech, clumsiness, poor judgment. Severe: shivering stops, drowsy, confused, slow breathing.</p>
+      <ol class="steps">
+        <li><b>Out of the wind.</b> Get the wet exposure suit off gently, dry them, and insulate, including the head.</li>
+        <li><b>Warm the core first:</b> warm packs to the armpits, chest and groin. Blankets or a foil sheet over dry clothing.</li>
+        <li><b>Warm, sweet drinks</b> only if they are fully alert. No alcohol.</li>
+        <li><b>Handle gently</b> and keep them horizontal if severe. Don't rub the arms and legs.</li>
+        <li><b>Severe:</b> call EMS. Check breathing for up to a minute, because it may be very slow, then CPR if needed.</li>
+      </ol>
+      <p class="small muted">Mild cold means no more diving that day.</p>
+    </div></details>
+    <details class="fa" id="fa-heat"><summary><b>Heat illness</b><span class="d">Suited up on a hot deck</span></summary><div class="body">
+      <h4>Heat exhaustion</h4>
+      <p>Heavy sweating, headache, nausea, weakness, dizziness. Get into shade, unzip or remove the suit, cool with water, sip fluids, rest. Skip the next dive.</p>
+      <div class="redflag"><b>Heat stroke is an emergency:</b> confusion, odd behavior, collapse or seizure, hot skin, sweating may have stopped. Call EMS and <b>cool fast.</b> Best is immersion in cool water with someone holding them. Otherwise soak with water and fan hard, ice packs to the neck, armpits and groin. No drinks unless fully alert.</div>
+    </div></details>
+    <details class="fa" id="fa-choke"><summary><b>Choking, adult</b><span class="d">Can't speak, cough or breathe</span></summary><div class="body">
+      <ol class="steps">
+        <li><b>Coughing hard?</b> Encourage them to keep coughing. Stay with them.</li>
+        <li><b>Can't speak or breathe:</b> 5 firm back blows between the shoulder blades, leaning them forward.</li>
+        <li><b>Then 5 abdominal thrusts:</b> fist just above the navel, other hand over it, sharp inward and upward pulls.</li>
+        <li><b>Alternate 5 and 5</b> until it clears or they go unresponsive.</li>
+        <li><b>Unresponsive:</b> lower them down, call EMS, start CPR. Look in the mouth before each set of breaths and remove anything you can see.</li>
+      </ol>
+      <p class="small muted">After abdominal thrusts, they should see a doctor.</p>
+    </div></details>
+  </div><p class="small muted">General first aid in line with Red Cross, ERC and DAN guidance. It supports training, it doesn't replace it. Call EMS early. For more, the free Red Cross First Aid app works offline.</p></div>
+  ${last? `<div class="section"><h3>Your last dive, for the call</h3><div class="panel small stack">
+    <p class="mono">${esc(last.date)}${last.surfacedAt?` \u00b7 surfaced ${new Date(last.surfacedAt).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})}`:""}${last.site?` \u00b7 ${esc(last.site)}`:""}</p>
+    <p>Max ${last.maxDepth!=null? U.d(last.maxDepth)+" "+U.du() : "?"} \u00b7 ${last.time? last.time+" min" : "? min"} \u00b7 ${last.fo2 && last.fo2>21? "EAN"+last.fo2 : "Air"}${last.deco?" \u00b7 deco dive":""}</p>
+  </div></div>`:""}`;
+}
+function setupDialed(k){ const h = divesFor(k); return h.length>0 && h[h.length-1].check==="eye" && !(h[h.length-1].rec && h[h.length-1].rec.change); }
+function viewDive(){
+  if(!S.draft){
+    const last = sorted().find(x=>!x.example);
+    const dialed = last && setupDialed(last.key);
+    const full = `<button class="btn ${dialed?"ghost":""}" type="button" data-act="startDive">Full log: new setup or something changed</button>`;
+    const quick = last? `<button class="btn ${dialed?"":"ghost"}" type="button" data-act="startQuick">Quick dive: same setup</button>` : "";
+    return `${noFlyCard()?`<div class="section">${noFlyCard()}</div>`:""}<div class="section"><h1>Next dive</h1>
+      <p class="muted">Full log for a new suit, tank, BCD, water type or weighting, new gear, or when something felt wrong. It runs the 5 m check and tunes the coach. Otherwise use Quick dive: pre-dive checks, then surfaced time for the no-fly clock.</p></div>
+    ${last? `<div class="section">${dialed? `<div class="okline"><b>Setup dialed.</b> ${esc(keyLabel(last.key))}: weight confirmed at the 5 m check. Quick dive is enough.</div>` : `<div class="caution"><b>Setup not confirmed yet.</b> ${esc(keyLabel(last.key))}: log a full dive with the 5 m check.</div>`}</div>`:""}
+    <div class="section">${dialed? quick+full : full+quick}</div>
+    ${last && divesFor(last.key).length? `<div class="section"><h3>Coach says</h3>${recCard(last.key)}</div>`:""}`;
+  }
+  const d = S.draft, st = d.stage;
+  const stages = d.quick? [["pre","Pre-dive","Checks"],["debrief","Surfaced","No-fly"]] : [["plan","Plan","Gear"],["pre","Pre-dive","Checks"],["debrief","Debrief","Surface"]];
+  const stepper = `<div class="stepper" ${d.quick?'style="grid-template-columns:repeat(2,1fr)"':""}>${stages.map(([k,t,s],i)=>{
+    const idx = stages.map(x=>x[0]).indexOf(st); const cls = k===st?"on": i<idx?"done":"";
+    return `<button type="button" class="${cls}" data-act="stage" data-v="${k}"><span>${s}</span>${t}</button>`; }).join("")}</div>`;
+  let body = "";
+  if(st==="plan") body = planView(d);
+  if(st==="pre") body = preView(d);
+  if(st==="debrief") body = d.quick? quickView(d) : debriefView(d);
+  return `<div class="section spread"><h1>${st==="plan"?"Plan and gear":st==="pre"?(d.quick?"Quick dive":"Pre-dive"):(d.quick?"Surfaced":"Debrief")}</h1><button type="button" class="btn slim ghost" data-act="discard">${armed==="discard"?"Tap again to discard":"Discard"}</button></div>${stepper}${body}`;
+}
+
+function planView(d){
+  const w = d.weights;
+  return `
+  <div class="section" id="planCoach"></div>
+  <div class="section"><h3>Dive</h3>
+    <div class="grid2"><label class="f">Date<input type="date" id="f_date" data-f="date" value="${d.date}"></label>
+    <label class="f">Site<input type="text" id="f_site" data-f="site" value="${esc(d.site)}" placeholder="Type a new site" list="siteList" autocomplete="off"></label></div>
+    <datalist id="siteList">${recentSites().map(x=>`<option value="${esc(x)}"></option>`).join("")}</datalist>
+    ${recentSites().length? `<div class="sitechips"><span class="small muted">Recent:</span>${recentSites().map(x=>`<button type="button" class="chip ${x===d.site?"on":""}" data-act="pickSite" data-v="${esc(x)}">${esc(x)}</button>`).join("")}</div>`:""}
+    <div class="grid2"><label class="f">Planned max (${U.du()})${numIn("planDepth",U.d(d.planDepth),"d")}</label>
+    <label class="f">Planned time (min)${numIn("planTime",d.planTime,"n")}</label></div>
+  </div>
+  <div class="section"><h3>Setup</h3>
+    <label class="f">Water</label>${seg("water",[["salt","Salt"],["fresh","Fresh"]],d.water)}
+    <label class="f">Exposure suit${select("suit",SUITS,d.suit)}</label>
+    <div class="grid2"><label class="f">Tank${select("tank",TANKS,d.tank)}</label>
+    <label class="f">BCD${select("bcd",BCDS,d.bcd)}</label></div>
+    <div class="grid2"><label class="f">Fins<input type="text" id="f_fins" data-f="fins" value="${esc(d.fins)}" placeholder="e.g. Jet fins"></label>
+    <span></span></div>
+    <label class="f">Gas</label>${seg("gas",[["air","Air"],["nitrox","Nitrox"]],d.gas||"air")}
+    <div id="planGas"></div>
+  </div>
+  <div class="section"><div class="spread"><h3>Weight (${U.wu()})</h3><span class="mono" id="wTotal">Total ${U.w(totalW(w))} ${U.wu()}</span></div>
+    <div class="grid4">
+      <label class="f">Belt${numIn("w.belt",U.w(w.belt),"w","0.5")}</label>
+      <label class="f">Pockets${numIn("w.pockets",U.w(w.pockets),"w","0.5")}</label>
+      <label class="f">Trim${numIn("w.trim",U.w(w.trim),"w","0.5")}</label>
+      <label class="f">Ankle${numIn("w.ankle",U.w(w.ankle),"w","0.5")}</label>
+    </div>
+    <label class="f">Tank position in band</label>${seg("tankPos",[["low","Lower"],["std","Standard"],["high","Raised"]],d.tankPos)}
+    <label class="f">Start pressure (${U.pu()})${numIn("startP",U.p(d.startP),"p")}</label>
+  </div>
+  <div class="section"><button class="btn" type="button" data-act="stage" data-v="pre">Gear set: go to pre-dive</button></div>`;
+}
+
+function gasCheck(tested, label, depthM, water){
+  const unit = water==="fresh"? 10.3 : 10, valid = x => x!=null && x>=21 && x<=100;
+  let h = "";
+  if(!valid(tested) && valid(label) && label>21) h += `<div class="caution"><b>Gas not tested.</b> Analyze the cylinder and enter the tested O₂ %. Checks below use the ${label}% label for now.</div>`;
+  const fo2 = valid(tested)? tested : valid(label)? label : null;
+  if(!fo2) return h;
+  const f = fo2/100, mod14 = (1.4/f-1)*unit, mod16 = (1.6/f-1)*unit;
+  const gasName = fo2===21? "Air" : `EAN${fo2}`;
+  if(valid(tested) && valid(label) && Math.abs(label-fo2) > 1) h += `<div class="caution"><b>Tested ${fo2}% doesn't match the ${label}% label.</b> Use the tested value, set it on your computer, and correct the label.</div>`;
+  const modTxt = `MOD ${U.d(Math.floor(mod14*10)/10)} ${U.du()} at 1.4 · ${U.d(Math.floor(mod16*10)/10)} ${U.du()} at 1.6`;
+  if(depthM==null) h += `<div class="okline">${gasName}: ${modTxt}. Enter a planned max depth to check it.</div>`;
+  else if(depthM > mod16) h += `<div class="alarm" role="alert">EXCEEDS MOD: DON'T DIVE THIS PLAN<span>Planned ${U.d(depthM)} ${U.du()} is deeper than the 1.6 contingency limit for ${gasName} (${U.d(Math.floor(mod16*10)/10)} ${U.du()}). Change the plan or the gas.</span></div>`;
+  else if(depthM > mod14) h += `<div class="alarm" role="alert">PLANNED DEPTH EXCEEDS MOD<span>Planned ${U.d(depthM)} ${U.du()} is past the 1.4 working MOD for ${gasName} (${U.d(Math.floor(mod14*10)/10)} ${U.du()}). Only the contingency margin is left.</span></div>`;
+  else h += `<div class="okline">Within MOD. ${modTxt}.</div>`;
+  return h;
+}
+function planGas(d){
+  if(d.gas!=="nitrox") return "";
+  const mix = d.fo2 || d.fo2Label;
+  return `<div class="spread"><span>${mix?`<b class="mono">EAN${mix}</b> ${d.fo2?"tested":"from label"}`:`<span class="muted">No mix entered yet</span>`}</span><button type="button" class="btn slim ghost" data-tab="nitrox">Edit in Nitrox</button></div>` + gasCheck(d.fo2, d.fo2Label, d.planDepth, d.water);
+}
+function updatePlanGas(){
+  const d = S.draft, el = $("#planGas"); if(!el || !d) return;
+  el.innerHTML = planGas(d);
+}
+function updatePlanCoach(){
+  const d = S.draft, el = $("#planCoach"); if(!el) return;
+  updatePlanGas();
+  const k = keyOf(d), h = divesFor(k);
+  if(h.length){
+    const lr = latestRec(k), c = lr && lr.rec.change;
+    const btn = c ? (d.applied ? `<p class="small"><span class="pill good">Applied</span> Weights below include this change.</p>` : `<button type="button" class="btn slim" data-act="applyRec">Apply this change to my gear</button>`) : "";
+    el.innerHTML = `<h3>For this setup</h3>` + recCard(k, true) + btn;
+  }
+  else if(d.xfer){
+    const x = d.xfer;
+    el.innerHTML = `<h3>For this setup</h3><div class="coachcard"><span class="eyebrow">New setup · carried over</span>
+      <div class="gear">Start at ${U.w(totalW(d.weights))} ${U.wu()} total</div>
+      <p class="small">From your ${esc(x.date)}${x.site?` ${esc(x.site)}`:""} dive (${x.confirmed?"weight confirmed at the 5 m check":"not yet confirmed at the 5 m check"}).</p>
+      ${x.lines.length? `<ul class="xfer">${x.lines.map(l=>`<li>${esc(l)}</li>`).join("")}</ul>` : `<p class="small">No adjustment needed for this change.</p>`}
+      <p class="small muted">Already applied to the weights below. Rules of thumb only: the 5 m check on this dive sets the real number.</p></div>`;
+  }
+  else {
+    const e = estimate(d);
+    el.innerHTML = `<h3>For this setup</h3><div class="coachcard"><span class="eyebrow">New setup · starting point</span>
+      ${e!=null? `<div class="gear">About ${U.w(e)} ${U.wu()} total</div><p class="small muted">A rough rule of thumb from your body weight, suit, tank, BCD and water. The 5 m check at the end of this dive replaces it with a real number.</p>`
+      : `<p>No history for this setup yet. Add your body weight under Me for a starting estimate, and do the 5 m check at the end of the dive.</p>`}</div>`;
+  }
+  const t = $("#wTotal"); if(t) t.textContent = `Total ${U.w(totalW(d.weights))} ${U.wu()}`;
+}
+
+function recCard(k, compact){
+  const lr = latestRec(k); if(!lr) return "";
+  const r = lr.rec;
+  const tone = r.issue==="rose"||r.issue==="tooLight" ? "bad" : r.change ? "warn" : r.issue==="check" ? "info" : "good";
+  const tag = r.issue==="rose"||r.issue==="tooLight" ? "Safety: add weight" : r.change ? "One change" : r.issue==="check" ? "Measure first" : "Hold";
+  return `<div class="coachcard">
+    <div class="spread"><span class="eyebrow">Next dive · rule-based</span><span class="pill ${tone}">${tag}</span></div>
+    <div class="gear">${esc(r.gear)}</div>
+    <p class="small">${esc(r.why)}</p>
+    ${r.evalText? `<p class="small"><span class="pill ${r.evalTone}">Last change</span> ${esc(r.evalText)}</p>`:""}
+    ${!compact && r.skills.length? `<hr><div class="small"><b>Skill focus</b><ul style="margin:4px 0 0;padding-left:18px">${r.skills.map(s=>`<li>${esc(s)}</li>`).join("")}</ul></div>`:""}
+    <p class="small muted">Based on ${esc(lr.dive.date)}${lr.dive.site?`, ${esc(lr.dive.site)}`:""} · ${esc(keyLabel(k))}</p>
+  </div>`;
+}
+
+function sigRow(x, tag){ return `<div class="sig"><b>${esc(x[2])}</b>${tag?`<span class="pill info">${tag}</span>`:`<span class="pill good">Starred</span>`}<span class="how">${esc(x[3])}</span>${x[4]?`<span class="note">${esc(x[4])}</span>`:""}</div>`; }
+function preView(d){
+  const k = keyOf(d), lr = latestRec(k);
+  const adaptive = [];
+  if(lr && lr.rec.change) adaptive.push({t:`Today's change: ${lr.rec.gear}`, src:"Coach"});
+  const recent = sorted().slice(0,3);
+  recent.forEach(x=> (x.rec? x.rec.skills:[]).forEach(s=>{ if(!adaptive.some(a=>a.t===s)) adaptive.push({t:s, src:"From recent dives"}); }));
+  adaptive.push({t:"Plan the 5 m weight check for the end of the dive", src:"Coach"});
+  const cues = adaptive.slice(0,5).concat(S.cues.map(t=>({t, src:""}))).concat((S.learnings||[]).filter(l=>l.cue).map(l=>({t:l.cue, src:"Learned"})));
+  const cueHtml = cues.map((c,i)=>`<label class="cue"><input type="checkbox" data-cue="${i}" ${d.cues[i]?"checked":""}><span>${c.src?`<span class="src">${esc(c.src)}</span><br>`:""}${esc(c.t)}</span></label>`).join("");
+  const refRow = ([l,t,x])=>`<div class="chk ref"><span class="letter">${l}</span><span><b>${t}</b><span class="d">${esc(x)}</span></span></div>`;
+  const bw = BWRAF.map(refRow).join(""), so = SORTED.map(refRow).join("");
+  const gas = d.gas==="nitrox" ? gasCheck(d.fo2, d.fo2Label, d.planDepth, d.water) : "";
+  return `
+  ${gas && /alarm|caution/.test(gas) ? `<div class="section">${gas}</div>` : ""}
+  <div class="section"><h3>Reminders</h3><div class="panel">${cueHtml}</div></div>
+  ${S.skills.queue.length? `<div class="section"><div class="spread"><h3>Skills to try</h3><button type="button" class="btn slim ghost" data-tab="skills">Skills</button></div>
+    <div class="panel">${S.skills.queue.map(skillBy).filter(Boolean).map(x=>`<div class="sig"><b>${esc(x[2])}</b><span></span><span class="how">${esc(x[3])}</span>${x[4]?`<span class="note">${esc(x[4])}</span>`:""}</div>`).join("")}</div></div>` : ""}
+  <div class="section"><div class="spread"><h3>Signals to agree with your buddy</h3><button type="button" class="btn slim ghost" data-tab="signals">All signals</button></div>
+    <div class="panel">${S.sigFav.map(id=>SIG_BY[id]).filter(Boolean).map(x=>sigRow(x,"")).join("")}${sigRotation(d).map(id=>SIG_BY[id]).filter(Boolean).map(x=>sigRow(x,"Rotating review")).join("")}</div>
+  </div>
+  <div class="section"><h3>Buddy check · BWRAF</h3>
+    <div class="panel chkgroup">${bw}</div></div>
+  <div class="section"><h3>Descent · SORTED</h3>
+    <p class="small muted">On the surface, just before you leave. In order. Don't drop until S-O-R-T-E are done.</p>
+    <div class="panel chkgroup">${so}</div></div>
+  <div class="section"><button class="btn" type="button" data-act="stage" data-v="debrief">${d.quick?"Surfaced":"Surfaced: debrief"}</button></div>`;
+}
+function quickView(d){
+  return `
+  <div class="section"><div class="grid2"><label class="f">Date<input type="date" id="f_date" data-f="date" value="${d.date}"></label>
+    <label class="f">Site<input type="text" id="f_site" data-f="site" value="${esc(d.site)}" list="siteList" autocomplete="off"></label></div>
+    <datalist id="siteList">${recentSites().map(x=>`<option value="${esc(x)}"></option>`).join("")}</datalist>
+    <p class="small muted">${esc(keyLabel(keyOf(d)))} · ${U.w(totalW(d.weights))} ${U.wu()}</p></div>
+  <div class="section"><h3>Surfacing</h3>
+    <div class="grid2"><label class="f">Surfaced at<input type="time" id="c_surf" value="${d.surfTime || nowHM()}"></label>
+    <label class="f">Deco stops required?${condSegRaw("deco",[["no","No"],["yes","Yes"]], d.deco?"yes":"no")}</label></div>
+    <label class="f">Max depth (${U.du()}, optional)${numIn("maxDepth",U.d(d.maxDepth),"d")}</label>
+    <p class="small muted">Surfaced time drives the flying-after-diving countdown.</p></div>
+  <div class="section"><h3>Anything to note?</h3><p class="small muted">Optional.</p>
+    ${["Body","Comfort"].map(g=>`<div class="chips">${FEEL.filter(f=>f.g===g).map(f=>`<button type="button" class="chip ${d.feel.includes(f.k)?"on":""}" data-act="feel" data-v="${f.k}">${esc(f.t)}</button>`).join("")}</div>`).join("")}
+    <label class="f">Notes<textarea id="f_notes" data-f="notes" placeholder="Anything worth remembering">${esc(d.notes)}</textarea></label>
+    <p class="small muted">Weight, trim or buoyancy felt off? Use <button type="button" class="btn slim ghost" data-act="toFull">Switch to full log</button></p></div>
+  <div class="section"><button class="btn" type="button" data-act="saveDive">Save dive</button></div>`;
+}
+
+function nowHM(){ const n = new Date(); return String(n.getHours()).padStart(2,"0")+":"+String(n.getMinutes()).padStart(2,"0"); }
+function condSeg(field, opts, cur){ return `<div class="seg" role="group">${opts.map(([v,t])=>`<button type="button" data-act="cond" data-v="${field}|${v}" class="${cur===v?"on":""}">${esc(t)}</button>`).join("")}</div>`; }
+function condSegRaw(field, opts, cur){ return `<div class="seg" role="group">${opts.map(([v,t])=>`<button type="button" data-act="deco" data-v="${v}" class="${cur===v?"on":""}">${esc(t)}</button>`).join("")}</div>`; }
+function debriefView(d){
+  const checks = [["sank","Sank","Overweighted"],["eye","Eye level","Weight correct"],["rose","Rose","Underweighted"],["none","Didn't check","Use feel only"]];
+  const groups = ["Overall","Weight","Trim","Comfort","Body"];
+  return `
+  <div class="section"><div class="spread"><h3>The 5 m check</h3><span class="small muted">Optional</span></div>
+    <p class="small muted">End of dive, 5 m, about ${imp()?"500 psi":"50 bar"} left, BCD empty, normal breath, no finning.</p>
+    <div class="checkopts">${checks.map(([k,t,s])=>`<button type="button" class="opt ${d.check===k?"on":""}" data-f="check" data-v="${k}"><b>${t}</b><span>${s}</span></button>`).join("")}</div>
+  </div>
+  <div class="section"><h3>What you felt</h3>
+    ${groups.map(g=>`<p class="small muted" style="font-weight:700">${g}</p><div class="chips">${FEEL.filter(f=>f.g===g).map(f=>`<button type="button" class="chip ${d.feel.includes(f.k)?"on":""}" data-act="feel" data-v="${f.k}">${esc(f.t)}</button>`).join("")}</div>`).join("")}
+  </div>
+  ${S.skills.queue.length? `<div class="section"><div class="spread"><h3>Skills you planned</h3><span class="small muted">Optional</span></div><div class="panel">${S.skills.queue.map(skillBy).filter(Boolean).map(x=>{
+      const r = (d.skillRes||{})[x[0]]||{};
+      return `<div class="tried"><b>${esc(x[2])}</b>
+        <div class="seg">${[["nailed","Nailed it"],["ok","Getting there"],["hard","Struggled"],["skip","Didn't try"]].map(([k,t])=>`<button type="button" class="${r.r===k?"on":""}" data-act="skillRes" data-v="${x[0]}|${k}">${t}</button>`).join("")}</div>
+        <input type="text" data-skillnote="${x[0]}" value="${esc(r.note||"")}" placeholder="Note (optional)"></div>`; }).join("")}</div></div>` : ""}
+  <div class="section"><h3>Numbers</h3>
+    <div class="grid2">
+      <label class="f">End pressure (${U.pu()})${numIn("endP",U.p(d.endP),"p")}</label>
+      <label class="f">Bottom time (min)${numIn("time",d.time,"n")}</label>
+      <label class="f">Max depth (${U.du()})${numIn("maxDepth",U.d(d.maxDepth),"d")}</label>
+      <label class="f">Average depth (${U.du()})${numIn("avgDepth",U.d(d.avgDepth),"d")}</label>
+    </div>
+    <p class="small muted">Average depth comes from your computer. With start and end pressure it gives your air consumption trend.</p>
+  </div>
+  <div class="section"><h3>Conditions</h3>
+    <label class="f">Current</label>${condSeg("current", Object.entries(CUR_T), d.cond.current)}
+    <label class="f">Visibility</label>${condSeg("vis", Object.entries(imp()?VIS_TI:VIS_T), d.cond.vis)}
+    <div class="grid2"><label class="f">Entry</label><label class="f">Camera or light rig</label></div>
+    <div class="grid2">${condSeg("entry", [["shore","Shore"],["boat","Boat"]], d.cond.entry)}${condSeg("camera", [["no","No"],["yes","Yes"]], d.cond.camera)}</div>
+    <label class="f">Water temperature (${imp()?"\u00b0F":"\u00b0C"})<input type="number" inputmode="decimal" id="c_temp" value="${d.cond.temp==null?"":(imp()? Math.round(d.cond.temp*9/5+32) : d.cond.temp)}"></label>
+  </div>
+  <div class="section"><h3>Surfacing</h3>
+    <div class="grid2"><label class="f">Surfaced at<input type="time" id="c_surf" value="${d.surfTime || nowHM()}"></label>
+    <label class="f">Deco stops required?${condSegRaw("deco",[["no","No"],["yes","Yes"]], d.deco?"yes":"no")}</label></div>
+    <p class="small muted">Used for your flying-after-diving countdown.</p>
+  </div>
+  <div class="section"><h3>Overall</h3>${seg("rating",[[1,"1"],[2,"2"],[3,"3"],[4,"4"],[5,"5"]],d.rating)}
+    <label class="f">Notes<textarea id="f_notes" data-f="notes" placeholder="Anything worth remembering">${esc(d.notes)}</textarea></label></div>
+  <div class="section"><button class="btn" type="button" data-act="saveDive">Save dive and get coaching</button></div>`;
+}
+
+/* --- Coach tab --- */
+function viewCoach(){
+  const keys = [...new Set(sorted().filter(d=>!d.quick).map(d=>d.key))];
+  if(!keys.length) return `<div class="section"><h1>Coach</h1><p class="muted">Log a dive and the coaching for that setup appears here.</p></div>${learnView()}`;
+  if(!coachKey || !keys.includes(coachKey)) coachKey = keys[0];
+  const h = divesFor(coachKey);
+  const rows = h.slice(-8).reverse().map(d=>{
+    const r = rmvOf(d);
+    const ck = {sank:["bad","Sank"],eye:["good","Eye"],rose:["bad","Rose"],none:["info","–"]}[d.check]||["info","–"];
+    return `<tr><td>${esc(d.date.slice(5))}</td><td class="n">${U.w(totalW(d.weights))}</td><td class="n">${U.w(d.weights.trim)}</td><td><span class="pill ${ck[0]}">${ck[1]}</span></td><td class="n">${r!=null?U.rmv(r):"–"}</td></tr>`; }).join("");
+  const aiPart = ai.sample
+    ? `<div class="row"><button class="btn slim" type="button" data-act="aiCoach">Get Claude's read on this setup</button><button class="btn slim ghost" type="button" id="aiStop" data-act="aiStop" hidden>Stop</button></div>
+       <div class="aibox" id="aiOut" aria-live="polite">Claude reviews the full history for this setup and checks the rule-based call.</div>
+       <label class="f">Ask a dive question<textarea id="aiQ" placeholder="e.g. Why do I burn more air on the second dive of the day?"></textarea></label>
+       <button class="btn slim ghost" type="button" data-act="aiAsk">Ask</button>`
+    : `<p class="small muted">AI coaching turns on when this page is open in Claude with a connection. Until then the rule-based coach above does the work.</p>`;
+  return `<div class="section"><h1>Coach</h1>
+    ${keys.length>1?`<label class="f">Setup<select id="coachKey">${keys.map(k=>`<option value="${esc(k)}" ${k===coachKey?"selected":""}>${esc(keyLabel(k))}</option>`).join("")}</select></label>`:`<p class="small muted">${esc(keyLabel(coachKey))}</p>`}
+  </div>
+  <div class="section">${recCard(coachKey)}</div>
+  <div class="section"><h3>This setup, recent dives</h3>
+    <div class="panel tbl"><table><thead><tr><th>Date</th><th class="n">Lead ${U.wu()}</th><th class="n">Trim</th><th>5 m</th><th class="n">${U.ru()}</th></tr></thead><tbody>${rows}</tbody></table></div>
+  </div>
+  ${learnView()}
+  <div class="section"><h3>Ask Claude</h3>${aiPart}</div>`;
+}
+function learnView(){
+  const L = (S.learnings||[]).slice().sort((a,b)=> a.date<b.date?1:a.date>b.date?-1:0);
+  const row = l=>`<div class="skill"><div class="spread"><b>${esc(l.title)}</b><span class="pill ${l.kind==="progress"?"good":"info"}">${l.kind==="progress"?"Progress":"Learning"}</span></div>
+    <span class="small muted mono">${esc(l.date)}</span><span class="how">${esc(l.text)}</span>
+    ${l.cue?`<span class="small"><b>Pre-dive cue:</b> ${esc(l.cue)}</span>`:""}
+    <div><button type="button" class="btn slim ghost" data-act="delLearn" data-v="${esc(l.id)}">${armed==="L"+l.id?"Tap again to remove":"Remove"}</button></div></div>`;
+  return `<div class="section"><h3>My learnings</h3><div class="panel">${L.length?L.map(row).join(""):`<p class="small muted">Nothing yet. Add what a dive taught you.</p>`}</div>
+  <div class="panel stack"><div class="seg" id="lKindSeg">${[["learning","Learning"],["progress","Progress"]].map(([v,t])=>`<button type="button" class="${learnKind===v?"on":""}" data-act="lKind" data-v="${v}">${t}</button>`).join("")}</div>
+    <label class="f">Title<input type="text" id="lTitle" placeholder="e.g. Exhale fully before the stop"></label>
+    <label class="f">What happened, what I learned<textarea id="lText"></textarea></label>
+    <label class="f">Pre-dive cue (optional, shows in Reminders)<input type="text" id="lCue" placeholder="Short cue for next dive"></label>
+    <button type="button" class="btn slim" data-act="addLearn">Add</button></div></div>`;
+}
+
+/* --- Log tab --- */
+function viewLog(){
+  const all = sorted();
+  if(!all.length) return `<div class="section"><h1>Log</h1><p class="muted">No dives yet.</p></div>`;
+  const pts = all.slice().reverse().map(d=>({d, r:rmvOf(d)})).filter(x=>x.r!=null);
+  const avgMax = all.reduce((a,d)=>a+(d.maxDepth||0),0)/all.length;
+  const totalTime = all.reduce((a,d)=>a+(d.time||0),0);
+  const lastR = pts.length? pts[pts.length-1].r : null;
+  const list = all.map(d=>{
+    const ck = d.quick? ["info","Quick log"] : ({sank:["bad","Sank at 5 m"],eye:["good","Eye level"],rose:["bad","Rose at 5 m"],none:["info","No check"]}[d.check]||["info","No check"]);
+    const r = rmvOf(d);
+    return `<div class="dive">
+      <div class="spread"><b>${esc(d.site||"Unnamed site")}</b><span class="mono small muted">${esc(d.date)}</span></div>
+      <div class="small muted">${esc(keyLabel(d.key))}</div>
+      <div class="row small"><span class="pill ${ck[0]}">${ck[1]}</span><span class="mono">${U.w(totalW(d.weights))} ${U.wu()}</span><span class="mono">${d.maxDepth!=null?U.d(d.maxDepth)+" "+U.du():""}</span><span class="mono">${d.time?d.time+" min":""}</span>${r!=null?`<span class="mono">${U.rmv(r)} ${U.ru()}</span>`:""}</div>
+      ${d.cond && (d.cond.current||d.cond.vis||d.cond.temp!=null||d.cond.camera==="yes")? `<div class="small muted">${[d.cond.current&&CUR_T[d.cond.current]+(d.cond.current!=="none"?" current":""), d.cond.vis&&"Vis "+(imp()?VIS_TI:VIS_T)[d.cond.vis].toLowerCase(), d.cond.temp!=null&&(imp()?Math.round(d.cond.temp*9/5+32)+"\u00b0F":d.cond.temp+"\u00b0C"), d.cond.entry, d.cond.camera==="yes"&&"camera"].filter(Boolean).join(" \u00b7 ")}</div>`:""}
+      ${d.skillsTried&&d.skillsTried.length?`<div class="chips">${d.skillsTried.map(t=>{ const x = skillBy(t.skill); return x? `<span class="pill ${SKILL_RES[t.r][0]}">${esc(x[2])}: ${SKILL_RES[t.r][1]}</span>` : ""; }).join("")}</div>`:""}
+      ${d.feel&&d.feel.length?`<div class="chips">${d.feel.map(k=>`<span class="chip static">${esc(FEEL_T[k])}</span>`).join("")}</div>`:""}
+      ${d.rec?`<p class="small"><b>Coach:</b> ${esc(d.rec.gear)}</p>`:""}
+      ${d.notes?`<p class="small muted">${esc(d.notes)}</p>`:""}
+      <div><button type="button" class="btn slim ghost" data-act="delDive" data-v="${d.id}">${armed==="del"+d.id?"Tap again to delete":"Delete"}</button></div>
+    </div>`; }).join("");
+  return `<div class="section"><h1>Log</h1></div>
+  <div class="section"><div class="panel grid2" style="grid-template-columns:repeat(3,1fr)">
+    <div class="stat"><span class="v">${all.length}</span><span class="k">Dives</span></div>
+    <div class="stat"><span class="v">${Math.round(totalTime/60*10)/10}</span><span class="k">Hours</span></div>
+    <div class="stat"><span class="v">${lastR!=null?U.rmv(lastR):"–"}</span><span class="k">Last ${U.ru()}</span></div>
+  </div></div>
+  ${pts.length>=2? rmvSection(pts) : ""}
+  <div class="section"><h3>Dives</h3><div class="panel">${list}</div></div>`;
+}
+
+let RC = {calm:false};
+function rmvSection(allPts){
+  const pts = RC.calm? allPts.filter(p=> p.d.cond && (p.d.cond.current==="none"||p.d.cond.current==="light")) : allPts;
+  const n = pts.length;
+  let lim = null, msg = "";
+  if(n>=10){
+    const v = pts.map(p=>p.r), mean = v.reduce((a,b)=>a+b,0)/n;
+    const mr = v.slice(1).map((x,i)=>Math.abs(x-v[i])), mrbar = mr.reduce((a,b)=>a+b,0)/mr.length;
+    lim = {mean, ucl: mean+2.66*mrbar, lcl: Math.max(0, mean-2.66*mrbar)};
+    const last = v[n-1];
+    let run = 0, side = 0;
+    for(let i=n-1;i>=0;i--){ const sd = Math.sign(v[i]-mean); if(!sd) break; if(!side) side = sd; if(sd!==side) break; run++; }
+    if(last > lim.ucl){ const c = pts[n-1].d.cond||{}; msg = `<span class="pill bad">Signal</span> Last dive is above your normal range. ${c.current==="strong"||c.current==="mod"? "Current was logged, which may explain it." : "Worth a look: conditions, stress, gear, or a leak?"}`; }
+    else if(last < lim.lcl) msg = `<span class="pill good">Signal</span> Last dive is below your normal range. Note what was different.`;
+    else if(run>=8 && side<0) msg = `<span class="pill good">Shift</span> ${run} dives in a row below your average. Your air use has genuinely improved.`;
+    else if(run>=8 && side>0) msg = `<span class="pill warn">Shift</span> ${run} dives in a row above your average. Something has changed.`;
+    else msg = `<span class="pill info">Stable</span> Differences between recent dives are normal variation. No single dive needs explaining.`;
+  }
+  return `<div class="section"><div class="spread"><h3>Air consumption (RMV)</h3>
+      <div class="seg" style="flex:none;flex-wrap:nowrap;white-space:nowrap"><button type="button" class="${RC.calm?"":"on"}" data-act="rcCalm" data-v="0">All</button><button type="button" class="${RC.calm?"on":""}" data-act="rcCalm" data-v="1">Calm only</button></div></div>
+    ${n>=2? `<div class="panel chart">${chart(pts, lim)}</div>` : `<div class="panel small muted">Need at least 2 calm dives with conditions logged.</div>`}
+    ${lim? `<div class="legend"><span><i class="c"></i>Your average ${U.rmv(lim.mean)}</span><span><i></i>Normal range ${U.rmv(lim.lcl)} to ${U.rmv(lim.ucl)} ${U.ru()}</span></div><p class="small">${msg}</p>` : `<p class="small muted">Normal-range limits appear after 10 dives (${n} of 10). Lower is better. Uses liters, so any tank size compares fairly.</p>`}
+  </div>`;
+}
+function chart(pts, lim){
+  const W=320, H=150, pl=38, pr=12, pt=12, pb=26;
+  const cv = x => imp()? x*0.0353147 : x;
+  const vals = pts.map(p=> cv(p.r));
+  let lo = Math.min(...vals, ...(lim?[cv(lim.lcl)]:[])), hi = Math.max(...vals, ...(lim?[cv(lim.ucl)]:[]));
+  const pad = (hi-lo)*0.25 || (imp()?0.1:2); lo = Math.max(0, lo-pad); hi = hi+pad;
+  const x = i => pl + (pts.length===1?0: i*(W-pl-pr)/(pts.length-1));
+  const y = v => pt + (1-(v-lo)/(hi-lo))*(H-pt-pb);
+  const ticks = [lo, (lo+hi)/2, hi];
+  const fmt = v => imp()? v.toFixed(2) : v.toFixed(0);
+  const line = vals.map((v,i)=>`${i?"L":"M"}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join("");
+  const area = line + `L${x(vals.length-1).toFixed(1)},${H-pb}L${x(0).toFixed(1)},${H-pb}Z`;
+  const li = vals.length-1;
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Air consumption per dive">
+    ${ticks.map(t=>`<line x1="${pl}" x2="${W-pr}" y1="${y(t)}" y2="${y(t)}" stroke="var(--line)" stroke-width="1"/><text x="${pl-6}" y="${y(t)+4}" text-anchor="end" font-size="10" fill="var(--muted)" font-family="IBM Plex Mono, monospace">${fmt(t)}</text>`).join("")}
+    <path d="${area}" fill="var(--deep)" fill-opacity=".12"/>
+    ${lim? `<line x1="${pl}" x2="${W-pr}" y1="${y(cv(lim.ucl))}" y2="${y(cv(lim.ucl))}" stroke="var(--bad)" stroke-width="1.2" stroke-dasharray="4 3"/>
+      <line x1="${pl}" x2="${W-pr}" y1="${y(cv(lim.lcl))}" y2="${y(cv(lim.lcl))}" stroke="var(--bad)" stroke-width="1.2" stroke-dasharray="4 3"/>
+      <line x1="${pl}" x2="${W-pr}" y1="${y(cv(lim.mean))}" y2="${y(cv(lim.mean))}" stroke="var(--muted)" stroke-width="1"/>` : ""}
+    <path d="${line}" fill="none" stroke="var(--deep)" stroke-width="2"/>
+    ${vals.map((v,i)=>{ const out = lim && (pts[i].r>lim.ucl || pts[i].r<lim.lcl); return `<circle cx="${x(i)}" cy="${y(v)}" r="${i===li||out?4.5:2.5}" fill="${out?"var(--bad)":i===li?"var(--accent)":"var(--deep)"}"/>`; }).join("")}
+    <text x="${pl}" y="${H-8}" font-size="10" fill="var(--muted)">${esc(pts[0].d.date.slice(5))}</text>
+    <text x="${W-pr}" y="${H-8}" font-size="10" fill="var(--muted)" text-anchor="end">${esc(pts[li].d.date.slice(5))}</text>
+  </svg>`;
+}
+
+/* --- Skills tab --- */
+let SK = {cat:"All", log:null, hist:null, adding:false};
+function skillStatus(id){
+  const l = skillLog(id); if(!l.length) return `<span class="pill info">Not tried</span>`;
+  const [tone,txt] = SKILL_RES[l[0].r]; return `<span class="pill ${tone}">${txt} \u00b7 ${l.length}\u00d7</span>`;
+}
+function suggestions(){
+  const out = [], seen = new Set(S.skills.queue), add = (id, why)=>{ if(!seen.has(id) && skillBy(id) && out.length<3){ seen.add(id); out.push([id,why]); } };
+  sorted().slice(0,3).forEach(d=> (d.feel||[]).forEach(f=> (SKILL_SUGGEST[f]||[]).forEach(id=> add(id, `You logged \u201c${FEEL_T[f]}\u201d recently`))));
+  allSkills().forEach(x=>{ const l = skillLog(x[0]); if(l.length && l[0].r==="hard") add(x[0], `Struggled on ${l[0].date}. Try again`); });
+  ["hover","frog","maskrr"].forEach(id=>{ if(!skillLog(id).length) add(id, "A core skill you haven't logged yet"); });
+  return out;
+}
+function viewSkills(){
+  const cats = ["All"].concat(SKILL_CATS, S.skills.custom.length? ["My skills"]:[]);
+  const list = allSkills().filter(x=> SK.cat==="All" || x[1]===SK.cat);
+  const q = S.skills.queue.map(skillBy).filter(Boolean);
+  const sug = suggestions();
+  const row = x=>{
+    const id = x[0], queued = S.skills.queue.includes(id), hist = skillLog(id);
+    return `<div class="skill">
+      <div class="spread"><b>${esc(x[2])}</b>${skillStatus(id)}</div>
+      ${x[3]?`<span class="how">${esc(x[3])}</span>`:""}${x[4]?`<span class="note">${esc(x[4])}</span>`:""}
+      <div class="row">
+        <button type="button" class="btn slim ${queued?"":"ghost"}" data-act="skillQueue" data-v="${id}">${queued?"On next dive \u2713":"Try next dive"}</button>
+        <button type="button" class="btn slim ghost" data-act="skillLogOpen" data-v="${id}">Log practice</button>
+        ${hist.length?`<button type="button" class="btn slim ghost" data-act="skillHist" data-v="${id}">${SK.hist===id?"Hide history":"History"}</button>`:""}
+      </div>
+      ${SK.log===id? `<div class="panel stack">
+        <div class="seg">${Object.entries(SKILL_RES).map(([k,[,t]])=>`<button type="button" class="${SK.logRes===k?"on":""}" data-act="skillLogRes" data-v="${k}">${t}</button>`).join("")}</div>
+        <div class="grid2"><input type="date" id="sk_date" value="${today()}"><input type="text" id="sk_note" placeholder="Note (optional)"></div>
+        <div class="row"><button type="button" class="btn slim" data-act="skillLogSave" data-v="${id}">Save</button><button type="button" class="btn slim ghost" data-act="skillLogOpen" data-v="">Cancel</button></div>
+      </div>`:""}
+      ${SK.hist===id? `<div class="hist">${hist.map(h=>`<div><span class="mono small">${esc(h.date)}</span> <span class="pill ${SKILL_RES[h.r][0]}">${SKILL_RES[h.r][1]}</span>${h.site?` <span class="muted">${esc(h.site)}</span>`:""}${h.note?` \u00b7 ${esc(h.note)}`:""} <button type="button" class="star" data-act="skillDelLog" data-v="${h.id}">${armed==="sk"+h.id?"Tap to delete":"Delete"}</button></div>`).join("")}</div>`:""}
+    </div>`;
+  };
+  return `<div class="section"><h1>Skills</h1>
+    <p class="small muted">Optional. Pick something to work on, try it on a dive, and log how it went. Practice shallow, over sand, within your training, with your buddy briefed.</p></div>
+  <div class="section"><h3>Next dive</h3><div class="panel">${q.length? `<div class="chips">${q.map(x=>`<button type="button" class="chip on" data-act="skillQueue" data-v="${x[0]}">${esc(x[2])} \u00d7</button>`).join("")}</div><p class="small muted" style="margin-top:8px">These show in Pre-dive, and you rate them in the Debrief.</p>` : `<p class="small muted">Nothing planned. Tap \u201cTry next dive\u201d on any skill.</p>`}</div></div>
+  ${sug.length? `<div class="section"><h3>Suggested</h3><div class="panel">${sug.map(([id,why])=>{ const x = skillBy(id); return `<div class="skill"><div class="spread"><b>${esc(x[2])}</b><button type="button" class="btn slim" data-act="skillQueue" data-v="${id}">Try next dive</button></div><span class="small muted">${esc(why)}</span></div>`; }).join("")}</div></div>`:""}
+  <div class="section"><div class="chips">${cats.map(c=>`<button type="button" class="chip ${SK.cat===c?"on":""}" data-act="skillCat" data-v="${c}">${c}</button>`).join("")}</div></div>
+  <div class="section"><div class="panel">${list.map(row).join("")}</div></div>
+  <div class="section"><h3>Add your own skill</h3><div class="panel stack">
+    <input type="text" id="sk_newName" placeholder="Skill name, e.g. Hover while deploying a DSMB">
+    <input type="text" id="sk_newHow" placeholder="How to do it (optional)">
+    <button type="button" class="btn slim" data-act="skillAdd">Add skill</button>
+  </div></div>`;
+}
+
+/* --- Mk2i guide --- */
+const MK_URL = "https://www8.garmin.com/manuals/webhelp/GUID-4A2D3019-BA14-49BD-B371-4214D187D493/EN-US/Descent_Mk2i_OM_EN-US.pdf";
+const MK = [
+["buttons","Buttons and basics","What each button does, pressed and held",
+ '<div class="btnmap">'
+ +'<span class="b">LIGHT</span><span>Press: backlight on and off, and powers the watch on. Hold: controls menu. Both are disabled underwater.</span>'
+ +'<span class="b">UP / MENU</span><span>Press: moves through widgets and menu items. Hold: opens the menu. You can switch this button off for dive activities so it is not pressed by accident.</span>'
+ +'<span class="b">DOWN</span><span>Press: moves through widgets and menus, and changes the data screen during a dive. Hold: music controls, disabled underwater.</span>'
+ +'<span class="b">START / STOP</span><span>Press: opens the activity list, confirms a selection, and opens the dive menu during a dive.</span>'
+ +'<span class="b">BACK / LAP</span><span>Press: goes back one screen and leaves dive menus. Hold: returns to the watch face, or back to the main dive screen while diving.</span>'
+ +'<span class="b">Double tap</span><span>Two taps on the watch body changes the dive data screen without pressing anything. Turn it off in Dive Setup if it triggers on its own.</span></div>'
+ +'<div class="tip">In gloves, the double tap and the DOWN button do the same job. Practice one of them on a shallow dive so you are not hunting for a screen at depth.</div>',
+ "buttons light up down start stop back lap hold press double tap backlight"],
+["start","Start a dive","The sequence from watch face to descent",
+ '<ol><li>From the watch face, press <b>START</b>.</li>'
+ +'<li>Pick your dive mode, for example Single-Gas.</li>'
+ +'<li>Press <b>DOWN</b> if you want to check or change gases, water type or alerts before this dive.</li>'
+ +'<li>Keep your wrist out of the water until GPS locks, so the entry point is recorded.</li>'
+ +'<li>Press <b>START</b> again. You are now on the main dive screen.</li>'
+ +'<li>Descend. The dive timer starts on its own at about 1.2 m (4 ft).</li></ol>'
+ +'<p>If you skip the mode selection, the watch uses whatever you dived last and records no entry location.</p>'
+ +'<div class="tip">Check the gas on the screen against the sticker on the cylinder every time. The watch does not know what was actually pumped into your tank.</div>'],
+["modes","Dive modes","Single-Gas, Multi-Gas, CCR, Gauge, Apnea, Apnea Hunt",
+ '<ul><li><b>Single-Gas.</b> One planned gas, with backup gases available if you have to switch.</li>'
+ +'<li><b>Multi-Gas.</b> Several gases you can switch between during the dive, from 5% to 100% oxygen.</li>'
+ +'<li><b>CCR.</b> Closed-circuit rebreather, with PO2 setpoints.</li>'
+ +'<li><b>Gauge.</b> Bottom timer only. No decompression calculation, so your tissue loading is not tracked.</li>'
+ +'<li><b>Apnea.</b> Freediving, with a faster screen refresh.</li>'
+ +'<li><b>Apnea Hunt.</b> Same as Apnea with the tones off, for spearfishing.</li>'
+ +'<li><b>Pool.</b> A separate activity for pool swimming and skills practice.</li></ul>'
+ +'<div class="tip">Gauge mode is not a shortcut around a deco obligation. Switching to it mid-series leaves the watch without the nitrogen picture for your next dive.</div>'],
+["gas","Gases and PO2 limits","Setting your mix and the oxygen thresholds",
+ '<p>Hold <b>MENU</b>, then <span class="path">Dive Setup &gt; Gases</span>. Each gas dive mode keeps its own list, up to twelve gases.</p>'
+ +'<p>For each gas you set the oxygen percentage, and for the Mk2i also helium if you dive trimix. Enter the <b>analyzed</b> percentage, not what you ordered.</p>'
+ +'<p><span class="path">Dive Setup &gt; PO2</span> sets the oxygen partial pressure thresholds in bar. These drive the MOD shown on the watch and the warnings you get if you go past it. The usual pairing is 1.4 for working and 1.6 for the contingency ceiling.</p>'
+ +'<div class="tip">Set the mix before you splash, not at depth. The Nitrox tab in this app gives you the same MOD number to cross-check what the watch shows.</div>'],
+["conservatism","Conservatism and gradient factors","How much margin the algorithm gives you",
+ '<p><span class="path">Dive Setup &gt; Conservatism</span>. The preset levels adjust how much margin the decompression model applies. Choosing custom lets you set gradient factors directly.</p>'
+ +'<p>Gradient factors are written as GF low / GF high. GF low controls how deep your first stop starts, and GF high controls how much supersaturation is allowed when you surface. Lower numbers mean longer, more conservative dives.</p>'
+ +'<p>Common recreational settings run in the range of 40/85 down to 30/70 for more conservatism. Your training and your own history should drive this, not a number from a forum.</p>'
+ +'<div class="tip">Pick one setting and stay on it. If you change conservatism between dives, your no-deco times are no longer comparable and you lose the baseline you are trying to build.</div>',
+ "gradient factor GF low high conservatism algorithm buhlmann deco margin"],
+["stops","Safety stop, deco and lockout","Stop settings and the 24 hour lockout",
+ '<ul><li><span class="path">Dive Setup &gt; Safety Stop</span> changes the length of the safety stop.</li>'
+ +'<li><span class="path">Dive Setup &gt; Last Deco Stop</span> sets the depth of the final decompression stop.</li>'
+ +'<li><span class="path">Dive Setup &gt; Deco Lockout</span> controls the feature that locks dive modes for 24 hours after you break a ceiling. It can be switched off, but that is there for a reason.</li></ul>'
+ +'<div class="tip">This app asks you to hold the stop at 5 m with about 50 bar left and an empty BCD. That is the weight check, and it is worth doing at the same time as your safety stop rather than as an extra task.</div>'],
+["units","Units: bar, psi, meters, feet","Switching pressure and depth units",
+ '<p>The watch keeps dive units and general watch units in two different places, which is why one of them often stays on the wrong setting.</p>'
+ +'<h4>Dive units: depth and tank pressure</h4>'
+ +'<ol><li>Hold <b>MENU</b>.</li><li>Go to <span class="path">Dive Setup &gt; Units</span>.</li>'
+ +'<li>Set distance, depth and pressure. Pressure is where you choose <b>bar</b> or <b>psi</b>.</li></ol>'
+ +'<h4>Watch units: everything else</h4>'
+ +'<ol><li>Hold <b>MENU</b>.</li><li>Go to <span class="path">System &gt; Units</span>.</li>'
+ +'<li>Each category is set on its own: distance, pace and speed, elevation, weight, height and temperature.</li></ol>'
+ +'<h4>After you switch</h4>'
+ +'<ul><li><b>Re-check the tank pod.</b> Working pressure and reserve pressure are entered in the unit that was active when you set them. Open <span class="path">Dive Setup &gt; Dive Network &amp; Air Integration</span> and confirm the numbers read sensibly, for example about 207 bar or 3000 psi for an AL80.</li>'
+ +'<li><b>Re-check your alerts.</b> A reserve alert set at 50 will mean something very different in psi.</li>'
+ +'<li><b>Match this app.</b> Use the unit button at the top of the screen here so your logged numbers and the watch agree.</li></ul>'
+ +'<div class="tip">Quick conversions: 1 bar is about 14.5 psi. 200 bar is about 2900 psi, 50 bar is about 725 psi, 10 m is about 33 ft.</div>',
+ "psi bar metric imperial units change switch pressure depth feet meters temperature convert"],
+["pod","Tank pod: pairing","Getting the T1 or T2 talking to the watch",
+ '<ol><li>Fit the transceiver to a high-pressure port on your first stage.</li>'
+ +'<li>Open the tank valve slowly. The pod wakes on pressure and sounds a tone when it is ready to pair.</li>'
+ +'<li>On the watch, hold <b>MENU</b>, then <span class="path">Dive Setup &gt; Dive Network &amp; Air Integration &gt; Transmitters &gt; Add New</span>.</li>'
+ +'<li>Pick your pod from the list using the ID printed on it.</li>'
+ +'<li>Choose <b>My Tank</b> for your own cylinder, or <b>Another Diver</b> for a buddy you want to monitor.</li></ol>'
+ +'<p>A pod bought with the watch arrives already paired. After the first pairing they reconnect on their own at the start of a dive. You can pair up to eight pods at once, which is how buddy pressure monitoring works.</p>'
+ +'<div class="tip">Pressurize the system before you try to pair. An unpressurized pod is asleep and will not appear in the list.</div>',
+ "pod transmitter T1 T2 pair pairing tank pressure air integration subwave"],
+["podset","Tank pod settings","Working pressure, volume, reserve and signal",
+ '<ul><li><b>Working pressure.</b> The full pressure rating of the cylinder. Get this right or the gauge and the air use figures are wrong.</li>'
+ +'<li><b>Volume.</b> The cylinder size, used for SAC and RMV. Reset it when you change tank size.</li>'
+ +'<li><b>Reserve pressure.</b> Sets the reserve and critical pressure alert levels.</li>'
+ +'<li><b>SAC / RMV / ATR.</b> Turns on air consumption and air time remaining.</li>'
+ +'<li><b>Public tank name and nickname.</b> What you and your buddies see on the display.</li>'
+ +'<li><b>Identify.</b> Plays a tone on a pod so you can tell which one it is.</li>'
+ +'<li><b>Transmit power.</b> Raise it if the signal drops out underwater. It costs battery life.</li>'
+ +'<li><b>About and software update.</b> Pod ID, firmware and battery state.</li>'
+ +'<li><b>Battery.</b> One 3 V CR123A lithium, up to about 100 hours. Never a rechargeable RCR123A: its higher voltage can damage the pod. To replace: unscrew the cap with a coin, battery in positive end first, check both gaskets are clean and seated, light silicone grease, cap fully tight. Garmin sells a battery cap kit with new gaskets.</li></ul>'
+ +'<div class="tip">Rental tanks are where this goes wrong. A pod still set for an AL80 on a steel 12 L will report air time you do not have.</div>'],
+["air","Air integration numbers","What SAC, RMV and ATR actually mean",
+ '<ul><li><b>SAC</b> is pressure used per minute, corrected to the surface. It only compares dives on the same size cylinder.</li>'
+ +'<li><b>RMV</b> is volume per minute, corrected to the surface. It compares across any cylinder, which is why this app trends RMV.</li>'
+ +'<li><b>ATR</b> is air time remaining at your current depth and breathing rate. It moves as you move, so treat it as a trend, not a promise.</li></ul>'
+ +'<p>To feed this app, take start pressure, end pressure, bottom time and average depth from the watch after the dive. Average depth is the one people forget, and without it the RMV figure is wrong.</p>'],
+["alerts","Alerts","Depth, time, pressure and staying quiet",
+ '<p><span class="path">Dive Setup &gt; Scuba Alerts</span> covers alerts for gas dives, such as depth and time. <span class="path">Apnea Alerts</span> does the same for freediving. Transceiver alerts cover reserve and critical tank pressure and lost pod signal.</p>'
+ +'<p><span class="path">Dive Setup &gt; Silent Diving</span> switches off all tones and vibration.</p>'
+ +'<div class="tip">Set a depth alert a few meters above your MOD for the gas you are on. It is an easy backstop against a slow drift deeper on a wall.</div>'],
+["during","During the dive","Screens and the in-dive menu",
+ '<ul><li><b>DOWN</b> or a double tap changes the data screen.</li>'
+ +'<li><b>START</b> opens the dive menu, where you switch gas and reach in-dive options.</li>'
+ +'<li><b>BACK</b> leaves a menu. Holding <b>BACK</b> returns you to the main dive screen.</li>'
+ +'<li>The compass, the timer and tank pressure are all screens in the same loop, so set the order you want before the trip.</li></ul>'],
+["after","After the dive","End delay, surface interval, log and no-fly",
+ '<ul><li><span class="path">Dive Setup &gt; End Dive Delay</span> sets how long the watch waits at the surface before it saves the dive. It keeps a short surface swim from ending the dive early.</li>'
+ +'<li>The <b>surface interval</b> widget shows time since the dive, tissue loading and the no-fly countdown.</li>'
+ +'<li>The <b>dive log</b> widget holds your recent dives on the watch.</li>'
+ +'<li><span class="path">Dive Setup &gt; No-Fly Time</span> switches the countdown mode.</li>'
+ +'<li>Sync to the Garmin Dive app for the full profile, the entry location and long-term storage.</li></ul>'
+ +'<div class="tip">The watch counts no-fly time from its own dive record. This app counts from the surfaced time you enter, so if the two disagree, trust the watch and fix the time in the debrief.</div>'],
+["plan","Dive planning on the watch","No-deco times before you get wet",
+ '<p>The watch plans a dive from a depth and a gas, and shows the no-decompression time available. It also reports your current tissue loading, so a planned second dive is based on where you actually are, not a fresh start.</p>'
+ +'<div class="tip">Plan the gas and the depth on the watch, then check the same numbers in the Nitrox tab here. Two independent calculations catching the same MOD is a real check. One calculation twice is not.</div>'],
+["altitude","Altitude, water type and fit","Settings that quietly change your numbers",
+ '<ul><li><span class="path">Dive Setup &gt; Water Type</span> switches between fresh and salt. It changes the depth reading, and this app changes your recommended lead for the same switch.</li>'
+ +'<li>The watch adjusts for altitude on its own, but altitude also affects your surface interval and flying plans. Treat a mountain lake dive as its own setup here too.</li>'
+ +'<li>Over a thick suit, wear the watch on the outside with the extension strap, snug enough that the sensors read and the display faces you.</li></ul>'],
+["setup","Setup checklist","Confirm these once, then stop fiddling",
+ '<ol><li>Units: match what you use here, either meters and bar or feet and psi.</li>'
+ +'<li>Water type: salt or fresh for the site.</li>'
+ +'<li>PO2: working 1.4, contingency 1.6.</li>'
+ +'<li>Conservatism: one setting you keep.</li>'
+ +'<li>Safety stop: 3 minutes.</li>'
+ +'<li>Deco lockout: on.</li>'
+ +'<li>Pod: working pressure and volume matching today\'s actual cylinder.</li>'
+ +'<li>Reserve and critical pressure alerts: set to numbers you will act on.</li>'
+ +'<li>SAC / RMV / ATR: on.</li>'
+ +'<li>End dive delay: long enough for a surface swim.</li>'
+ +'<li>UP key and double tap: set so nothing fires by accident in gloves.</li></ol>'
+ +'<div class="tip">Run this list at the start of a trip, not on the boat. Every item on it changes a number you will later try to compare.</div>'],
+["fix","If something is not working","The common ones",
+ '<ul><li><b>Pod not connecting.</b> Pressurize it first, check the battery in About, and raise transmit power if the signal drops at range.</li>'
+ +'<li><b>Wrong tank pressure or air time.</b> Working pressure or volume is set for a different cylinder.</li>'
+ +'<li><b>Screens will not change.</b> Double tap may be off, or the UP key is locked for dive activities.</li>'
+ +'<li><b>Locked out of dive modes.</b> A ceiling violation triggers a 24 hour lockout.</li>'
+ +'<li><b>No entry location.</b> GPS did not lock before the dive, or you skipped the mode selection.</li>'
+ +'<li><b>Battery.</b> Charge before a dive day. Cold water and high transmit power both cost you.</li>'
+ +'<li><b>Updates.</b> Watch firmware through Garmin Connect or Garmin Express, pod firmware from the watch.</li></ul>']
+];
+const S620_URL = "https://scubapro.johnsonoutdoors.com/us/shop/regulators/systems/mk25-evo-s620ti-dive-regulator-system";
+const S620 = [
+["controls","The two controls","What the knob and the lever actually do",
+ '<p>The S620 Ti gives you two adjustments on the second stage, both with ribbed grips you can work in gloves.</p>'
+ +'<div class="btnmap">'
+ +'<span class="b">Knob</span><span><b>Inhalation effort.</b> Sets how much suction it takes to crack the valve open. Screwed in, breathing is stiffer and the reg is less likely to free-flow. Wound out, it breathes easier and more freely.</span>'
+ +'<span class="b">Lever</span><span><b>VIVA (Venturi Initiated Vacuum Assist).</b> Aims the airflow inside the case. On the dive setting, the jet of air helps hold the valve open, so the reg breathes with less work. On the pre-dive setting, that assist is damped, which stops the reg running away on its own.</span></div>'
+ +'<p>The lever positions are marked on the housing, usually a minus for pre-dive and a plus for dive. Check the markings on your own regulator, because the two controls do different jobs and are easy to confuse by feel alone.</p>'
+ +'<div class="tip">Simple rule: the knob sets how hard you work, the lever sets how eager the reg is to keep flowing once it starts.</div>'],
+["pre","Pre-dive setup","On the boat, before you splash",
+ '<ol><li><b>Lever to pre-dive</b> (minus). Do this before the reg goes in the water and before you hand it off in the surf or on a rocking deck.</li>'
+ +'<li><b>Knob screwed in</b>, or close to it. Stiffer breathing at the surface is what keeps a sensitive reg from free-flowing.</li>'
+ +'<li><b>Breathe both regs</b> during BWRAF with your eyes on the SPG. The needle should hold steady.</li>'
+ +'<li><b>Purge briefly, face down.</b> The mouthpiece pointing down keeps water out of the hose.</li>'
+ +'<li><b>Keep it out of the flow</b> on entry. A giant stride or a wave across an open second stage is the usual free-flow trigger.</li></ol>'
+ +'<div class="tip">If the reg free-flows on the surface, put the lever to pre-dive and turn the knob in. If it keeps going, shut the valve, drain it, and check with your buddy before you dive it.</div>'],
+["during","During the dive","Once you are down and settled",
+ '<ol><li><b>At depth, lever to dive</b> (plus) and <b>wind the knob out</b> until breathing is easy without feeling like the reg wants to run on.</li>'
+ +'<li><b>Back the knob in a little</b> if you feel any flutter, if you are swimming into current, or if you are head down. Position and flow both make a reg more eager.</li>'
+ +'<li><b>Wind it out again for work.</b> Heavy finning or a swim against current is when the lower breathing effort earns its keep.</li>'
+ +'<li><b>Deeper and colder, expect to fiddle less.</b> Gas is denser, so the reg feels stiffer even with the knob out. That is normal.</li>'
+ +'<li><b>Set it back before you surface.</b> Lever to pre-dive, knob in, during the safety stop. Then the reg is already safe for the deck and for the next entry.</li></ol>'
+ +'<div class="tip">Make the last step a habit tied to the safety stop. The most common free-flow is a reg left in dive mode, lying face up on a bench.</div>'],
+["other","Other considerations","Cold water, octopus, care and service",
+ '<ul><li><b>Cold water.</b> Below roughly 10 C, a reg breathing wide open is more prone to icing. Ease off the knob, avoid long purges, and never breathe a reg out of the water in freezing air.</li>'
+ +'<li><b>Your octopus.</b> Leave the backup on pre-dive with the knob in. It hangs in the flow all dive, so it is the reg most likely to run away, and a donor in an out-of-air moment does not need a free-flowing spare.</li>'
+ +'<li><b>Air sharing.</b> If you donate the primary, remember it is set for easy breathing. A stressed diver may find it wet or lively. Set it before you donate if you have a second to spare.</li>'
+ +'<li><b>Rinse and store.</b> Fresh water soak with the dust cap on and dry, then store with the knob backed out and the lever on pre-dive so the seat is not compressed in storage.</li>'
+ +'<li><b>Service.</b> Follow Scubapro service intervals. Creeping intermediate pressure from the first stage shows up as a second stage that will not stop flowing no matter how you set the knob. That is a service issue, not an adjustment issue.</li>'
+ +'<li><b>Titanium barrel.</b> Good in salt water, but titanium components are not for high-oxygen mixes. Keep to the mixes your regulator is rated and prepared for.</li></ul>'],
+["fix","Quick troubleshooting","Symptom, then what to do",
+ '<ul><li><b>Free-flow at the surface.</b> Lever to pre-dive, knob in, mouthpiece down. Check for a stuck purge button or grit on the seat.</li>'
+ +'<li><b>Free-flow at depth.</b> Same two controls first. If it continues, breathe it as a flowing reg, signal your buddy, and end the dive under control.</li>'
+ +'<li><b>Wet breathing.</b> Check the mouthpiece is not split, the exhaust valve is clear, and you are not pulling on a twisted hose. Chewing the mouthpiece to one side is a common cause.</li>'
+ +'<li><b>Hard breathing at depth.</b> Wind the knob out, lever to dive. If it is still hard, check tank pressure and whether the valve is fully open.</li>'
+ +'<li><b>Breathing gets harder as the tank empties.</b> Normal as pressure drops, but a sudden change means check the SPG and start your ascent.</li></ul>'
+ +'<div class="tip">In this app, log a hard-breathing dive under Comfort. If your air use also jumps on the same dive, the coach can separate the regulator from your breathing.</div>']
+];
+const HYD_URL = "https://scubapro.johnsonoutdoors.com/us/shop/bcds/hydros-pro-bcd-men";
+const HYD = [
+["what","What you have","The numbers worth knowing",
+ '<ul><li><b>Lift:</b> about 40.5 lb (18 kg).</li>'
+ +'<li><b>Weight:</b> roughly 5.3 kg (11.7 lb) as shipped, less with the weight pockets pulled out for travel.</li>'
+ +'<li><b>Harness:</b> injection molded Monprene, the same material as Seawing Nova fins. It sheds water instead of soaking it up.</li>'
+ +'<li><b>Backplate:</b> a dual-compound plastic plate, not metal.</li>'
+ +'<li><b>Modular:</b> straps, pouches and weight systems clip on and off without stitching.</li>'
+ +'<li><b>Tank band:</b> Super Cinch.</li>'
+ +'<li><b>Inflator:</b> balanced power inflator, or an Air2 as an alternate air source, depending on how yours was bought.</li></ul>'
+ +'<div class="tip">Log this as <b>Back-inflate</b> in the dive plan, not Backplate and wing. That option assumes a steel or aluminum plate, which takes about 2 kg off your lead. Your plate is plastic and close to neutral, so picking it would leave you underweighted.</div>'],
+["fit","Fit and setup","Get this right once",
+ '<ul><li><b>Two sizes in play.</b> The harness and the backplate are sized separately. A plate that is too long for your torso pushes the tank low and drags your head down. If you have ever felt head-down in this rig, check the plate size before you move lead.</li>'
+ +'<li><b>Shoulder clips swivel.</b> Set them so the load sits on your shoulders without the straps cutting into your neck.</li>'
+ +'<li><b>Chest strap</b> stops the shoulders splaying. Snug, not tight.</li>'
+ +'<li><b>Super Cinch band:</b> wet it and cinch it again before the first dive of the day. A dry band always loosens.</li>'
+ +'<li><b>Tank height</b> in the band is a real trim control. Higher moves mass toward your head, lower moves it toward your feet.</li></ul>'],
+["weights","Weights on this BCD","Which pocket does what",
+ '<ul><li><b>Integrated pockets</b> (the pinch-clip ones at your waist) are your ditchable weight. In this app, log these under <b>Pockets</b>.</li>'
+ +'<li><b>Trim pockets</b> sit either side of the wing, high on your back, and are <b>not</b> ditchable. Log these under <b>Trim</b>.</li>'
+ +'<li><b>Belt.</b> If you also wear a weight belt, log it under Belt.</li></ul>'
+ +'<div class="tip">Keep enough weight ditchable to get positive at the surface if you have to. Loading the non-dumpable trim pockets to fix trim is fine in small amounts, but they are not the place for the bulk of your lead.</div>'],
+["trim","Tuning trim with this rig","The moves that work here",
+ '<ol><li><b>Feet sinking, head up:</b> move 1 kg from the waist pockets to the rear trim pockets, or raise the tank slightly in the band.</li>'
+ +'<li><b>Head down, feet floating:</b> move weight out of the trim pockets back to the waist, or lower the tank in the band. Check the backplate size too.</li>'
+ +'<li><b>Rolling to one side:</b> the pockets are almost certainly unequal, or a light or camera is clipped to one hip.</li>'
+ +'<li><b>One change per dive</b>, then log the result here. That is the whole point of the coach.</li></ol>'
+ +'<div class="tip">This BCD is close to neutral itself and dries fast, so it changes your lead less than a padded jacket would. If you move from a rental jacket back to this rig, expect the numbers to differ, and treat it as a new setup.</div>'],
+["care","Travel and care","Keeping it working",
+ '<ul><li><b>Packing:</b> the shoulder and waist straps fold into the wing. Pull the weight pockets out and you drop a useful chunk of luggage weight.</li>'
+ +'<li><b>Rinse:</b> soak in fresh water, fill the bladder partly through the inflator, slosh it, then drain it through the dump valve. Salt inside the bladder is what kills wings.</li>'
+ +'<li><b>Dry:</b> the Monprene dries almost at once. The bladder does not, so hang it partly inflated out of the sun.</li>'
+ +'<li><b>Storage:</b> store it loosely inflated so the bladder does not stick to itself.</li>'
+ +'<li><b>Parts:</b> because it is modular, a worn strap or pouch is replaceable without a trip to a sewing shop.</li></ul>'],
+["check","Pre-dive checks on this BCD","The ones specific to the Hydros",
+ '<ul><li><b>Pinch clips seated.</b> Push each loaded weight pocket in until it clicks, then tug it. This is the W in BWRAF for you.</li>'
+ +'<li><b>Trim pockets closed</b> and both carrying the same load.</li>'
+ +'<li><b>Dumps work:</b> shoulder and lower rear. Pull each once on the surface.</li>'
+ +'<li><b>Inflator:</b> a short press to add, and a check that it stops. If you dive the Air2, breathe it during your buddy check, since it is both your inflator and your alternate air.</li>'
+ +'<li><b>Cam band:</b> re-cinch it after the rig gets wet, before the first dive.</li></ul>']
+];
+const MK25_URL = "https://scubapro.johnsonoutdoors.com/us/shop/regulators/systems/mk25-evo-s620ti-dive-regulator-system";
+const MK25 = [
+["what","What you have","The first stage behind the S620 Ti",
+ '<ul><li><b>Air-balanced flow-through piston</b> in a chrome plated brass body. Balanced means the gas it delivers stays consistent as depth increases and as the tank empties.</li>'
+ +'<li><b>XTIS</b> (Extended Thermal Insulating System): the internals are insulated against cold, with anti-freeze protection.</li>'
+ +'<li><b>Ports:</b> 5 low pressure (4 high flow plus 1 axial super high flow) on a swivel turret, and 2 high pressure ports placed so the first stage can face up or down.</li>'
+ +'<li><b>Fitting:</b> INT (yoke) or DIN, depending on which you bought.</li>'
+ +'<li><b>Intermediate pressure</b> is externally adjustable, but it is a technician setting, not a dive-day one.</li></ul>'
+ +'<div class="tip">A balanced piston breathes beautifully and flows a lot of gas. The flip side is that it is not shy about free-flowing if the second stage is set wide open at the surface, which is why your S620 Ti pre-dive habit matters.</div>',
+ "mk25 evo first stage piston balanced xtis ports din yoke turret"],
+["ports","Ports and hose routing","Setting the rig up once, properly",
+ '<ul><li><b>Primary second stage</b> on the axial high flow port, if your hose routing allows. That is the port designed to feed the reg you breathe.</li>'
+ +'<li><b>Octopus</b> on a low pressure port on the opposite side, routed so it hangs in the triangle from chin to hips, clipped and reachable by a stranger.</li>'
+ +'<li><b>BCD inflator</b> on a low pressure port on your left, short enough not to loop.</li>'
+ +'<li><b>SPG</b> on a high pressure port, usually left side.</li>'
+ +'<li><b>Tank pod</b> on the other high pressure port. Check it clears the valve and your head when the first stage is turned.</li>'
+ +'<li><b>Turret:</b> rotate the turret so hoses leave in the direction they need to go, without tension at the fitting. A hose fighting its own routing is what wears a swivel out.</li></ul>'
+ +'<div class="tip">Set this once on land with the rig assembled the way you dive it, then leave it. Every port change is a chance to leave something loose.</div>',
+ "ports hose routing spg octopus inflator pod high pressure low pressure turret"],
+["cold","Cold water and free-flow","When the XTIS earns its keep",
+ '<ul><li>Below roughly 10 C, treat every long purge and every wide-open second stage as an icing risk. Gas expanding through the first stage chills it.</li>'
+ +'<li>Do not breathe the regulator in freezing air before the dive. Moisture in your breath is what freezes the mechanism.</li>'
+ +'<li>Keep the first stage dry before assembly. Water inside the fitting turns to ice at depth.</li>'
+ +'<li>Open the valve slowly on assembly. A fast blast heats and stresses the seat.</li>'
+ +'<li>If the first stage free-flows, close the valve, let it thaw, and do not dive it again until it has been checked.</li></ul>',
+ "cold water ice icing freeze freeflow free flow xtis"],
+["care","Care and service","What keeps it reliable",
+ '<ul><li><b>Dust cap dry and on</b> before rinsing. Water in the first stage inlet is the single most common way to ruin a regulator.</li>'
+ +'<li><b>Rinse with the cap sealed,</b> ideally pressurized on a tank, then dry the cap before storage.</li>'
+ +'<li><b>Salt:</b> soak, do not just splash. Salt crystals in the piston area cause creeping intermediate pressure.</li>'
+ +'<li><b>Service:</b> follow Scubapro service intervals for your use and keep the receipts. Warranty terms usually depend on inspections being done on schedule.</li>'
+ +'<li><b>Intermediate pressure</b> is typically set in the range of about 9 to 10 bar (roughly 130 to 145 psi). The exact figure and tolerance belong to Scubapro service data and to your technician, not to a dive-day adjustment.</li>'
+ +'<li><b>Before a trip:</b> pressurize, listen for leaks, watch the SPG for 5 minutes with the valve closed, and check the second stage does not creep or flow on its own.</li></ul>'
+ +'<div class="tip">A second stage that keeps flowing however you set the knob is usually a first stage with creeping intermediate pressure. That is a service issue and it will not be fixed on the boat.</div>',
+ "service interval intermediate pressure creep rinse dust cap maintenance leak"]
+];
+const GUIDES = [
+  {id:"mk2i", name:"Garmin Descent Mk2i", blurb:"Dive computer and T1 tank pod", secs:MK, url:MK_URL, urlText:"Open Garmin's owner's manual (PDF)"},
+  {id:"s620", name:"Scubapro S620 Ti", blurb:"Second stage: knob and VIVA lever", secs:S620, url:S620_URL, urlText:"Open Scubapro's product page"},
+  {id:"hydros", name:"Scubapro Hydros Pro", blurb:"Back-inflate BCD: fit, weights, trim", secs:HYD, url:HYD_URL, urlText:"Open Scubapro's product page"},
+  {id:"mk25", name:"Scubapro MK25 EVO", blurb:"First stage: ports, cold water, service", secs:MK25, url:MK25_URL, urlText:"Open Scubapro's product page"}
+];
+let MKS = {guide:null, sec:null};
+function stripTags(h){ return String(h).replace(/<[^>]*>/g," ").replace(/&nbsp;/g," ").replace(/&amp;/g,"&").replace(/\s+/g," ").trim(); }
+let GEAR_IX = null;
+function gearIndex(){
+  if(GEAR_IX) return GEAR_IX;
+  GEAR_IX = [];
+  GUIDES.forEach(g=> g.secs.forEach(sec=>{
+    const text = stripTags(sec[3]);
+    GEAR_IX.push({g:g.id, gname:g.name, id:sec[0], title:sec[1], blurb:sec[2], text, hay:(sec[1]+" "+sec[2]+" "+text+" "+(sec[4]||"")).toLowerCase()});
+  }));
+  return GEAR_IX;
+}
+function gearSearch(q){
+  const terms = q.toLowerCase().split(/\s+/).filter(Boolean); if(!terms.length) return [];
+  return gearIndex().filter(r=> terms.every(t=> r.hay.includes(t))).slice(0,20).map(r=>{
+    const low = r.text.toLowerCase(); let i = -1;
+    for(const t of terms){ const j = low.indexOf(t); if(j>=0 && (i<0 || j<i)) i = j; }
+    const snip = i<0? r.blurb : (i>50? "\u2026":"") + r.text.slice(Math.max(0,i-50), Math.max(0,i-50)+140) + "\u2026";
+    return Object.assign({snip}, r);
+  });
+}
+function gearResultsHtml(q){
+  const res = gearSearch(q);
+  if(!res.length) return `<p class="small muted">Nothing matches \u201c${esc(q)}\u201d. Try a shorter word, for example psi, pod, trim or deco.</p>`;
+  return `<div class="panel toc">${res.map(r=>`<button type="button" data-act="mkOpen" data-v="${r.g}|${r.id}"><span class="n">\u2315</span><b>${esc(r.title)}</b><span class="d">${esc(r.gname)}: ${esc(r.snip)}</span></button>`).join("")}</div>`;
+}
+function gearSearchBox(){
+  return `<div class="section"><input type="search" id="gearQ" placeholder="Search all gear guides, e.g. psi" autocomplete="off" value="${esc(GEARQ)}">
+    <div id="gearResults" ${GEARQ?"":"hidden"}>${GEARQ? gearResultsHtml(GEARQ):""}</div></div>`;
+}
+let GEARQ = "";
+function viewTrip(){
+  const done = TRIP.reduce((a,[grp,items])=> a + items.filter((_,i)=>S.trip.items[grp+"|"+i]).length, 0);
+  const total = TRIP.reduce((a,[,items])=>a+items.length,0);
+  return `<div class="section spread"><h1>Trip prep</h1><button type="button" class="btn slim ghost" data-act="mkGuide" data-v="">All guides</button></div>
+  <div class="section"><div class="panel stack">
+    <label class="f">Trip<input type="text" id="tripName" value="${esc(S.trip.name)}" placeholder="e.g. Similan liveaboard, March"></label>
+    <div class="spread"><span class="mono" id="tripCount">${done} of ${total} done</span><button type="button" class="btn slim ghost" data-act="tripReset">${armed==="trip"?"Tap again to clear":"Start a new trip"}</button></div>
+  </div></div>
+  ${TRIP.map(([grp,items])=>`<div class="section"><h3>${esc(grp)}</h3><div class="panel">${items.map((t,i)=>{
+      const k = grp+"|"+i;
+      return `<label class="cue"><input type="checkbox" data-trip="${esc(k)}" ${S.trip.items[k]?"checked":""}><span>${esc(t)}</span></label>`;
+    }).join("")}</div></div>`).join("")}
+  <div class="section"><p class="small muted">The SOS page has emergency numbers for Thailand and the Philippines: pick the country at the top of the Call list. For any other country, add its numbers there before your first dive.</p>
+  <button type="button" class="btn ghost" data-act="sos">Open SOS contacts</button></div>`;
+}
+function viewGear(){
+  if(MKS.guide==="trip") return viewTrip();
+  const g = GUIDES.find(x=>x.id===MKS.guide);
+  if(!g){
+    return `<div class="section"><h1>Gear guides</h1>
+      <p class="small muted">Quick references in my own words, written for how you dive. They work with no signal. The makers' own manuals are linked inside each guide and need a connection.</p></div>
+    ${gearSearchBox()}
+    <div class="section" id="gearList"><div class="panel toc"><button type="button" data-act="mkGuide" data-v="trip"><span class="n">\u2713</span><b>Trip prep checklist</b><span class="d">Before you go, on arrival, each dive day</span></button>${GUIDES.map((x,i)=>`<button type="button" data-act="mkGuide" data-v="${x.id}"><span class="n">${String(i+1).padStart(2,"0")}</span><b>${esc(x.name)}</b><span class="d">${esc(x.blurb)} · ${x.secs.length} topics</span></button>`).join("")}</div></div>`;
+  }
+  if(MKS.sec){
+    const i = g.secs.findIndex(x=>x[0]===MKS.sec), m = g.secs[i];
+    return `<div class="section spread"><h1>${esc(m[1])}</h1><button type="button" class="btn slim ghost" data-act="mkTop">Contents</button></div>
+    <p class="small muted">${esc(g.name)}</p>
+    <div class="section"><div class="panel guide">${m[3]}</div></div>
+    <div class="section"><div class="row">
+      ${i>0? `<button type="button" class="btn slim ghost" data-act="mkSec" data-v="${g.secs[i-1][0]}">Back: ${esc(g.secs[i-1][1])}</button>`:""}
+      ${i<g.secs.length-1? `<button type="button" class="btn slim" data-act="mkSec" data-v="${g.secs[i+1][0]}">Next: ${esc(g.secs[i+1][1])}</button>`:""}
+    </div></div>`;
+  }
+  return `<div class="section spread"><h1>${esc(g.name)}</h1><button type="button" class="btn slim ghost" data-act="mkGuide" data-v="">All guides</button></div>
+  ${gearSearchBox()}
+  <div class="section" id="gearList"><h3>Contents</h3><div class="panel toc">
+    ${g.secs.map((m,i)=>`<button type="button" data-act="mkSec" data-v="${m[0]}"><span class="n">${String(i+1).padStart(2,"0")}</span><b>${esc(m[1])}</b><span class="d">${esc(m[2])}</span></button>`).join("")}
+  </div></div>
+  <div class="section"><h3>The maker's own manual</h3><div class="panel stack">
+    <a class="lnk" href="${g.url}" target="_blank" rel="noopener">${esc(g.urlText)} ↗</a>
+    <p class="small muted">Their wording is theirs, so this guide does not reproduce it. Where the two disagree, the maker's manual and your training win.</p>
+  </div></div>`;
+}
+
+/* --- Terms --- */
+let backTab = "nitrox";
+const CONV = {
+  pressure: {label:"Pressure", units:[["bar","bar",1],["psi","psi",1/14.5037738]]},
+  depth: {label:"Depth", units:[["m","meters",1],["ft","feet",0.3048]]},
+  temp: {label:"Temp", units:[["c","\u00b0C",1],["f","\u00b0F",1]]},
+  volume: {label:"Tank", units:[["l","liters (water capacity)",1],["cuft","cubic feet at 207 bar / 3000 psi",1]]},
+  weight: {label:"Weight", units:[["kg","kg",1],["lb","lb",0.45359237]]}
+};
+let CV = {cat:"pressure", val:"", from:"bar"};
+function convert(){
+  const out = $("#cvOut"); if(!out) return;
+  const v = parseFloat(CV.val);
+  if(!isFinite(v)){ out.innerHTML = `<p class="small muted">Enter a number.</p>`; return; }
+  let rows = [];
+  if(CV.cat==="temp"){
+    rows = CV.from==="c" ? [[`${r1(v)} \u00b0C`, `${r1(v*9/5+32)} \u00b0F`]] : [[`${r1(v)} \u00b0F`, `${r1((v-32)*5/9)} \u00b0C`]];
+  } else if(CV.cat==="volume"){
+    rows = CV.from==="l"
+      ? [[`${r1(v)} L water capacity`, `${(v*207/28.3168).toFixed(1)} cu ft at 207 bar`], ["", `${(v*232/28.3168).toFixed(1)} cu ft at 232 bar`]]
+      : [[`${r1(v)} cu ft at 207 bar`, `${(v*28.3168/207).toFixed(1)} L water capacity`]];
+  } else {
+    const u = CONV[CV.cat].units, a = u.find(x=>x[0]===CV.from), b = u.find(x=>x[0]!==CV.from);
+    rows = [[`${r1(v)} ${a[1]}`, `${r1(v*a[2]/b[2])} ${b[1]}`]];
+  }
+  out.innerHTML = rows.map(([l,rt])=>`<div class="spread"><span class="small muted mono">${esc(l)}</span><span class="mono" style="font-size:20px">${esc(rt)}</span></div>`).join("");
+}
+function viewConv(){
+  const u = CONV[CV.cat].units;
+  if(!u.some(x=>x[0]===CV.from)) CV.from = u[0][0];
+  return `<div class="section"><h3>Unit converter</h3><div class="panel stack">
+    <div class="cvseg">${seg("cvcat", Object.entries(CONV).map(([k,c])=>[k,c.label]), CV.cat, "data-cv")}</div>
+    <div class="grid2"><label class="f">Value<input type="number" inputmode="decimal" id="cvVal" value="${esc(CV.val)}"></label>
+    <label class="f">Is in${`<select id="cvFrom">${u.map(x=>`<option value="${x[0]}" ${x[0]===CV.from?"selected":""}>${esc(x[1])}</option>`).join("")}</select>`}</label></div>
+    <div id="cvOut"><p class="small muted">Enter a number.</p></div>
+    <p class="small muted">Handy ones: 1 bar is 14.5 psi. 10 m is 32.8 ft. Cylinder conversions here assume ideal gas, so they read a few percent high: an AL80 is 11.1 L water capacity and rated 77 cu ft, not the 81 this shows.</p>
+  </div></div>`;
+}
+function viewTerms(){
+  return `<div class="section"><h1>Convert &amp; terms</h1></div>
+  ${viewConv()}
+  <div class="section"><h3>Abbreviations</h3><input type="text" id="termQ" placeholder="Search, e.g. ppO2 or bends" autocomplete="off"></div>
+  <div class="section"><div class="panel" id="termList">${TERMS.map(([a,f,d])=>`<div class="term" data-s="${esc((a+" "+f+" "+d).toLowerCase().replace(/\u2082/g,"2"))}"><span class="a">${esc(a)}</span><span class="full">${esc(f)}</span><span class="def">${esc(d)}</span></div>`).join("")}</div>
+  <p class="small muted" id="termNone" hidden>No matching term.</p></div>`;
+}
+
+/* --- Signals tab --- */
+let SG = {cat:"All", mode:"list", deck:[], i:0, show:false};
+function viewSignals(){
+  if(SG.mode==="quiz"){
+    const x = SIG_BY[SG.deck[SG.i]];
+    return `<div class="section spread"><h1>Signals quiz</h1><button type="button" class="btn slim ghost" data-act="sgExit">Done</button></div>
+    <p class="small muted">${SG.i+1} of ${SG.deck.length}. Picture the signal with your hand, then reveal.</p>
+    <div class="section"><div class="panel flash">
+      <span class="eyebrow">${esc(x[1])}</span><div class="q">${esc(x[2])}</div>
+      ${SG.show? `<p>${esc(x[3])}</p>${x[4]?`<p class="small" style="color:var(--warn)">${esc(x[4])}</p>`:""}` : ""}
+    </div></div>
+    <div class="section">${SG.show
+      ? `<div class="grid2"><button type="button" class="btn ghost" data-act="sgNext" data-v="miss">Missed it</button><button type="button" class="btn" data-act="sgNext" data-v="got">Knew it</button></div>`
+      : `<button type="button" class="btn" data-act="sgReveal">Reveal</button>`}</div>`;
+  }
+  const cats = ["All","Starred"].concat(SIG_CATS);
+  const list = SIGNALS.filter(x=> SG.cat==="All" || (SG.cat==="Starred"? S.sigFav.includes(x[0]) : x[1]===SG.cat));
+  const link = S.sigLink;
+  return `<div class="section"><h1>Hand signals</h1>
+    <p class="small muted">Common recreational signals. They vary by agency, region and dive op, so agree on them with your buddy before every dive. Starred signals appear in your pre-dive.</p></div>
+  <div class="section"><div class="row"><button type="button" class="btn slim" data-act="sgQuiz" data-v="all">Quiz me: all</button><button type="button" class="btn slim ghost" data-act="sgQuiz" data-v="star">Quiz me: starred</button></div></div>
+  <div class="section"><div class="chips">${cats.map(c=>`<button type="button" class="chip ${SG.cat===c?"on":""}" data-act="sgCat" data-v="${c}">${c}</button>`).join("")}</div></div>
+  <div class="section"><div class="panel">${list.map(x=>`<div class="sig"><b>${esc(x[2])}</b><button type="button" class="star ${S.sigFav.includes(x[0])?"on":""}" data-act="sgStar" data-v="${x[0]}">${S.sigFav.includes(x[0])?"Starred":"Star"}</button><span class="how">${esc(x[3])}</span>${x[4]?`<span class="note">${esc(x[4])}</span>`:""}</div>`).join("") || `<p class="small muted">Nothing starred yet.</p>`}</div></div>
+  <div class="section"><h3>Your picture guide</h3><div class="panel stack">
+    ${link? `<a class="lnk" href="${esc(link)}" target="_blank" rel="noopener">Open my signals chart ↗</a>` : `<p class="small muted">Save a link to the illustrated chart your agency or dive op uses. It opens when you have signal.</p>`}
+    <div class="row" style="flex-wrap:nowrap"><input type="text" id="sigLink" inputmode="url" placeholder="https://" value="${esc(link)}"><button type="button" class="btn slim" data-act="sgLink">Save</button></div>
+  </div></div>`;
+}
+
+/* --- Nitrox tab --- */
+let NX = {fo2:null, label:32, ppo2:1.4, depth:null, bestDepth:null, u:null, water:"salt"};
+function viewNitrox(){
+  if(NX.u!==S.units){ NX.depth = imp()?100:30; NX.u = S.units; }
+  const linked = S.draft && S.draft.gas==="nitrox";
+  if(linked){ NX.label = S.draft.fo2Label; NX.fo2 = S.draft.fo2; if(S.draft.planDepth!=null) NX.depth = U.d(S.draft.planDepth); }
+  const mixes = [28,32,36,40];
+  const mod = (fo2,pp)=> (pp/(fo2/100)-1)*(imp()?33:10);
+  return `<div class="section"><h1>Nitrox</h1></div>${linked? `<div class="section" style="margin-top:8px"><div class="okline spread"><span>Linked to your dive plan. Changes here update it.</span><button type="button" class="btn slim ghost" data-tab="dive">Back to plan</button></div></div>`:""}<div class="section" style="margin-top:8px"><p class="small muted">Planning aid only. Your training and your computer, set to the analyzed mix, govern the dive.</p></div>
+  <div class="section"><h3>Your mix</h3><div class="panel stack">
+    <div class="grid2"><label class="f">Fill label O₂ %<input type="number" inputmode="decimal" id="nx_label" value="${NX.label??""}" step="1"></label>
+    <label class="f">Tested O₂ %<input type="number" inputmode="decimal" id="nx_fo2" value="${NX.fo2??""}" step="0.1" placeholder="Analyzer reading"></label></div>
+    <label class="f">Planned max depth (${U.du()})<input type="number" inputmode="decimal" id="nx_depth" value="${NX.depth??""}"></label>
+    <div id="o_alert"></div>
+    <label class="f">Max ppO₂</label>${seg("ppo2",[["1.4","1.4 working"],["1.6","1.6 contingency"]],NX.ppo2,"data-nx")}
+    <div class="grid2">
+      <div class="stat"><span class="big" id="o_mod">–</span><span class="k">MOD<small>Maximum operating depth</small></span></div>
+      <div class="stat"><span class="big" id="o_ead">–</span><span class="k">EAD<small>Equivalent air depth, at planned max</small></span></div>
+      <div class="stat"><span class="big" id="o_pp">–</span><span class="k">ppO₂<small>Partial pressure of oxygen, at planned max</small></span></div>
+      <div class="stat"><span class="big" id="o_ata">–</span><span class="k">ata<small>Absolute pressure</small></span></div>
+    </div>
+    <p class="small" id="o_note"></p>
+    <p class="small" id="o_modWhy"></p>
+  </div></div>
+  <div class="section"><h3>Best mix</h3><div class="panel stack">
+    <p class="small muted">For the planned max depth entered above.</p>
+    <div class="stat"><span class="big" id="o_best">–</span><span class="k">Best mix at 1.4, rounded down</span></div>
+    <p class="small" id="o_bestWhy"></p>
+  </div></div>
+  <div class="section"><h3>Common mixes</h3><div class="panel tbl"><table><thead><tr><th>Mix</th><th class="n">MOD 1.4</th><th class="n">MOD 1.6</th></tr></thead><tbody>
+    ${mixes.map(m=>`<tr><td>EAN${m}</td><td class="n">${Math.floor(mod(m,1.4))} ${U.du()}</td><td class="n">${Math.floor(mod(m,1.6))} ${U.du()}</td></tr>`).join("")}
+  </tbody></table></div><p class="small muted">Salt water, rounded down.</p></div>
+  <div class="section"><h3>Before every nitrox dive</h3><div class="panel small"><ul style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px">
+    <li>Analyze your own cylinder, label it with O₂ % and MOD, and sign the fill log.</li>
+    <li>Set the computer's FO₂ to the analyzed value, not the ordered one.</li>
+    <li>Plan to 1.4. Treat 1.6 as the contingency ceiling, never the working limit.</li>
+    <li>Watch the computer's CNS % on repetitive days.</li>
+    <li>Nitrox extends no-deco time. It doesn't make deco safe or reduce narcosis in a way you should plan on.</li>
+  </ul></div></div>`;
+}
+function calcNitrox(){
+  const tested = num($("#nx_fo2").value), label = num($("#nx_label").value), depth = num($("#nx_depth").value), best = num($("#nx_depth").value);
+  const unit = imp()?33:10, du = U.du();
+  NX.fo2 = tested; NX.label = label; NX.depth = depth;
+  const linked = S.draft && S.draft.gas==="nitrox";
+  if(linked){ S.draft.fo2 = tested; S.draft.fo2Label = label; S.draft.planDepth = depth==null? null : U.dIn(depth); save(); }
+  const fo2 = tested || label;
+  $("#o_alert").innerHTML = gasCheck(tested, label, depth==null? null : U.dIn(depth), linked? S.draft.water : "salt");
+  const set = (id,t)=>{ const e=$(id); if(e) e.textContent = t; };
+  if(fo2 && fo2>=21 && fo2<=100){
+    const f = fo2/100;
+    set("#o_mod", `${Math.floor((NX.ppo2/f-1)*unit)} ${du}`);
+    {
+      const pp = NX.ppo2, lim = pp/f, mod = Math.floor((lim-1)*unit);
+      const o = fo2>=36 ? Math.max(21,fo2-4) : fo2+4, olim = pp/(o/100), omod = Math.floor((olim-1)*unit);
+      const name = x => x===21? "air" : `EAN${x}`;
+      const [rich, lean] = o>fo2 ? [[o,olim,omod],[fo2,lim,mod]] : [[fo2,lim,mod],[o,olim,omod]];
+      set("#o_modWhy", `Why more oxygen means a shallower MOD: ppO\u2082 = O\u2082 fraction \u00d7 ata, and pressure rises 1 ata every ${unit} ${du}. With more oxygen in every breath, you reach the ${pp} limit at less pressure. ${lean[0]===21?"Air":name(lean[0])} hits ${pp} at ${lean[1].toFixed(2)} ata (${lean[2]} ${du}); ${name(rich[0])} hits it at ${rich[1].toFixed(2)} ata (${rich[2]} ${du}). The trade-off: a richer mix gives longer no-deco time but a shallower depth limit.`);
+    }
+    if(depth!=null){
+      const ata = depth/unit+1, pp = f*ata;
+      set("#o_pp", pp.toFixed(2)); set("#o_ata", `${ata.toFixed(2)} ata`);
+      set("#o_ead", `${Math.max(0,Math.ceil(((depth+unit)*(1-f)/0.79)-unit))} ${du}`);
+      const note = $("#o_note");
+      note.innerHTML = tested? "" : `<span class="pill warn">Using label value</span> Numbers above use the fill label until you enter a tested value.`;
+    }
+  } else { set("#o_modWhy",""); ["#o_mod","#o_pp","#o_ata","#o_ead"].forEach(i=>set(i,"–")); $("#o_note").textContent = "Enter an O₂ % between 21 and 100."; }
+  if(best!=null && best>0){
+    const ata = best/unit+1, raw = 1.4/ata, b = Math.floor(raw*100);
+    set("#o_best", b<21? "Air" : `EAN${Math.min(b,40)}${b>40?"+":""}`);
+    let why = `At ${best} ${du} you're breathing at ${ata.toFixed(2)} ata. Divide the 1.4 limit by that pressure: 1.4 \u00f7 ${ata.toFixed(2)} = ${raw.toFixed(3)}, or ${b}% O\u2082. That's the richest mix that keeps ppO\u2082 at or under 1.4 at your deepest point. More oxygen means less nitrogen and longer no-deco time. Round down, never up, so you stay under the limit.`;
+    if(b>40) why += ` Recreational nitrox stops at EAN40, so use that.`;
+    if(b<21) why = `At ${best} ${du} (${ata.toFixed(2)} ata), even air's 21% O\u2082 gives a ppO\u2082 of ${(0.21*ata).toFixed(2)}. No nitrox mix helps here, and this depth is past recreational limits.`;
+    set("#o_bestWhy", why);
+  }
+  else { set("#o_best","\u2013"); set("#o_bestWhy",""); }
+}
+
+/* --- Me tab --- */
+function viewMe(){
+  const p = S.profile;
+  const hIn = p.heightCm==null? "" : imp()? Math.round(p.heightCm/2.54) : Math.round(p.heightCm);
+  const bmi = p.heightCm && p.weightKg ? (p.weightKg/Math.pow(p.heightCm/100,2)).toFixed(1) : null;
+  return `<div class="section"><h1>Me</h1></div>
+  <div class="section"><h3>Units</h3>${seg("units",[["metric","Meters, bar, kg"],["imperial","Feet, psi, lb"]],S.units,"data-me")}</div>
+  <div class="section"><h3>Profile</h3><div class="panel stack">
+    <div class="grid2"><label class="f">Height (${imp()?"in":"cm"})<input type="number" inputmode="decimal" id="p_h" value="${hIn}"></label>
+    <label class="f">Body weight (${U.wu()})<input type="number" inputmode="decimal" id="p_w" value="${p.weightKg==null?"":U.w(p.weightKg)}"></label></div>
+    <div class="spread"><span class="small muted">BMI (calculated)</span><span class="mono" id="p_bmi">${bmi||"–"}</span></div>
+    <p class="small muted">Used only for the starting weight estimate on a brand-new setup. After one dive, your 5 m checks drive the coaching.</p>
+  </div></div>
+  ${certCard()}
+  <div class="section"><h3>My reminders</h3><div class="panel stack">
+    ${S.cues.map((c,i)=>`<div class="spread"><span>${esc(c)}</span><button type="button" class="btn slim ghost" data-act="delCue" data-v="${i}">Remove</button></div>`).join("")}
+    <div class="row" style="flex-wrap:nowrap"><input type="text" id="newCue" placeholder="Add a reminder"><button type="button" class="btn slim" data-act="addCue">Add</button></div>
+  </div></div>
+  <div class="section" id="backupPanel"><h3>Backup</h3><div class="panel stack">
+    <p class="small muted">Dives are stored in this browser on this phone. ${S.backup.at? `Last backup ${new Date(S.backup.at).toLocaleDateString()}.` : "No backup yet."} You'll get a reminder every 5 dives.</p>
+    ${ai.downloads? `<button type="button" class="btn ghost" data-act="export">Export backup file</button>` : ""}
+    <button type="button" class="btn ghost" data-act="copyBackup">Copy backup to clipboard</button>
+    <p class="small muted">Copy, then paste into a note or email to yourself.</p>
+    <label class="f">Restore from a backup file<input type="file" id="importFile" accept="application/json,.json"></label>
+    <label class="f">Or paste backup text<textarea id="pasteBox" placeholder="Paste backup text here"></textarea></label>
+    <button type="button" class="btn slim ghost" data-act="pasteRestore">Restore from pasted text</button>
+    <button type="button" class="btn ghost" data-act="reset">${armed==="reset"?"Tap again: erase all dives":"Erase all data"}</button>
+  </div></div>
+  <div class="section"><h3>Coach engine</h3><div class="panel small stack">
+    <p><span class="pill info">Rules</span> Always on, works offline. One change per dive, safety-biased: it never removes weight after a rise at the 5 m check or a hard safety stop.</p>
+    <p><span class="pill ${ai.sample?"good":"warn"}">Claude</span> ${ai.sample? "Available here. Used only when you tap it." : "Not available in this view."}</p>
+  </div></div>`;
+}
+
+function efrStatus(c){
+  if(!c.efr) return {ok:false, txt:"Not done yet. Needed before Rescue (within 24 months)."};
+  const d = new Date(c.efr+"T00:00:00"); if(isNaN(d)) return {ok:false, txt:"Enter the course date."};
+  const until = new Date(d); until.setMonth(until.getMonth()+24);
+  const ok = until.getTime() > Date.now();
+  return {ok, txt: ok? `Current until ${until.toISOString().slice(0,10)}.` : `Lapsed ${until.toISOString().slice(0,10)}. Renew before Rescue.`};
+}
+function certCard(){
+  const c = S.certs, logged = (c.prior||0) + S.dives.filter(x=>!x.example).length, e = efrStatus(c);
+  const item = (ok, title, sub, ctl)=>`<div class="cue"><span class="pill ${ok?"good":"warn"}" style="flex:none;min-width:52px;justify-content:center">${ok?"Done":"To do"}</span><span style="flex:1;min-width:0"><b>${title}</b><br><span class="small muted">${sub}</span>${ctl?`<div style="margin-top:6px">${ctl}</div>`:""}</span></div>`;
+  const specs = (c.specs||[]).map((s,i)=>`<span class="chip static">${esc(s)} <button type="button" class="star" style="padding:0 6px;margin-left:4px" data-act="certDelSpec" data-v="${i}" aria-label="Remove ${esc(s)}">${armed==="cs"+i?"Remove?":"×"}</button></span>`).join("");
+  const done = [c.aow, (c.specs||[]).length>=5, logged>=50, e.ok, c.rescue].filter(Boolean).length;
+  return `<div class="section"><div class="spread"><h3>Master Scuba Diver</h3><span class="mono small">${done} of 5${c.applied?" · applied":""}</span></div><div class="panel">
+    ${item(c.aow, "Advanced Open Water", "PADI")}
+    ${item((c.specs||[]).length>=5, `Five PADI specialties (${(c.specs||[]).length} of 5)`, "Cards confirmed", `<div class="chips">${specs}</div><div class="row" style="flex-wrap:nowrap;margin-top:6px"><input type="text" id="cert_spec" placeholder="Add a specialty"><button type="button" class="btn slim ghost" data-act="certAddSpec">Add</button></div>`)}
+    ${item(logged>=50, `50 logged dives (${logged})`, "Before this app plus dives logged here", `<label class="f">Dives logged before this app<input type="number" inputmode="numeric" id="cert_prior" value="${c.prior??""}"></label>`)}
+    ${item(e.ok, "Emergency First Response", e.txt, `<label class="f">Course date<input type="date" id="cert_efr" value="${esc(c.efr||"")}"></label><button type="button" class="btn slim ghost" style="margin-top:6px" data-act="sos">First aid reference on SOS page</button>`)}
+    ${item(c.rescue, "Rescue Diver", c.rescue? "Certified" : "Needs current EFR first", `<label class="cue" style="border:0;padding:0"><input type="checkbox" data-cert="rescue" ${c.rescue?"checked":""}><span>Rescue completed</span></label>`)}
+    <div class="cue"><span style="flex:1"><label class="cue" style="border:0;padding:0"><input type="checkbox" data-cert="applied" ${c.applied?"checked":""}><span><b>Application submitted</b><br><span class="small muted">Instructor verifies cards and log, then submits</span></span></label></span></div>
+    <label class="f" style="margin-top:8px">Plan<input type="text" id="cert_plan" value="${esc(c.plan||"")}"></label>
+  </div></div>`;
+}
+function markBackup(){ S.backup = {at:Date.now(), dives:S.dives.filter(x=>!x.example).length}; save(); }
+try{ navigator.storage && navigator.storage.persist && navigator.storage.persist(); }catch(e){}
+
+/* ---------- events ---------- */
+function setField(d, f, raw, t){
+  let val = raw;
+  if(t){ const n = num(raw); val = n==null? null : t==="w"? U.wIn(n) : t==="d"? U.dIn(n) : t==="p"? U.pIn(n) : n; }
+  if(f.startsWith("w.")) d.weights[f.slice(2)] = val||0; else d[f] = val;
+}
+
+document.addEventListener("input", e=>{
+  const el = e.target;
+  if(el.dataset && el.dataset.f && S.draft && el.id!=="coachKey"){
+    setField(S.draft, el.dataset.f, el.value, el.dataset.t); save();
+    if(S.draft.stage==="plan" && (el.tagName==="SELECT" || el.dataset.f.startsWith("w."))) updatePlanCoach();
+    else if(S.draft.stage==="plan") updatePlanGas();
+    if(S.draft.stage==="plan" && el.tagName==="SELECT"){ applyRecToDraft(S.draft); render(); }
+    return;
+  }
+  if(el.id && el.id.startsWith("nx_")) calcNitrox();
+  if(el.id==="c_temp" && S.draft){ const n = num(el.value); S.draft.cond.temp = n==null? null : imp()? r1((n-32)*5/9) : n; save(); }
+  if(el.id==="c_surf" && S.draft){ S.draft.surfTime = el.value || null; save(); }
+  if(el.dataset && el.dataset.skillnote && S.draft){ const id = el.dataset.skillnote; S.draft.skillRes = S.draft.skillRes||{}; S.draft.skillRes[id] = Object.assign(S.draft.skillRes[id]||{}, {note:el.value}); save(); }
+  if(el.id==="cvVal"){ CV.val = el.value; convert(); return; }
+  if(el.id==="gearQ"){
+    GEARQ = el.value.trim();
+    const box = $("#gearResults"), list = $("#gearList");
+    if(box){ box.innerHTML = GEARQ? gearResultsHtml(GEARQ) : ""; box.hidden = !GEARQ; }
+    if(list) list.hidden = !!GEARQ;
+    return;
+  }
+  if(el.id==="termQ"){
+    const q = el.value.toLowerCase().replace(/\u2082/g,"2").trim(); let n = 0;
+    document.querySelectorAll("#termList .term").forEach(t=>{ const hit = !q || t.dataset.s.includes(q); t.hidden = !hit; if(hit) n++; });
+    $("#termNone").hidden = n>0;
+  }
+  if(el.id==="p_h" || el.id==="p_w"){
+    const h = num($("#p_h").value), w = num($("#p_w").value);
+    S.profile.heightCm = h==null? null : imp()? h*2.54 : h;
+    S.profile.weightKg = w==null? null : U.wIn(w);
+    save();
+    const p=S.profile; $("#p_bmi").textContent = p.heightCm && p.weightKg ? (p.weightKg/Math.pow(p.heightCm/100,2)).toFixed(1) : "–";
+  }
+});
+document.addEventListener("change", e=>{
+  const el = e.target;
+  if(el.id==="tripName"){ S.trip.name = el.value; save(); return; }
+  if(el.dataset && el.dataset.cert){ S.certs[el.dataset.cert] = el.checked; save(); render(); return; }
+  if(el.id==="cert_efr"){ S.certs.efr = el.value || null; save(); render(); return; }
+  if(el.id==="cert_prior"){ const n = num(el.value); S.certs.prior = n==null? 0 : Math.max(0, Math.round(n)); save(); render(); return; }
+  if(el.id==="cert_plan"){ S.certs.plan = el.value.trim(); save(); return; }
+  if(el.dataset && el.dataset.trip){
+    S.trip.items[el.dataset.trip] = el.checked; save();
+    const c = $("#tripCount");
+    if(c){ const done = TRIP.reduce((a,[grp,items])=> a + items.filter((_,i)=>S.trip.items[grp+"|"+i]).length, 0), total = TRIP.reduce((a,[,items])=>a+items.length,0); c.textContent = `${done} of ${total} done`; }
+    return;
+  }
+  if(el.dataset && el.dataset.cue!=null && S.draft){ S.draft.cues[el.dataset.cue] = el.checked; save(); return; }
+  if(el.id==="coachKey"){ coachKey = el.value; render(); }
+  if(el.id==="cvFrom"){ CV.from = el.value; convert(); }
+  if(el.id==="importFile" && el.files && el.files[0]){
+    const r = new FileReader();
+    r.onload = ()=>{ try{ const o = JSON.parse(r.result); if(!o || o.v!==1 || !Array.isArray(o.dives)) throw 0; S = migrate(o); save(); toast("Backup restored"); render(); }catch(err){ toast("That file isn't a Neutral backup"); } };
+    r.readAsText(el.files[0]);
+  }
+});
+
+document.addEventListener("click", async e=>{
+  const b = e.target.closest("button"); if(!b) return;
+  if(b.dataset.tab){ tab = b.dataset.tab; armed=null; render(); window.scrollTo(0,0); return; }
+  if(b.id==="unitBtn"){ S.units = imp()? "metric":"imperial"; save(); render(); return; }
+  if(b.dataset.cv==="cvcat"){ CV.cat = b.dataset.v; CV.from = CONV[CV.cat].units[0][0]; render(); setTimeout(convert,0); return; }
+  if(b.dataset.nx){ NX.ppo2 = parseFloat(b.dataset.v); b.parentNode.querySelectorAll("button").forEach(x=>x.classList.toggle("on", x===b)); calcNitrox(); return; }
+  if(b.dataset.me==="units"){ S.units = b.dataset.v; save(); render(); return; }
+  if(b.dataset.f==="gas" && S.draft){
+    S.draft.gas = b.dataset.v;
+    if(b.dataset.v==="air"){ S.draft.fo2 = 21; S.draft.fo2Label = null; save(); render(); }
+    else { if(S.draft.fo2===21) S.draft.fo2 = null; save(); tab = "nitrox"; render(); window.scrollTo(0,0); toast("Enter your mix"); }
+    return;
+  }
+  if(b.dataset.f && S.draft){
+    const f = b.dataset.f, v = b.dataset.v;
+    S.draft[f] = f==="rating"? parseInt(v,10) : v; save();
+    if(S.draft.stage==="plan" && f==="water") applyRecToDraft(S.draft);
+    render(); return;
+  }
+  const act = b.dataset.act, v = b.dataset.v; if(!act) return;
+  const d = S.draft;
+  if(act!=="delDive" && act!=="reset" && act!=="discard" && act!=="skillDelLog" && act!=="tripReset" && act!=="delLearn" && act!=="certDelSpec") armed = null;
+  switch(act){
+    case "certAddSpec": { const t = ($("#cert_spec").value||"").trim(); if(t){ S.certs.specs.push(t); save(); render(); } break; }
+    case "certDelSpec": if(armed==="cs"+v){ S.certs.specs.splice(+v,1); armed=null; save(); } else armed="cs"+v; render(); break;
+    case "startDive": S.draft = newDraft(); save(); render(); window.scrollTo(0,0); break;
+    case "startQuick": { const q = newDraft(); q.quick = true; q.stage = "pre"; S.draft = q; save(); render(); window.scrollTo(0,0); break; }
+    case "toFull": d.quick = false; d.stage = "debrief"; save(); render(); window.scrollTo(0,0); toast("Full debrief: add the 5 m check and weights"); break;
+    case "stage": d.stage = v; save(); render(); window.scrollTo(0,0); break;
+    case "discard": if(armed==="discard"){ S.draft=null; armed=null; save(); } else armed="discard"; render(); break;
+    case "feel": {
+      const i = d.feel.indexOf(v);
+      if(i>=0) d.feel.splice(i,1);
+      else {
+        d.feel.push(v); const g = FEEL_G[v];
+        if(v==="good") d.feel = d.feel.filter(x=>FEEL_OK[x]);
+        else if(FEEL_OK[v]) d.feel = d.feel.filter(x=> FEEL_OK[x] || FEEL_G[x]!==g);
+        else d.feel = d.feel.filter(x=> x!=="good" && x!==GROUP_OK[g]);
+      }
+      save(); render(); break;
+    }
+    case "cond": { const [f,val] = v.split("|"); d.cond[f] = d.cond[f]===val? null : val; save(); render(); break; }
+    case "deco": d.deco = v==="yes"; save(); render(); break;
+    case "sos": backTab = tab==="emergency"? backTab : tab; tab = "emergency"; render(); window.scrollTo(0,0); break;
+    case "ctSave": {
+      const L = emList(); document.querySelectorAll("[data-ct]").forEach(el=>{ const [id,f] = el.dataset.ct.split("|"); const c = L.find(x=>x.id===id); if(c) c[f] = el.value.trim(); });
+      EM.edit = false; save(); render(); toast("Contacts saved"); break;
+    }
+    case "meEdit": if(EM.meEdit){ document.querySelectorAll("[data-me]").forEach(el=>{ S.emergency.me[el.dataset.me] = el.value.trim(); }); save(); } EM.meEdit = !EM.meEdit; render(); break;
+    case "meSave": { document.querySelectorAll("[data-me]").forEach(el=>{ S.emergency.me[el.dataset.me] = el.value.trim(); }); EM.meEdit = false; save(); render(); toast("Saved on this phone"); break; }
+    case "ctEdit": EM.edit = !EM.edit; render(); break;
+    case "ctAdd": emList().push({id:"k"+uid(), who:"New contact", num:"", sub:""}); EM.edit = true; save(); render(); break;
+    case "ctDel": { const k = emRegion()==="ph"? "ph" : "contacts"; S.emergency[k] = emList().filter(c=>c.id!==v); save(); render(); break; }
+    case "emRegion": S.emergency.region = v==="ph"? "ph" : "th"; EM.edit = false; save(); render(); break;
+    case "backupNow": tab = "me"; render(); setTimeout(()=>{ const el = $("#backupPanel"); el && el.scrollIntoView({block:"start"}); }, 30); break;
+    case "copyBackup": {
+      try{ await navigator.clipboard.writeText(JSON.stringify(S)); markBackup(); toast("Backup copied. Paste it into Notes"); }
+      catch(e){ toast("Couldn't copy. Use Export instead"); }
+      break;
+    }
+    case "pasteRestore": {
+      const t = ($("#pasteBox").value||"").trim();
+      try{ const o = JSON.parse(t); if(!o || o.v!==1 || !Array.isArray(o.dives)) throw 0; S = migrate(o); save(); toast("Backup restored"); render(); }
+      catch(e){ toast("That text isn't a Neutral backup"); }
+      break;
+    }
+    case "tripReset": if(armed==="trip"){ S.trip = {name:S.trip.name, items:{}}; armed=null; save(); toast("Checklist cleared"); } else armed="trip"; render(); break;
+    case "mkOpen": { const [gid,sid] = v.split("|"); MKS.guide = gid; MKS.sec = sid; GEARQ = ""; render(); window.scrollTo(0,0); break; }
+    case "mkGuide": MKS.guide = v || null; MKS.sec = null; render(); window.scrollTo(0,0); break;
+    case "mkSec": MKS.sec = v; render(); window.scrollTo(0,0); break;
+    case "mkTop": MKS.sec = null; render(); window.scrollTo(0,0); break;
+    case "rcCalm": RC.calm = v==="1"; render(); break;
+    case "pickSite": d.site = v; save(); render(); break;
+    case "skillRes": { const [id,r] = v.split("|"); d.skillRes = d.skillRes||{}; const cur = d.skillRes[id]||{}; d.skillRes[id] = Object.assign(cur, {r: cur.r===r? null : r}); save(); render(); break; }
+    case "skillCat": SK.cat = v; render(); break;
+    case "skillQueue": { const q = S.skills.queue, i = q.indexOf(v); if(i>=0) q.splice(i,1); else q.push(v); save(); render(); break; }
+    case "skillLogOpen": SK.log = v || null; SK.logRes = null; render(); break;
+    case "skillLogRes": SK.logRes = v; render(); break;
+    case "skillLogSave": {
+      if(!SK.logRes){ toast("Pick how it went"); break; }
+      S.skills.log.push({id:uid(), skill:v, date:($("#sk_date").value||today()), r:SK.logRes, note:($("#sk_note").value||"").trim(), site:""});
+      SK.log = null; SK.hist = v; save(); render(); toast("Practice logged"); break;
+    }
+    case "skillHist": SK.hist = SK.hist===v? null : v; render(); break;
+    case "skillDelLog": if(armed==="sk"+v){ S.skills.log = S.skills.log.filter(l=>l.id!==v); armed=null; save(); } else armed = "sk"+v; render(); break;
+    case "skillAdd": {
+      const n = ($("#sk_newName").value||"").trim(); if(!n){ $("#sk_newName").focus(); break; }
+      S.skills.custom.push({id:"c"+uid(), name:n, how:($("#sk_newHow").value||"").trim()}); SK.cat = "My skills"; save(); render(); toast("Skill added"); break;
+    }
+    case "applyRec": { const lr = latestRec(keyOf(d)); if(lr && lr.rec.change && !d.applied){ applyChange(d, lr.rec.change); save(); render(); toast("Change applied"); } break; }
+    case "saveDive": {
+      if(!d.check) d.check = "none";
+      if(S.example){ S.dives = S.dives.filter(x=>!x.example); S.example=false; }
+      const dive = Object.assign({}, d); delete dive.stage; delete dive.cues; delete dive.bwraf; delete dive.sorted; delete dive.xfer; delete dive.applied; delete dive.skillRes; delete dive.sigRot;
+      if(d.gas!=="nitrox"){ dive.fo2 = 21; dive.fo2Label = null; }
+      { const t = d.surfTime || nowHM(); const dt = new Date(`${d.date}T${t}:00`); dive.surfacedAt = isNaN(dt.getTime())? Date.now() : dt.getTime(); }
+      dive.skillsTried = [];
+      Object.entries(d.skillRes||{}).forEach(([id,res])=>{
+        if(!res.r) return;
+        if(res.r!=="skip"){ S.skills.log.push({id:uid(), skill:id, date:d.date, r:res.r, note:res.note||"", site:d.site||"", dive:d.id}); dive.skillsTried.push({skill:id, r:res.r}); }
+        S.skills.queue = S.skills.queue.filter(x=> x!==id || res.r==="skip");
+      });
+      dive.key = keyOf(dive);
+      const hist = divesFor(dive.key);
+      if(d.quick){ dive.rec = null; S.dives.push(dive); S.draft = null; save(); render(); window.scrollTo(0,0); toast("Dive saved. No-fly clock running"); break; }
+      dive.rec = recommend(dive, hist[hist.length-1]||null, S.dives.filter(x=>!x.quick));
+      S.dives.push(dive); S.draft = null; coachKey = dive.key; tab = "coach"; save(); render(); window.scrollTo(0,0); toast("Dive saved"); break;
+    }
+    case "clearEx": S.dives = S.dives.filter(x=>!x.example); S.example = false; save(); render(); break;
+    case "delDive": if(armed==="del"+v){ S.dives = S.dives.filter(x=>x.id!==v); armed=null; save(); } else armed="del"+v; render(); break;
+    case "addCue": { const t = ($("#newCue").value||"").trim(); if(t){ S.cues.push(t); save(); render(); } break; }
+    case "delCue": S.cues.splice(+v,1); save(); render(); break;
+    case "lKind": learnKind = v; render(); break;
+    case "addLearn": { const t=($("#lTitle").value||"").trim(), x=($("#lText").value||"").trim(), c=($("#lCue").value||"").trim(); if(t||x){ S.learnings.push({id:uid(), date:today(), kind:learnKind, title:t||x.slice(0,50), text:x, cue:c}); save(); toast("Learning saved"); render(); } break; }
+    case "delLearn": if(armed==="L"+v){ S.learnings = S.learnings.filter(l=>l.id!==v); armed=null; save(); } else { armed="L"+v; } render(); break;
+    case "reset": if(armed==="reset"){ const u=S.units, p=S.profile, c=S.cues, em=S.emergency, sf=S.sigFav, sl=S.sigLink, o0=S.learnings, ce=S.certs; S = blank(); S.units=u; S.profile=p; S.cues=c; S.emergency=em; S.sigFav=sf; S.sigLink=sl; S.learnings=(o0||[]); if(ce) S.certs=ce; armed=null; save(); toast("All dives erased"); } else armed="reset"; render(); break;
+    case "export":
+      if(!ai.downloads) return;
+      try{ await ai.downloads.save({filename:`neutral-backup-${today()}.json`, data: JSON.stringify(S, null, 2)}); markBackup(); toast("Backup saved"); render(); }
+      catch(err){ if(err && err.code!=="cancelled" && err.code!=="declined") toast("Export didn't complete"); }
+      break;
+    case "aiCoach": runAI("coach"); break;
+    case "aiAsk": runAI("ask"); break;
+    case "aiStop": aiCtl && aiCtl.abort(); break;
+    case "sgCat": SG.cat = v; render(); break;
+    case "sgStar": { const i = S.sigFav.indexOf(v); if(i>=0) S.sigFav.splice(i,1); else S.sigFav.push(v); save(); render(); break; }
+    case "sgQuiz": {
+      let ids = v==="star"? S.sigFav.filter(id=>SIG_BY[id]) : SIGNALS.map(x=>x[0]);
+      if(!ids.length){ toast("Star some signals first"); break; }
+      ids = ids.slice(); for(let i=ids.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [ids[i],ids[j]]=[ids[j],ids[i]]; }
+      SG = Object.assign(SG, {mode:"quiz", deck:ids, i:0, show:false, miss:[]}); render(); window.scrollTo(0,0); break;
+    }
+    case "sgReveal": SG.show = true; render(); break;
+    case "sgNext": {
+      if(v==="miss") SG.miss.push(SG.deck[SG.i]);
+      if(SG.i < SG.deck.length-1){ SG.i++; SG.show=false; }
+      else if(SG.miss.length){ toast(`${SG.miss.length} to review again`); SG.deck = SG.miss; SG.miss=[]; SG.i=0; SG.show=false; }
+      else { toast("All signals known"); SG.mode="list"; }
+      render(); break;
+    }
+    case "sgExit": SG.mode="list"; render(); break;
+    case "sgLink": {
+      const t = ($("#sigLink").value||"").trim();
+      if(t && !/^https?:\/\//i.test(t)){ toast("Links need to start with https://"); break; }
+      S.sigLink = t; save(); toast(t? "Link saved":"Link removed"); render(); break;
+    }
+  }
+});
+
+S = load();
+if(S) migrate(S);
+if(!S){ S = blank(); seedExamples(); save(); }
+render();
+})();
+</script>
+
+<script>if("serviceWorker" in navigator){addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));}</script></body></html>
