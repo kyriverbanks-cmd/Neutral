@@ -110,9 +110,9 @@ td.n{font-family:var(--mono);text-align:right}
 th.n{text-align:right}
 .banner{margin-top:12px;background:var(--warn-soft);color:var(--ink);border-radius:9px;padding:10px 12px;font-size:14px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
 .aibox{white-space:pre-wrap;font-size:15px;background:var(--ground);border:1px solid var(--line);border-radius:8px;padding:12px;min-height:44px}
-.tabs{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--surface);border-top:1px solid var(--line);padding:6px 2px calc(6px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:repeat(9,1fr)}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--surface);border-top:1px solid var(--line);padding:6px 2px calc(6px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:repeat(10,1fr)}
 .tabs button{border:0;background:none;padding:6px 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:9.5px;font-weight:700;letter-spacing:0;color:var(--muted);cursor:pointer}
-.tabs svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tabs svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .tabs button.on{color:var(--accent)}
 .toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--ground);padding:9px 16px;border-radius:999px;font-weight:600;font-size:14px;z-index:20}
 .big{font-family:var(--mono);font-size:30px;font-weight:500;font-variant-numeric:tabular-nums;line-height:1.1}
@@ -216,6 +216,7 @@ ol.steps{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
 <nav class="tabs" id="tabs">
   <button type="button" data-tab="dive"><svg viewBox="0 0 24 24"><path d="M3 15c2 2 4 2 6 0s4-2 6 0 4 2 6 0"/><path d="M12 3v8m-3-3 3 3 3-3"/></svg>Dive</button>
   <button type="button" data-tab="coach"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/></svg>Coach</button>
+  <button type="button" data-tab="weight"><svg viewBox="0 0 24 24"><path d="M9 7a3 3 0 0 1 6 0"/><path d="M6.5 9h11l2 11h-15z"/><path d="M10 14h4"/></svg>Weight</button>
   <button type="button" data-tab="log"><svg viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5z"/><path d="M8 11h8M8 15h8M8 7h5"/></svg>Log</button>
   <button type="button" data-tab="signals"><svg viewBox="0 0 24 24"><path d="M8 13V5a1.5 1.5 0 0 1 3 0v6"/><path d="M11 10V4a1.5 1.5 0 0 1 3 0v6"/><path d="M14 10V5.5a1.5 1.5 0 0 1 3 0V14a7 7 0 0 1-7 7h-.5A6.5 6.5 0 0 1 4 16.5L3.5 13a1.5 1.5 0 0 1 2.8-1L8 14"/></svg>Signals</button>
   <button type="button" data-tab="nitrox"><svg viewBox="0 0 24 24"><rect x="8" y="6" width="8" height="15" rx="3"/><path d="M10 6V3h4v3M8 11h8"/></svg>Nitrox</button>
@@ -767,7 +768,7 @@ function render(){
     if(tab!=="emergency" && (since>=5 || (since>=1 && old))) banner += `<div class="banner"><span>${since} dive${since>1?"s":""} since your last backup.</span><button class="btn slim ghost" data-act="backupNow" type="button">Back up now</button></div>`; }
   if(memOnly) banner += `<div class="banner"><span>This browser isn't saving data. Export a backup from Me before closing.</span></div>`;
   $("#bannerSlot").innerHTML = banner;
-  const v = {dive:viewDive, coach:viewCoach, log:viewLog, nitrox:viewNitrox, me:viewMe, signals:viewSignals, terms:viewTerms, skills:viewSkills, emergency:viewEmergency, gear:viewGear}[tab]();
+  const v = {dive:viewDive, coach:viewCoach, log:viewLog, nitrox:viewNitrox, me:viewMe, signals:viewSignals, weight:viewWeight, terms:viewTerms, skills:viewSkills, emergency:viewEmergency, gear:viewGear}[tab]();
   $("#view").innerHTML = v;
   if(tab==="nitrox") calcNitrox();
   if(tab==="terms") convert();
@@ -1127,7 +1128,7 @@ function updatePlanCoach(){
     const x = d.xfer;
     el.innerHTML = `<h3>For this setup</h3><div class="coachcard"><span class="eyebrow">New setup · carried over</span>
       <div class="gear">Start at ${U.w(totalW(d.weights))} ${U.wu()} total</div>
-      <p class="small">${x.known? `From your known weighting (${esc(keyLabel(x.key))}), set on the Coach tab.` : `From your ${esc(x.date)}${x.site?` ${esc(x.site)}`:""} dive (${x.confirmed?"weight confirmed at the 5 m check":"not yet confirmed at the 5 m check"}).`}</p>
+      <p class="small">${x.known? `From your known weighting (${esc(keyLabel(x.key))}), set on the Weight tab.` : `From your ${esc(x.date)}${x.site?` ${esc(x.site)}`:""} dive (${x.confirmed?"weight confirmed at the 5 m check":"not yet confirmed at the 5 m check"}).`}</p>
       ${x.lines.length? `<ul class="xfer">${x.lines.map(l=>`<li>${esc(l)}</li>`).join("")}</ul>` : `<p class="small">No adjustment needed for this change.</p>`}
       ${kitHtml(kitNotes(pickBase(), d, false))}
       <p class="small muted">Already applied to the weights below. Rules of thumb only: the 5 m check on this dive sets the real number.</p></div>`;
@@ -1288,6 +1289,7 @@ function wtTable(){
     <li><b>Lungs:</b> a relaxed breath at the check. A big held breath hides about 1 to 2 kg (2 to 4 lb).</li></ul></div>`;
   return `<div class="section"><h3>Quick table by suit</h3>${body}${tips}</div>`;
 }
+function viewWeight(){ return `<div class="section"><h1>Weighting</h1><p class="small muted">Starting lead for any suit, tank and water, from your body weight and your known weighting. The 5 m check on a logged dive always beats these numbers.</p></div>${calcView()}`; }
 function calcView(){
   if(!WC) wcInit();
   const b = S.wbase || {}, kb = wbaseDive();
@@ -1313,7 +1315,7 @@ function calcView(){
     out = `<div class="coachcard"><span class="eyebrow">Starting weight</span>${e!=null? `<div class="gear">About ${both(e)} total</div><p class="small muted">From your body weight. Enter a known weighting below for a better number.</p>` : `<p>Enter your body weight above, or a known weighting below.</p>`}</div>`;
   }
   const est = estimate(WC);
-  return `<div class="section"><h3>Weight calculator</h3><div class="panel stack">
+  return `<div class="section"><h3>Calculator</h3><div class="panel stack">
     <p class="small muted">What lead to start with for a setup, without starting a dive.</p>
     <label class="f">Your body weight (${U.wu()})<input type="number" inputmode="decimal" id="wc_bw" value="${S.profile.weightKg==null?"":U.w(S.profile.weightKg)}" placeholder="needed for the table"></label>
     <label class="f">Exposure suit${wcSel("suit",SUITS,WC.suit,"data-wc")}</label>
@@ -1333,7 +1335,7 @@ function calcView(){
 }
 function viewCoach(){
   const keys = [...new Set(sorted().filter(d=>!d.quick).map(d=>d.key))];
-  if(!keys.length) return `<div class="section"><h1>Coach</h1><p class="muted">Log a dive and the coaching for that setup appears here.</p></div>${calcView()}${learnView()}`;
+  if(!keys.length) return `<div class="section"><h1>Coach</h1><p class="muted">Log a dive and the coaching for that setup appears here.</p></div>${learnView()}`;
   if(!coachKey || !keys.includes(coachKey)) coachKey = keys[0];
   const h = divesFor(coachKey);
   const rows = h.slice(-8).reverse().map(d=>{
@@ -1353,7 +1355,6 @@ function viewCoach(){
   <div class="section"><h3>This setup, recent dives</h3>
     <div class="panel tbl"><table><thead><tr><th>Date</th><th class="n">Lead ${U.wu()}</th><th class="n">Trim</th><th>5 m</th><th class="n">${U.ru()}</th></tr></thead><tbody>${rows}</tbody></table></div>
   </div>
-  ${calcView()}
   ${learnView()}
   <div class="section"><h3>Ask Claude</h3>${aiPart}</div>`;
 }
@@ -1859,7 +1860,7 @@ const KIT = [
  +'<ul><li><b>Long-sleeve shorty alone</b>: log <b>3 mm long-sleeve shorty (Neosport)</b>. A bit more neoprene than your short-sleeve shorty.</li>'
  +'<li><b>Farmer john alone</b>: legs and torso covered, arms bare. Log <b>3 mm farmer john (Neosport)</b>.</li>'
  +'<li><b>Both</b>, shorty over the farmer john: 6 mm over your torso and thighs, 3 mm on arms and lower legs. That is more neoprene than a 5 mm full suit. Log <b>Neosport farmer john + long-sleeve shorty</b>.</li></ul>'
- +'<p><b>Weight:</b> every layer floats, and the full combination is a big jump from your short-sleeve shorty. The Weight calculator on the Coach tab starts from your known weighting (shorty, AL80) and adds the difference. The 5 m check on the first dive sets the real number.</p>'
+ +'<p><b>Weight:</b> every layer floats, and the full combination is a big jump from your short-sleeve shorty. The Weight tab starts from your known weighting (shorty, AL80) and adds the difference. The 5 m check on the first dive sets the real number.</p>'
  +'<p><b>New neoprene</b> is at its most buoyant. Over the first several dives it compresses a little, so you will probably remove some lead along the way. The coach catches this from your 5 m checks.</p>'
  +'<div class="tip">Wear the shorty over the farmer john, not under it. The overlap at the waist is where the warmth comes from.</div>',
  "neosport wetsuit farmer john shorty jacket two piece layer 3mm 6mm weight"],
@@ -1890,7 +1891,7 @@ const KIT = [
  '<ul><li><b>Exposure suit:</b> pick the combination you are wearing. Each one keeps its own weight history.</li>'
  +'<li><b>Boots:</b> pick 6.5 mm. Changing boots shifts your lead by the difference and adds a trim note.</li>'
  +'<li><b>Fins:</b> type Seawing Supernova. A fin change does not change lead, but the Plan screen reminds you to check trim.</li></ul>'
- +'<div class="tip">The Weight calculator on the Coach tab shows the starting number for any combination without starting a dive.</div>',
+ +'<div class="tip">The Weight tab shows the starting number for any combination without starting a dive.</div>',
  "log plan suit boots fins setup weight calculator"]
 ];
 const GUIDES = [
