@@ -491,7 +491,7 @@ const DEFAULT_CUES = ["Breathe from the diaphragm","Tuck your butt, knees bent",
 /* ---------- state ---------- */
 let memOnly = false;
 function defaultWbase(){ return {suit:"shorty3", tank:"al80", water:"salt", bcd:"back", boots:"", pockets:3.2, trim:4/2.20462, date:"2026-11-12", note:"Boat blocks about 0.8 kg: 2 per weight pocket (3.2 kg / 7 lb) plus 2 x 2 lb trim. Near perfect, if anything slightly light"}; }
-function blank(){ return {wbase:defaultWbase(), v:1, units:"metric", profile:{heightCm:null, weightKg:null}, cues:DEFAULT_CUES.slice(), dives:[], draft:null, example:false, sigFav:DEFAULT_SIGFAV.slice(), sigLink:"", skills:{queue:[], log:[], custom:[]}, emergency:{contacts: DEFAULT_CONTACTS.map(c=>Object.assign({}, c)), me:{name:"", blood:"", allergies:"", meds:"", cert:"", kin:"", kinPhone:"", insurer:"", policy:"", doctor:"", notes:""}}, backup:{at:null, dives:0}, trip:{name:"", items:{}}, learnings:SEED_LEARNINGS.map(x=>Object.assign({},x)), seedL:SEED_V, certs:defaultCerts()}; }
+function blank(){ return {wbase:defaultWbase(), v:1, units:"metric", profile:{heightCm:null, weightKg:null}, cues:DEFAULT_CUES.slice(), dives:[], draft:null, example:false, sigFav:DEFAULT_SIGFAV.slice(), sigLink:"", skills:{queue:[], log:[], custom:[]}, emergency:{contacts: DEFAULT_CONTACTS.map(c=>Object.assign({}, c)), me:{name:"", blood:"", allergies:"", meds:"", cert:"", kin:"", kinPhone:"", insurer:"", policy:"", doctor:"", notes:""}}, backup:{at:null, dives:0}, trip:{name:"", items:{}}, learnings:SEED_LEARNINGS.map(x=>Object.assign({},x)), seedL:SEED_V, certs:defaultCerts(), medical:{signed:"", physician:false, physDate:""}, incident:{active:null, past:[]}}; }
 function migrate(o){
   if(o.wbase===undefined) o.wbase = defaultWbase();
   if(o.wbase && Math.abs((o.wbase.pockets||0) - 3.5/2.20462) < 0.01) o.wbase.pockets = 7/2.20462;
@@ -510,9 +510,31 @@ function migrate(o){
   { const had = o.seedL||0; if(had<SEED_V){ SEED_LEARNINGS.filter(x=>x.sv>had).forEach(x=>{ if(!o.learnings.some(l=>l.id===x.id)) o.learnings.push(Object.assign({},x)); }); o.seedL = SEED_V; } }
   if(!o.emergency.me) o.emergency.me = {name:"", blood:"", allergies:"", meds:"", cert:"", kin:"", kinPhone:"", insurer:"", policy:"", doctor:"", notes:""};
   if(!o.certs) o.certs = defaultCerts();
+  if(o.certs.certV===2 || o.certs.certV===3){ (o.certs.list||[]).forEach(x=>{ const sd = CERT_SEED.find(y=>y.id===x.id); if(sd){ if(!x.date) x.date = sd.date; if(!x.no) x.no = sd.no; if(!x.note && sd.note) x.note = sd.note; } }); o.certs.certV = 4; }
+  if(o.certs.certV!==4){ o.certs.list = CERT_SEED.map(x=>Object.assign({},x)); o.certs.msd = Object.assign({},MSD_SEED); o.certs.rescue = true; o.certs.applied = true; o.certs.certV = 4; }
+  if(o.emergency && o.emergency.me && (!o.emergency.me.cert || /advanced|aow/i.test(o.emergency.me.cert))) o.emergency.me.cert = "PADI Master Scuba Diver (Rescue Diver, EFR)";
+  if(!o.medical) o.medical = {signed:"2026-09-28", physician:false, physDate:""};
+  if(!o.incident) o.incident = {active:null, past:[]};
   return o;
 }
-function defaultCerts(){ return {aow:true, specs:["Enriched Air Nitrox","Peak Performance Buoyancy","Deep","Wreck","Search and Recovery"], prior:100, efr:null, rescue:false, applied:false, plan:"EFR, Rescue and the application with my instructor after the liveaboard, December 2026"}; }
+function defaultCerts(){ return {list:CERT_SEED.map(x=>Object.assign({},x)), certV:4, msd:Object.assign({},MSD_SEED), aow:true, specs:["Enriched Air Nitrox","Peak Performance Buoyancy","Deep","Wreck","Search and Recovery"], prior:100, efr:null, rescue:false, applied:false, plan:"EFR, Rescue and the application with my instructor after the liveaboard, December 2026"}; }
+const CERT_SEED = [
+  {id:"c1", name:"Master Scuba Diver", date:"2026-10-18", no:"2610AL7955"},
+  {id:"c2", name:"Rescue Diver", date:"2026-10-18", no:"2610A9TBHK"},
+  {id:"c3", name:"EFR Primary and Secondary Care (CPR, first aid, AED)", date:"2026-10-17", no:"2610A4FDHK", efr:true, note:"Adult CPR, AED and first aid. Refresh every two years"},
+  {id:"c4", name:"Search and Recovery", date:"2026-10-03", no:"2610ADBKGH"},
+  {id:"c5", name:"Wreck", date:"2026-10-03", no:"2610AOVVOH"},
+  {id:"c6", name:"Enriched Air Diver", date:"2026-09-21", no:"2609AJBAPD", note:"Nitrox up to 40% O2"},
+  {id:"c7", name:"Deep", date:"2026-09-15", no:"2609A6F81C"},
+  {id:"c8", name:"Peak Performance Buoyancy", date:"2026-09-21", no:"2609AB2V1D"},
+  {id:"c9", name:"Advanced Open Water", date:"2024-01-31", no:"24010J4546", note:"Scuba Shack, Brentwood, Tennessee. Instructor Dan McIntyre Jr"},
+  {id:"c10", name:"Open Water", date:"2021-07-13", no:"21070J8605", note:"Sandals Dive Center, St. Lucia. Instructor Adolphus A Henry"}
+];
+const MSD_SEED = {instructor:"Mats Yngve (PADI 429916)", shop:"No Limit Divers, Bang Lamung, Chonburi", phone:"+66 86 084 0651"};
+const SYMPTOMS = ["Unusual fatigue","Itchy skin","Skin rash or marbling","Joint pain","Numbness or tingling","Weakness","Dizziness","Headache","Trouble breathing","Severe cough","Chest pain","Confusion","Speech or vision trouble","Bloody froth","Convulsions","Unconscious"];
+const AIDS = ["Oxygen started","Lying flat","Recovery position","CPR started","AED applied","Fluids by mouth","EMS called","DAN called","Evacuation started","Handed to EMS"];
+function blankIncident(){ return {id:uid(), start:Date.now(), name:"", age:"", contact:"", phone:"", history:"", notes:"", log:[], dives:[{},{},{}]}; }
+function hm(t){ const d=new Date(t); return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0"); }
 function allSkills(){ return SKILLS.concat((S.skills.custom||[]).map(c=>[c.id,"My skills",c.name,c.how||"",""])); }
 function skillBy(id){ return allSkills().find(x=>x[0]===id); }
 function skillLog(id){ return S.skills.log.filter(l=>l.skill===id).sort((a,b)=> a.date<b.date?1:a.date>b.date?-1:0); }
@@ -891,7 +913,94 @@ function noFlyCard(){
     <span class="small muted">Includes driving over mountain passes. The guidelines were tested at an 8,000 ft cabin: flying yourself higher, or unpressurized, calls for more margin. These are minimums, not guarantees.</span></div>`;
 }
 let EM = {edit:false, meEdit:false};
+function incText(r){
+  const L = [];
+  L.push("DIVING ACCIDENT RECORD");
+  L.push("This person was scuba diving and may have decompression sickness (DCS) or arterial gas embolism (AGE). Keep them on 100% oxygen. A diving physician is available 24 h through DAN: +1-919-684-9111.");
+  L.push("");
+  L.push("Started: "+new Date(r.start).toLocaleString());
+  if(r.name||r.age) L.push("Patient: "+[r.name, r.age&&("age "+r.age)].filter(Boolean).join(", "));
+  if(r.contact||r.phone) L.push("Contact: "+[r.contact, r.phone].filter(Boolean).join(", "));
+  if(r.history) L.push("History (allergies, medications, conditions, injuries): "+r.history);
+  const sy = r.log.filter(l=>l.k==="s"), ai = r.log.filter(l=>l.k!=="s");
+  if(sy.length){ L.push(""); L.push("Signs and symptoms:"); sy.forEach(l=>L.push("  "+hm(l.t)+"  "+l.x)); }
+  if(ai.length){ L.push(""); L.push("First aid and actions:"); ai.forEach(l=>L.push("  "+hm(l.t)+"  "+l.x)); }
+  const dv = (r.dives||[]).filter(d=>d && (d.in||d.out||d.depth||d.gas));
+  if(dv.length){ L.push(""); L.push("Dive profile (most recent dives):"); dv.forEach((d,i)=>L.push(`  Dive ${i+1}: in ${d.in||"?"}, out ${d.out||"?"}, max depth ${d.depth||"?"}, gas ${d.gas||"?"}`)); }
+  if(r.notes){ L.push(""); L.push("Notes: "+r.notes); }
+  return L.join("\n");
+}
+function incView(){
+  const I = S.incident || {active:null, past:[]}, a = I.active;
+  const past = I.past.length? `<details class="fa"><summary><b>Past records</b><span class="d">${I.past.length}</span></summary><div class="body">${I.past.map(r=>`<div class="call"><span class="who">${esc(new Date(r.start).toLocaleDateString())}${r.name?" · "+esc(r.name):""}</span><span class="row" style="gap:6px"><button type="button" class="btn slim ghost" data-act="incCopy" data-v="${r.id}">Copy</button><button type="button" class="btn slim ghost" data-act="incDelPast" data-v="${r.id}">${armed==="ip"+r.id?"Delete?":"Delete"}</button></span></div>`).join("")}</div></details>` : "";
+  if(!a) return `<div class="section" id="incPanel"><h3>Accident record</h3><div class="panel stack">
+    <p class="small">One tap logs each symptom and each action with the time. The record copies as text for EMS, the chamber or DAN.</p>
+    <button type="button" class="btn" data-act="incStart">Start accident record</button>${past}</div></div>`;
+  const inp = (k,lab,type="text",ph="") => `<label class="f">${lab}<input type="${type}" data-inc="${k}" value="${esc(a[k]||"")}" placeholder="${ph}"></label>`;
+  const log = a.log.slice().reverse().map(l=>`<div class="cue"><span class="mono small" style="flex:none">${hm(l.t)}</span><span style="flex:1"><span class="pill ${l.k==="s"?"bad":l.k==="a"?"good":""}" style="margin-right:6px">${l.k==="s"?"Sign":l.k==="a"?"Action":"Note"}</span>${esc(l.x)}</span><button type="button" class="star" data-act="incDelLog" data-v="${l.t}" aria-label="Remove">×</button></div>`).join("");
+  const dv = a.dives.map((d,i)=>`<div class="stack" style="gap:6px;border-top:1px solid var(--line);padding-top:8px"><b class="small">Dive ${i+1}${i===0?" (most recent)":""}</b><div class="grid2">
+    <label class="f">Time in<input type="time" data-inc="d|${i}|in" value="${esc(d.in||"")}"></label><label class="f">Time out<input type="time" data-inc="d|${i}|out" value="${esc(d.out||"")}"></label>
+    <label class="f">Max depth<input type="text" data-inc="d|${i}|depth" value="${esc(d.depth||"")}" placeholder="e.g. 24 m"></label><label class="f">Gas<input type="text" data-inc="d|${i}|gas" value="${esc(d.gas||"")}" placeholder="Air, EAN32"></label></div></div>`).join("");
+  return `<div class="section" id="incPanel"><div class="spread"><h3 style="color:var(--bad)">Accident record</h3><span class="mono small">since ${hm(a.start)}</span></div><div class="panel stack">
+    <div class="grid2">${inp("name","Patient name")}${inp("age","Age","text")}${inp("contact","Contact person")}${inp("phone","Contact phone","text")}</div>
+    ${inp("history","History","text","Allergies, medications, conditions, injuries")}
+    <h4>Signs and symptoms</h4><div class="chips">${SYMPTOMS.map(x=>`<button type="button" class="chip" data-act="incSym" data-v="${esc(x)}">${esc(x)}</button>`).join("")}</div>
+    <h4>First aid and actions</h4><div class="chips">${AIDS.map(x=>`<button type="button" class="chip" data-act="incAid" data-v="${esc(x)}">${esc(x)}</button>`).join("")}</div>
+    <div class="row" style="flex-wrap:nowrap"><input type="text" id="incFree" placeholder="Anything else, timed now"><button type="button" class="btn slim" data-act="incNote">Add</button></div>
+    ${log? `<div>${log}</div>` : `<p class="small muted">Nothing logged yet.</p>`}
+    <h4>Dive profile</h4><p class="small muted">From the dive computer. Send the computer with the patient.</p>${dv}
+    ${inp("notes","Notes","text","Buddy, conditions, what happened")}
+    <div class="row"><button type="button" class="btn slim" data-act="incShare">Share</button><button type="button" class="btn slim ghost" data-act="incCopy">Copy as text</button><button type="button" class="btn slim ghost" data-act="incClose">${armed==="incClose"?"Tap again to close":"Close record"}</button></div>
+    ${past}
+  </div></div>`;
+}
+let WF = null; // {node, hist:[], done:{}, cprAt}
+const WFN = {
+  safe:{t:"Is the scene safe for you?", d:"Boat traffic, current, surf, a panicking diver, electrics on deck. Don't become a second victim.", go:[["Safe","resp"],["Not safe","unsafe"]]},
+  unsafe:{t:"Make it safe first", d:"Reach or throw before you go. Get the boat crew. Call EMS if you can't reach them safely.", acts:["EMS called"], go:[["Now safe","resp"]]},
+  resp:{t:"Do they respond?", d:"Tap the shoulders and shout. A diver at the surface: inflate their BCD, drop their weights, call for help.", go:[["Responds","conscious"],["No response","noresp"]], log:{conscious:"Responsive", noresp:"Unresponsive"}},
+  noresp:{t:"Get help moving", d:"Shout for help. Assign people by name: one calls, one fetches oxygen and the AED.", acts:["EMS called","DAN called"], go:[["Next","breath"]]},
+  breath:{t:"Breathing normally?", d:"Open the airway: tilt the head, lift the chin. Look, listen and feel for up to 10 seconds. Gasping is not breathing.", go:[["Breathing","unconsc"],["Not breathing","drown"]], log:{unconsc:"Breathing, unresponsive", drown:"Not breathing normally"}},
+  drown:{t:"Pulled from the water?", d:"After drowning the problem is oxygen, so breaths come first.", go:[["Yes, from the water","five"],["No","cpr"]]},
+  five:{t:"Give 5 rescue breaths", d:"Pocket mask if you have one. Each about 1 second, chest visibly rises. Then start CPR.", acts:["5 rescue breaths"], go:[["Start CPR","cpr"]]},
+  cpr:{t:"CPR 30:2", d:"Center of the chest, 5 to 6 cm deep, 100 to 120 a minute, full recoil. 2 breaths after every 30. AED on as soon as it arrives: dry the chest, follow the voice. Swap compressors every 2 minutes.", acts:["AED applied","Shock given","Oxygen started"], cpr:true, go:[["Breathing again","unconsc"],["Help took over","hand"]], log:{unconsc:"Breathing returned", hand:"Care handed over"}},
+  unconsc:{t:"Breathing but unresponsive", d:"Recovery position so the airway stays clear. 100% oxygen. Watch breathing without a break; if it stops, back to CPR. Keep them warm.", acts:["Recovery position","Oxygen started"], go:[["Breathing stopped","cpr"],["Next","diver"]], log:{cpr:"Breathing stopped"}},
+  conscious:{t:"Life threats first", d:"Severe bleeding: gloves, firm direct pressure, pressure bandage, add layers on top. Severe allergic reaction: their epinephrine, call EMS. Shock: keep warm, legs up unless a spinal injury is possible.", acts:["Bleeding controlled","Epinephrine given","Treated for shock"], go:[["Next","diver"]]},
+  diver:{t:"Did they breathe compressed gas underwater?", d:"Any depth, even briefly, in the last 48 hours.", go:[["Yes","signs"],["No","notdive"]], log:{signs:"Diver: compressed gas exposure", notdive:"Not a diving injury"}},
+  notdive:{t:"Treat as an ordinary illness or injury", d:"Ask SAMPLE questions and write the answers down. Treat what you find, keep them warm and still, and get them to the nearest hospital.", acts:["EMS called"], links:[["efr-sample","SAMPLE questions"],["efr-sss","Bleeding, shock, spinal"],["fa-more","Other emergencies"]], go:[["Next","hand"]]},
+  signs:{t:"What signs do you see?", d:"Tap each one to log it with the time. Ask about pain, numbness and weakness, and check speech and vision.", signs:true, go:[["Any serious sign","serious"],["Only fatigue or itchy skin","mild"]]},
+  serious:{t:"Serious: treat as DCS or AGE", d:"Every step, now. Don't wait to see if it passes.", acts:["Oxygen started","Lying flat","EMS called","DAN called","Evacuation started","Fluids by mouth"], list:["Highest-flow oxygen, as close to 100% as the kit gives. Don't stop if they improve.","Lie flat. Recovery position if they vomit or lose consciousness.","Fluids only if fully alert. Water, no alcohol.","Never back in the water.","Check their buddy: same profile, same risk.","Fill in the dive profile in the accident record."], go:[["Next","hand"]]},
+  mild:{t:"Mild signs: oxygen and watch", d:"Mild signs can be the start of DCS.", acts:["Oxygen started","Lying flat","Fluids by mouth","DAN called"], list:["Oxygen and lying down anyway.","Call DAN for a diving doctor's advice.","Keep checking. Anything new or worse is serious."], go:[["Getting worse","serious"],["Next","hand"]], log:{serious:"Signs worsening"}},
+  hand:{t:"Hand over", d:"Give the facts, not opinions. Send the record and the dive computer with them. Keep their gear together as found.", acts:["Handed to EMS"], share:true, go:[["Finish","end"]]}
+};
+function wfStart(){ if(!S.incident.active){ S.incident.active = blankIncident(); } WF = {node:"safe", hist:[], done:{}, cprAt:null, paused:false}; save(); }
+function wfLog(k,x){ const a = S.incident.active; if(a){ a.log.push({t:Date.now(), k, x}); save(); } }
+function wfView(){
+  const n = WFN[WF.node], a = S.incident.active, list = emList().filter(c=>c.num).slice(0,3);
+  const tel = x => "tel:" + x.replace(/[^0-9+]/g,"");
+  const calls = list.map(c=>`<a class="btn ghost" style="text-align:center;text-decoration:none;padding:8px 4px;font-size:12.5px;white-space:normal;min-width:0" href="${tel(c.num)}" target="_top">${esc(c.who.replace(/\s*\(.*\)/,"").replace(/,.*$/,"").slice(0,24))}<br><span class="mono" style="font-size:11px;white-space:nowrap">${esc(c.num)}</span></a>`).join("");
+  const step = WF.hist.length + 1;
+  const acts = (n.acts||[]).map(x=>{ const on = WF.done[WF.node+"|"+x]; return `<button type="button" class="chip ${on?"on":""}" data-act="wfAct" data-v="${esc(x)}">${on?"✓ ":""}${esc(x)}</button>`; }).join("");
+  const signs = n.signs? `<div class="chips">${SYMPTOMS.map(x=>{ const on = WF.done["sig|"+x]; return `<button type="button" class="chip ${on?"on":""}" data-act="wfSig" data-v="${esc(x)}">${on?"✓ ":""}${esc(x)}</button>`; }).join("")}</div>` : "";
+  const cpr = n.cpr? `<div class="panel" style="text-align:center;border:2px solid var(--bad)"><div class="small muted">CPR running</div><div class="mono" id="cprT" style="font-size:34px;font-weight:700">0:00</div><div class="small" id="cprSwap">Swap compressors every 2 minutes</div></div>` : "";
+  return `<div class="section spread"><h1 style="color:var(--bad)">Emergency</h1><button type="button" class="btn slim ghost" data-act="wfExit">Exit</button></div>
+  <div class="section"><div style="display:grid;grid-template-columns:repeat(${Math.max(1,list.length)},1fr);gap:6px">${calls}</div></div>
+  <div class="section"><div class="spread"><span class="small muted">Step ${step}${a?` · record since ${hm(a.start)}`:""}</span>${WF.hist.length?`<button type="button" class="btn slim ghost" data-act="wfBack">Back</button>`:""}</div>
+  <div class="panel stack" style="border:2px solid var(--bad)">
+    <h2 style="margin:0">${esc(n.t)}</h2>
+    <p>${esc(n.d)}</p>
+    ${n.list? `<ol class="steps">${n.list.map(x=>`<li>${esc(x)}</li>`).join("")}</ol>` : ""}
+    ${cpr}${signs}
+    ${acts? `<div class="small muted">Tap when done. Each tap is logged with the time.</div><div class="chips">${acts}</div>` : ""}
+    ${n.links? `<div class="row">${n.links.map(([id,l])=>`<button type="button" class="btn slim ghost" data-act="wfLink" data-v="${id}">${esc(l)}</button>`).join("")}</div>` : ""}
+    ${n.share? `<div class="row"><button type="button" class="btn slim" data-act="incShare">Share record</button><button type="button" class="btn slim ghost" data-act="incCopy">Copy as text</button></div>` : ""}
+    <div class="stack" style="gap:8px;margin-top:4px">${n.go.map(([l,to],i)=>`<button type="button" class="btn ${i===0?"":"ghost"}" style="${i===0?"background:var(--bad);color:#fff":""}" data-act="wfGo" data-v="${to}">${esc(l)}</button>`).join("")}</div>
+  </div></div>
+  <div class="section"><p class="small muted">Patient details, dive profile and the full timeline are in the accident record. Exit to see it; the workflow keeps your place.</p></div>`;
+}
+setInterval(()=>{ const el = document.getElementById("cprT"); if(el && WF && WF.cprAt){ const s2 = Math.floor((Date.now()-WF.cprAt)/1000); el.textContent = Math.floor(s2/60)+":"+String(s2%60).padStart(2,"0"); const sw = document.getElementById("cprSwap"); if(sw){ const due = s2>=120 && (s2 % 120) < 15; sw.textContent = due? "Swap compressors now" : "Swap compressors every 2 minutes"; sw.style.color = due? "var(--bad)" : ""; sw.style.fontWeight = due? "700" : ""; } } }, 1000);
 function viewEmergency(){
+  if(WF && !WF.paused) return wfView();
   const last = sorted().find(x=>!x.example);
   const tel = n => "tel:" + n.replace(/[^0-9+]/g,"");
   const R = emRegion(), list = emList();
@@ -903,6 +1012,8 @@ function viewEmergency(){
         <button type="button" class="btn slim ghost" data-act="ctDel" data-v="${c.id}">Remove</button></div>`).join("")
     : list.map(c=>`<div class="call"><span class="who">${esc(c.who)}</span>${c.num?`<a href="${tel(c.num)}" target="_top">${esc(c.num)}</a>`:`<span class="small muted">No number</span>`}${c.sub?`<span class="sub">${esc(c.sub)}</span>`:""}</div>`).join("");
   return `<div class="section spread"><h1 style="color:var(--bad)">Emergency</h1><button type="button" class="btn slim ghost" data-tab="${backTab==="emergency"?"dive":backTab}">Close</button></div>
+  <div class="section"><button type="button" class="btn" style="background:var(--bad);color:#fff;font-size:18px;padding:16px" data-act="wfStart">${WF? "Resume emergency workflow" : "Start emergency workflow"}</button>
+    <p class="small muted" style="margin-top:6px">Step by step from scene safety to handover. Opens an accident record and logs each step with the time.</p></div>
   <div class="section"><div class="spread"><h3>Call</h3><div class="seg" style="flex:none" role="group" aria-label="Country"><button type="button" class="${R==="th"?"on":""}" data-act="emRegion" data-v="th">Thailand</button><button type="button" class="${R==="ph"?"on":""}" data-act="emRegion" data-v="ph">Philippines</button></div></div>
     <div class="panel">${contacts}</div>
     ${R==="ph"? `<p class="small muted">Chamber numbers come from Philippine dive community lists dated 2023 to 2024. Confirm the nearest working chamber with the liveaboard before departure.</p>` : ""}
@@ -917,6 +1028,13 @@ function viewEmergency(){
         : `<p class="small muted">Empty. Tap Edit and fill this in. If you cannot speak for yourself, this is what someone else reads out.</p>`)}
     </div>
     <p class="small muted">Stored only on this phone.</p></div>
+  ${incView()}
+  <div class="section"><h3>Is it a diving injury?</h3><div class="panel"><ol class="steps">
+    <li><b>Did they breathe compressed gas underwater,</b> at any depth, even briefly? No: treat it as an ordinary illness or injury and go to the nearest hospital. Yes: treat it as possible DCS or AGE.</li>
+    <li><b>Serious signs:</b> weakness, numbness, paralysis, dizziness, trouble breathing, severe cough, bloody froth, confusion, convulsions, reduced consciousness, or pain in joints, belly or lower back. Oxygen, lie flat, call EMS and arrange evacuation now. Be ready for CPR.</li>
+    <li><b>Only mild signs,</b> such as unusual fatigue or itchy skin: give oxygen anyway, keep them lying down, fluids if fully alert, and call DAN. Anything new or worse: treat as serious.</li>
+    <li><b>Keep the oxygen and first aid going</b> even if they improve. Improvement on oxygen doesn't rule out DCS.</li>
+  </ol></div></div>
   <div class="section"><h3>Suspected DCS or AGE: first aid</h3><div class="panel"><ol class="steps">
     <li><b>Get them out and lying flat.</b> Recovery position if unconscious or vomiting.</li>
     <li><b>100% oxygen, now,</b> at the highest flow the kit allows. Don't stop if symptoms improve.</li>
@@ -926,6 +1044,15 @@ function viewEmergency(){
     <li><b>Never put them back in the water.</b> No in-water recompression.</li>
     <li><b>Record the dive:</b> depths, times, gas. Send the dive computer with them.</li>
     <li><b>Watch the buddy too.</b> Same profile, same risk.</li>
+  </ol></div></div>
+  <div class="section"><h3>Managing the scene</h3><div class="panel"><ol class="steps">
+    <li><b>Find their ID and certification,</b> and get the recent dive history from the buddy and their computer.</li>
+    <li><b>Start the accident record above.</b> Times matter to the chamber.</li>
+    <li><b>Keep their gear as it is.</b> Note the cylinder pressure and whether the valve was open before you touch it. Don't take it apart; keep it together and labeled.</li>
+    <li><b>Send the record and the dive computer</b> with the patient. Keep a copy.</li>
+    <li><b>State facts only.</b> No blame, no guesses, no opinions.</li>
+    <li><b>Write your own account</b> as soon as you can, while it's fresh.</li>
+    <li><b>Cooperate with officials</b> once they've identified themselves.</li>
   </ol></div></div>
   <div class="section"><h3>Warning signs</h3><div class="panel stack small">
     <p><span class="pill bad">AGE</span> <b>Within minutes of surfacing:</b> unconsciousness, confusion, chest pain, trouble breathing, weakness or numbness on one side, blurred vision, bloody froth from the mouth.</p>
@@ -2255,26 +2382,43 @@ function viewMe(){
   </div></div>`;
 }
 
+let CE = false;
+function addMonths(iso, m){ const d = new Date(iso+"T00:00:00"); if(isNaN(d)) return null; d.setMonth(d.getMonth()+m); return d.toISOString().slice(0,10); }
+function fmtD(iso){ if(!iso) return ""; const d = new Date(iso+"T00:00:00"); return isNaN(d)? iso : d.toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"}); }
 function efrStatus(c){
-  if(!c.efr) return {ok:false, txt:"Not done yet. Needed before Rescue (within 24 months)."};
-  const d = new Date(c.efr+"T00:00:00"); if(isNaN(d)) return {ok:false, txt:"Enter the course date."};
-  const until = new Date(d); until.setMonth(until.getMonth()+24);
-  const ok = until.getTime() > Date.now();
-  return {ok, txt: ok? `Current until ${until.toISOString().slice(0,10)}.` : `Lapsed ${until.toISOString().slice(0,10)}. Renew before Rescue.`};
+  const e = (c.list||[]).find(x=>x.efr);
+  if(!e || !e.date) return {ok:null, txt:"Add the EFR course date. A refresher every 24 months keeps CPR and first aid current."};
+  const until = addMonths(e.date, 24), ok = until > today();
+  return {ok, txt: ok? `EFR current until ${fmtD(until)}.` : `EFR lapsed ${fmtD(until)}. Book a refresher.`};
 }
 function certCard(){
-  const c = S.certs, logged = (c.prior||0) + S.dives.filter(x=>!x.example).length, e = efrStatus(c);
-  const item = (ok, title, sub, ctl)=>`<div class="cue"><span class="pill ${ok?"good":"warn"}" style="flex:none;min-width:52px;justify-content:center">${ok?"Done":"To do"}</span><span style="flex:1;min-width:0"><b>${title}</b><br><span class="small muted">${sub}</span>${ctl?`<div style="margin-top:6px">${ctl}</div>`:""}</span></div>`;
-  const specs = (c.specs||[]).map((s,i)=>`<span class="chip static">${esc(s)} <button type="button" class="star" style="padding:0 6px;margin-left:4px" data-act="certDelSpec" data-v="${i}" aria-label="Remove ${esc(s)}">${armed==="cs"+i?"Remove?":"×"}</button></span>`).join("");
-  const done = [c.aow, (c.specs||[]).length>=5, logged>=50, e.ok, c.rescue].filter(Boolean).length;
-  return `<div class="section"><div class="spread"><h3>Master Scuba Diver</h3><span class="mono small">${done} of 5${c.applied?" · applied":""}</span></div><div class="panel">
-    ${item(c.aow, "Advanced Open Water", "PADI")}
-    ${item((c.specs||[]).length>=5, `Five PADI specialties (${(c.specs||[]).length} of 5)`, "Cards confirmed", `<div class="chips">${specs}</div><div class="row" style="flex-wrap:nowrap;margin-top:6px"><input type="text" id="cert_spec" placeholder="Add a specialty"><button type="button" class="btn slim ghost" data-act="certAddSpec">Add</button></div>`)}
-    ${item(logged>=50, `50 logged dives (${logged})`, "Before this app plus dives logged here", `<label class="f">Dives logged before this app<input type="number" inputmode="numeric" id="cert_prior" value="${c.prior??""}"></label>`)}
-    ${item(e.ok, "Emergency First Response", e.txt, `<label class="f">Course date<input type="date" id="cert_efr" value="${esc(c.efr||"")}"></label><button type="button" class="btn slim ghost" style="margin-top:6px" data-act="sos">First aid reference on SOS page</button>`)}
-    ${item(c.rescue, "Rescue Diver", c.rescue? "Certified" : "Needs current EFR first", `<label class="cue" style="border:0;padding:0"><input type="checkbox" data-cert="rescue" ${c.rescue?"checked":""}><span>Rescue completed</span></label>`)}
-    <div class="cue"><span style="flex:1"><label class="cue" style="border:0;padding:0"><input type="checkbox" data-cert="applied" ${c.applied?"checked":""}><span><b>Application submitted</b><br><span class="small muted">Instructor verifies cards and log, then submits</span></span></label></span></div>
-    <label class="f" style="margin-top:8px">Plan<input type="text" id="cert_plan" value="${esc(c.plan||"")}"></label>
+  const c = S.certs, m = c.msd||{}, e = efrStatus(c), list = c.list||[];
+  const msd = list.find(x=>/master scuba/i.test(x.name));
+  const tel = n => "tel:" + String(n||"").replace(/[^0-9+]/g,"");
+  const rows = CE
+    ? list.map(x=>`<div class="stack" style="border-top:1px solid var(--line);padding:10px 0;gap:6px">
+        <input type="text" data-cl="${x.id}|name" value="${esc(x.name)}" placeholder="Certification">
+        <div class="grid2"><input type="date" data-cl="${x.id}|date" value="${esc(x.date)}"><input type="text" data-cl="${x.id}|no" value="${esc(x.no)}" placeholder="Card number"></div>
+        <button type="button" class="btn slim ghost" data-act="certDel" data-v="${x.id}">${armed==="cd"+x.id?"Tap again to remove":"Remove"}</button></div>`).join("")
+    : list.map(x=>`<div class="call"><span class="who">${esc(x.name)}</span><span class="mono small">${x.date? esc(fmtD(x.date)) : `<span class="muted">date?</span>`}</span>${x.no||x.note?`<span class="sub">${x.no?`<span class="mono">PADI ${esc(x.no)}</span>`:""}${x.no&&x.note?" · ":""}${esc(x.note||"")}</span>`:""}</div>`).join("");
+  return `<div class="section"><div class="spread"><h3>Certifications</h3><button type="button" class="btn slim ghost" data-act="certEdit">${CE?"Done":"Edit"}</button></div>
+  <div class="panel">
+    ${msd? `<div class="cue" style="border-top:0"><span class="pill good" style="flex:none">Achieved</span><span style="flex:1;min-width:0"><b>Master Scuba Diver</b>${msd.date?` · ${esc(fmtD(msd.date))}`:""}<br><span class="small muted">${esc(m.instructor||"")}${m.shop?`<br>${esc(m.shop)}`:""}</span>${m.phone?`<br><a class="small" href="${tel(m.phone)}" target="_top">${esc(m.phone)}</a>`:""}</span></div>` : ""}
+    ${rows}
+    ${CE? `<div class="row" style="margin-top:8px"><button type="button" class="btn slim" data-act="certSave">Save</button><button type="button" class="btn slim ghost" data-act="certAdd">Add certification</button></div>` : ""}
+    <div class="cue"><span class="pill ${e.ok===true?"good":"warn"}" style="flex:none">EFR</span><span class="small" style="flex:1">${e.txt} <button type="button" class="btn slim ghost" style="margin-top:6px" data-act="sos">First aid on SOS page</button></span></div>
+  </div></div>
+  ${medCard()}`;
+}
+function medCard(){
+  const md = S.medical || {signed:"", physician:false, physDate:""};
+  const base = md.physician && md.physDate ? md.physDate : md.signed;
+  const until = base? addMonths(base, 12) : null, ok = until && until > today();
+  return `<div class="section"><h3>Diver medical statement</h3><div class="panel stack">
+    <div class="grid2"><label class="f">Questionnaire signed<input type="date" id="med_signed" value="${esc(md.signed||"")}"></label>
+    <label class="f">Physician signed<input type="date" id="med_phys" value="${esc(md.physDate||"")}"></label></div>
+    <p class="small">${!base? "Add the date you signed the questionnaire." : ok? `<span class="pill good">OK</span> Most operators accept it until ${esc(fmtD(until))}.` : `<span class="pill warn">Renew</span> Older than 12 months. Fill in a new one before the next trip or course.`}</p>
+    <p class="small muted">Any yes answer marked with an asterisk needs a physician's signature on the evaluation page before training, and some liveaboards ask for it on fun dives too. Keep a photo of the signed pages on the phone.</p>
   </div></div>`;
 }
 function markBackup(){ S.backup = {at:Date.now(), dives:S.dives.filter(x=>!x.example).length}; save(); }
@@ -2327,6 +2471,9 @@ document.addEventListener("change", e=>{
   if(el.id==="tripName"){ S.trip.name = el.value; save(); return; }
   if(el.dataset && el.dataset.cert){ S.certs[el.dataset.cert] = el.checked; save(); render(); return; }
   if(el.id==="cert_efr"){ S.certs.efr = el.value || null; save(); render(); return; }
+  if(el.id==="med_signed"){ S.medical.signed = el.value || ""; save(); render(); return; }
+  if(el.id==="med_phys"){ S.medical.physDate = el.value || ""; S.medical.physician = !!el.value; save(); render(); return; }
+  if(el.dataset && el.dataset.inc){ const a = S.incident.active; if(a){ const [k,i,f] = el.dataset.inc.split("|"); if(k==="d"){ a.dives[+i][f] = el.value; } else a[k] = el.value; save(); } return; }
   if(el.id==="cert_prior"){ const n = num(el.value); S.certs.prior = n==null? 0 : Math.max(0, Math.round(n)); save(); render(); return; }
   if(el.id==="cert_plan"){ S.certs.plan = el.value.trim(); save(); return; }
   if(el.dataset && el.dataset.trip){
@@ -2370,8 +2517,28 @@ document.addEventListener("click", async e=>{
   }
   const act = b.dataset.act, v = b.dataset.v; if(!act) return;
   const d = S.draft;
-  if(act!=="delDive" && act!=="reset" && act!=="discard" && act!=="skillDelLog" && act!=="tripReset" && act!=="delLearn" && act!=="certDelSpec") armed = null;
+  if(act!=="delDive" && act!=="reset" && act!=="discard" && act!=="skillDelLog" && act!=="tripReset" && act!=="delLearn" && act!=="certDelSpec" && act!=="certDel" && act!=="incClose" && act!=="incDelPast") armed = null;
   switch(act){
+    case "certEdit": if(CE){ document.querySelectorAll("[data-cl]").forEach(el=>{ const [id,f] = el.dataset.cl.split("|"); const x = S.certs.list.find(y=>y.id===id); if(x) x[f] = el.value.trim(); }); save(); } CE = !CE; render(); break;
+    case "certSave": document.querySelectorAll("[data-cl]").forEach(el=>{ const [id,f] = el.dataset.cl.split("|"); const x = S.certs.list.find(y=>y.id===id); if(x) x[f] = el.value.trim(); }); CE = false; save(); render(); toast("Saved"); break;
+    case "certAdd": document.querySelectorAll("[data-cl]").forEach(el=>{ const [id,f] = el.dataset.cl.split("|"); const x = S.certs.list.find(y=>y.id===id); if(x) x[f] = el.value.trim(); }); S.certs.list.push({id:"c"+uid(), name:"", date:"", no:""}); save(); render(); break;
+    case "certDel": if(armed==="cd"+v){ S.certs.list = S.certs.list.filter(x=>x.id!==v); armed=null; save(); } else armed="cd"+v; render(); break;
+    case "wfStart": if(!WF) wfStart(); else WF.paused = false; render(); window.scrollTo(0,0); break;
+    case "wfExit": WF.paused = true; render(); window.scrollTo(0,0); break;
+    case "wfGo": { const n = WFN[WF.node]; if(n.log && n.log[v]) wfLog("s", n.log[v]); if(v==="cpr" && !WF.cprAt){ WF.cprAt = Date.now(); wfLog("a","CPR started"); } if(v!=="cpr" && WF.node==="cpr"){ { const q = Math.round((Date.now()-(WF.cprAt||Date.now()))/1000); wfLog("a","CPR stopped after "+Math.floor(q/60)+" min "+(q%60)+" s"); } WF.cprAt = null; } if(v==="end"){ WF = null; toast("Workflow finished. The record is still open."); render(); setTimeout(()=>{ const x=$("#incPanel"); if(x) x.scrollIntoView(); },0); break; } WF.hist.push(WF.node); WF.node = v; render(); window.scrollTo(0,0); break; }
+    case "wfBack": if(WF && WF.hist.length){ WF.node = WF.hist.pop(); render(); window.scrollTo(0,0); } break;
+    case "wfAct": { const k = WF.node+"|"+v; if(!WF.done[k]){ WF.done[k] = 1; wfLog("a", v); toast(v+" · "+hm(Date.now())); render(); } break; }
+    case "wfSig": { const k = "sig|"+v; if(!WF.done[k]){ WF.done[k] = 1; wfLog("s", v); toast(v+" · "+hm(Date.now())); render(); } break; }
+    case "wfLink": { WF.paused = true; render(); setTimeout(()=>{ const x = document.getElementById(v); if(x){ x.scrollIntoView(); if(x.tagName==="DETAILS") x.open = true; } },0); break; }
+    case "incStart": S.incident.active = blankIncident(); save(); render(); setTimeout(()=>{ const x=$("#incPanel"); if(x) x.scrollIntoView(); },0); break;
+    case "incSym": case "incAid": { const a = S.incident.active; if(a){ a.log.push({t:Date.now(), k:act==="incSym"?"s":"a", x:v}); save(); render(); toast(v+" · "+hm(Date.now())); } break; }
+    case "incNote": { const a = S.incident.active, el = $("#incFree"); if(a && el && el.value.trim()){ a.log.push({t:Date.now(), k:"n", x:el.value.trim()}); save(); render(); } break; }
+    case "incDelLog": { const a = S.incident.active; if(a){ a.log = a.log.filter(l=>String(l.t)!==v); save(); render(); } break; }
+    case "incCopy": case "incShare": { const r = v? S.incident.past.find(x=>x.id===v) : S.incident.active; if(!r) break; const t = incText(r);
+      if(act==="incShare" && navigator.share){ try{ await navigator.share({title:"Diving accident record", text:t}); }catch(err){} }
+      else { try{ await navigator.clipboard.writeText(t); toast("Copied. Paste into a message to the medic."); }catch(err){ prompt("Copy this text", t); } } break; }
+    case "incClose": if(armed==="incClose"){ const a = S.incident.active; if(a){ a.end = Date.now(); S.incident.past.unshift(a); S.incident.active = null; } armed=null; save(); } else armed="incClose"; render(); break;
+    case "incDelPast": if(armed==="ip"+v){ S.incident.past = S.incident.past.filter(x=>x.id!==v); armed=null; save(); } else armed="ip"+v; render(); break;
     case "certAddSpec": { const t = ($("#cert_spec").value||"").trim(); if(t){ S.certs.specs.push(t); save(); render(); } break; }
     case "certDelSpec": if(armed==="cs"+v){ S.certs.specs.splice(+v,1); armed=null; save(); } else armed="cs"+v; render(); break;
     case "startDive": S.draft = newDraft(); save(); render(); window.scrollTo(0,0); break;
