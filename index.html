@@ -110,10 +110,14 @@ td.n{font-family:var(--mono);text-align:right}
 th.n{text-align:right}
 .banner{margin-top:12px;background:var(--warn-soft);color:var(--ink);border-radius:9px;padding:10px 12px;font-size:14px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
 .aibox{white-space:pre-wrap;font-size:15px;background:var(--ground);border:1px solid var(--line);border-radius:8px;padding:12px;min-height:44px}
-.tabs{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--surface);border-top:1px solid var(--line);padding:6px 2px calc(6px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:repeat(10,1fr)}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--surface);border-top:1px solid var(--line);padding:6px 2px calc(6px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:repeat(11,1fr)}
 .tabs button{border:0;background:none;padding:6px 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:9.5px;font-weight:700;letter-spacing:0;color:var(--muted);cursor:pointer}
 .tabs svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .tabs button.on{color:var(--accent)}
+.tabs button{font-size:8.6px;letter-spacing:-.1px}
+.tabs svg{width:21px;height:21px}
+.tabs button.sostab,.tabs button.sostab.on{color:var(--bad);font-weight:800}
+.tabs button.sostab.on{background:color-mix(in srgb,var(--bad) 12%,transparent);border-radius:8px}
 .toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--ground);padding:9px 16px;border-radius:999px;font-weight:600;font-size:14px;z-index:20}
 .big{font-family:var(--mono);font-size:30px;font-weight:500;font-variant-numeric:tabular-nums;line-height:1.1}
 .chart svg{width:100%;height:auto;display:block}
@@ -208,7 +212,7 @@ ol.steps{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
 <div class="wrap">
   <header class="top">
     <div class="brand"><i></i>NEUTRAL<small>dive coach</small></div>
-    <div class="hdr-r"><button class="sos" type="button" data-act="sos">SOS</button><button class="unitbtn" id="unitBtn" type="button"></button></div>
+    <div class="hdr-r"><button class="unitbtn" id="unitBtn" type="button"></button></div>
   </header>
   <div id="bannerSlot"></div>
   <main id="view"></main>
@@ -224,6 +228,7 @@ ol.steps{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
   <button type="button" data-tab="skills"><svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.4 6.8 19.1l1-5.8L3.5 9.2l5.9-.9z"/></svg>Skills</button>
   <button type="button" data-tab="gear"><svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="3"/><path d="M9 6V3.5h6V6M9 18v2.5h6V18M18 10h2M18 14h2"/></svg>Gear</button>
   <button type="button" data-tab="me"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>Me</button>
+  <button type="button" data-tab="emergency" class="sostab"><svg viewBox="0 0 24 24"><path d="M12 3l9 16H3z"/><path d="M12 9v5M12 17v.5"/></svg>SOS</button>
 </nav>
 
 <script>
@@ -491,7 +496,7 @@ const DEFAULT_CUES = ["Breathe from the diaphragm","Tuck your butt, knees bent",
 /* ---------- state ---------- */
 let memOnly = false;
 function defaultWbase(){ return {suit:"shorty3", tank:"al80", water:"salt", bcd:"back", boots:"", pockets:3.2, trim:4/2.20462, date:"2026-11-12", note:"Boat blocks about 0.8 kg: 2 per weight pocket (3.2 kg / 7 lb) plus 2 x 2 lb trim. Near perfect, if anything slightly light"}; }
-function blank(){ return {wbase:defaultWbase(), v:1, units:"metric", profile:{heightCm:null, weightKg:null}, cues:DEFAULT_CUES.slice(), dives:[], draft:null, example:false, sigFav:DEFAULT_SIGFAV.slice(), sigLink:"", skills:{queue:[], log:[], custom:[]}, emergency:{contacts: DEFAULT_CONTACTS.map(c=>Object.assign({}, c)), me:{name:"", blood:"", allergies:"", meds:"", cert:"", kin:"", kinPhone:"", insurer:"", policy:"", doctor:"", notes:""}}, backup:{at:null, dives:0}, trip:{name:"", items:{}}, learnings:SEED_LEARNINGS.map(x=>Object.assign({},x)), seedL:SEED_V, certs:defaultCerts(), medical:{signed:"", physician:false, physDate:""}, incident:{active:null, past:[]}}; }
+function blank(){ return {wbase:defaultWbase(), v:1, units:"metric", profile:{heightCm:null, weightKg:null}, cues:DEFAULT_CUES.slice(), dives:[], draft:null, example:false, sigFav:DEFAULT_SIGFAV.slice(), sigLink:"", skills:{queue:[], log:[], custom:[]}, emergency:{contacts: DEFAULT_CONTACTS.map(c=>Object.assign({}, c)), me:{name:"", blood:"", allergies:"", meds:"", cert:"", kin:"", kinPhone:"", insurer:"", policy:"", doctor:"", notes:""}}, backup:{at:null, dives:0}, trip:{name:"", items:{}}, learnings:SEED_LEARNINGS.map(x=>Object.assign({},x)), seedL:SEED_V, certs:defaultCerts(), medical:{signed:"", physician:false, physDate:""}, incident:{active:null, past:[]}, hiddenGuides:[], myGuides:[], gear:GEAR_SEED.map(x=>Object.assign({},x)), gearSeed:1}; }
 function migrate(o){
   if(o.wbase===undefined) o.wbase = defaultWbase();
   if(o.wbase && Math.abs((o.wbase.pockets||0) - 3.5/2.20462) < 0.01) o.wbase.pockets = 7/2.20462;
@@ -515,6 +520,10 @@ function migrate(o){
   if(o.emergency && o.emergency.me && (!o.emergency.me.cert || /advanced|aow/i.test(o.emergency.me.cert))) o.emergency.me.cert = "PADI Master Scuba Diver (Rescue Diver, EFR)";
   if(!o.medical) o.medical = {signed:"2026-09-28", physician:false, physDate:""};
   if(!o.incident) o.incident = {active:null, past:[]};
+  if(!Array.isArray(o.hiddenGuides)) o.hiddenGuides = [];
+  if(!Array.isArray(o.myGuides)) o.myGuides = [];
+  if(!Array.isArray(o.gear)) o.gear = [];
+  if(!o.gearSeed){ if(!o.gear.length) o.gear = GEAR_SEED.map(x=>Object.assign({},x)); o.gearSeed = 1; }
   return o;
 }
 function defaultCerts(){ return {list:CERT_SEED.map(x=>Object.assign({},x)), certV:4, msd:Object.assign({},MSD_SEED), aow:true, specs:["Enriched Air Nitrox","Peak Performance Buoyancy","Deep","Wreck","Search and Recovery"], prior:100, efr:null, rescue:false, applied:false, plan:"EFR, Rescue and the application with my instructor after the liveaboard, December 2026"}; }
@@ -781,6 +790,14 @@ async function runAI(kind){
 }
 
 /* ---------- rendering ---------- */
+const COPYRIGHT = "© 2026 Paul Banks. All rights reserved. Personal use only. Do not copy, modify or redistribute.";
+const DISCLAIMER = `<p><b>Neutral is a personal reference and learning aid, made for interest and fun.</b> It is not professional advice, not a certified dive planner, and may contain errors or out-of-date information.</p>
+<p>Do not rely on it for dive planning, weighting, gas, decompression, equipment setup or medical decisions. Always follow your training, your dive computer, the maker's manuals, the dive operator's briefing and qualified medical professionals.</p>
+<p>In an emergency, call local emergency services first. You use this app at your own risk; the author accepts no responsibility for how it is used.</p>`;
+function ackView(){ return `<div class="section"><h1>Before you start</h1></div>
+  <div class="section"><div class="panel stack" style="border:2px solid var(--accent)">${DISCLAIMER}
+    <button type="button" class="btn" data-act="ack">I understand</button></div>
+  <p class="small muted" style="margin-top:8px">The SOS tab works without this step.</p><p class="small muted">${esc(COPYRIGHT)}</p></div>`; }
 function render(){
   $("#unitBtn").textContent = imp()? "ft · psi · lb" : "m · bar · kg";
   document.querySelectorAll("#tabs button").forEach(b=> b.classList.toggle("on", b.dataset.tab===tab));
@@ -790,7 +807,8 @@ function render(){
     if(tab!=="emergency" && (since>=5 || (since>=1 && old))) banner += `<div class="banner"><span>${since} dive${since>1?"s":""} since your last backup.</span><button class="btn slim ghost" data-act="backupNow" type="button">Back up now</button></div>`; }
   if(memOnly) banner += `<div class="banner"><span>This browser isn't saving data. Export a backup from Me before closing.</span></div>`;
   $("#bannerSlot").innerHTML = banner;
-  const v = {dive:viewDive, coach:viewCoach, log:viewLog, nitrox:viewNitrox, me:viewMe, signals:viewSignals, weight:viewWeight, terms:viewTerms, skills:viewSkills, emergency:viewEmergency, gear:viewGear}[tab]();
+  const v = (!S.ack && tab!=="emergency")? ackView() : {dive:viewDive, coach:viewCoach, log:viewLog, nitrox:viewNitrox, me:viewMe, signals:viewSignals, weight:viewWeight, terms:viewTerms, skills:viewSkills, emergency:viewEmergency, gear:viewGear}[tab]();
+  if(!S.ack && tab!=="emergency"){ $("#view").innerHTML = v; return; }
   $("#view").innerHTML = v;
   if(tab==="nitrox") calcNitrox();
   if(tab==="terms") convert();
@@ -1011,9 +1029,9 @@ function viewEmergency(){
         <input type="text" data-ct="${c.id}|sub" value="${esc(c.sub)}" placeholder="Note">
         <button type="button" class="btn slim ghost" data-act="ctDel" data-v="${c.id}">Remove</button></div>`).join("")
     : list.map(c=>`<div class="call"><span class="who">${esc(c.who)}</span>${c.num?`<a href="${tel(c.num)}" target="_top">${esc(c.num)}</a>`:`<span class="small muted">No number</span>`}${c.sub?`<span class="sub">${esc(c.sub)}</span>`:""}</div>`).join("");
-  return `<div class="section spread"><h1 style="color:var(--bad)">Emergency</h1><button type="button" class="btn slim ghost" data-tab="${backTab==="emergency"?"dive":backTab}">Close</button></div>
+  return `<div class="section spread"><h1 style="color:var(--bad)">Emergency</h1></div>
   <div class="section"><button type="button" class="btn" style="background:var(--bad);color:#fff;font-size:18px;padding:16px" data-act="wfStart">${WF? "Resume emergency workflow" : "Start emergency workflow"}</button>
-    <p class="small muted" style="margin-top:6px">Step by step from scene safety to handover. Opens an accident record and logs each step with the time.</p></div>
+    <p class="small muted" style="margin-top:6px">Step by step from scene safety to handover. Opens an accident record and logs each step with the time. A memory aid only: it does not replace training. Call local emergency services first.</p></div>
   <div class="section"><div class="spread"><h3>Call</h3><div class="seg" style="flex:none" role="group" aria-label="Country"><button type="button" class="${R==="th"?"on":""}" data-act="emRegion" data-v="th">Thailand</button><button type="button" class="${R==="ph"?"on":""}" data-act="emRegion" data-v="ph">Philippines</button></div></div>
     <div class="panel">${contacts}</div>
     ${R==="ph"? `<p class="small muted">Chamber numbers come from Philippine dive community lists dated 2023 to 2024. Confirm the nearest working chamber with the liveaboard before departure.</p>` : ""}
@@ -2030,12 +2048,36 @@ const GUIDES = [
   {id:"kit", name:"Suit, boots and fins", blurb:"Neosport two-piece, Pelagic boots, Seawing Supernova", secs:KIT, url:KIT_URL, urlText:"Open Scubapro's Supernova page"}
 ];
 let MKS = {guide:null, sec:null};
+let GLE = false, GED = null;
+function userGuides(){ return (S.myGuides||[]).map(u=>({id:"u_"+u.id, uid:u.id, user:true, name:u.name||"My guide", blurb:u.blurb||"", url:u.url||"", urlText:"Open the maker's manual",
+  secs:(u.topics||[]).map(t=>[t.id, t.title||"Topic", String(t.text||"").split("\n")[0].slice(0,90), String(t.text||"").split(/\n{2,}/).map(q=>"<p>"+esc(q).replace(/\n/g,"<br>")+"</p>").join("")])})); }
+function allGuides(){ const h = S.hiddenGuides||[]; return GUIDES.filter(g=>!h.includes(g.id)).concat(userGuides()); }
+function gedSync(){ if(!GED) return; const v = id=>{ const el = document.getElementById(id); return el? el.value : null; };
+  ["name","blurb","url"].forEach(k=>{ const x = v("ged_"+k); if(x!==null) GED[k] = x.trim(); });
+  GED.topics.forEach((t,i)=>{ const a = v("gt_t"+i), b = v("gt_x"+i); if(a!==null) t.title = a.trim(); if(b!==null) t.text = b.replace(/\s+$/,""); }); }
+function guideEditor(){
+  const G = GED;
+  return `<div class="section spread"><h1>${G.id? "Edit guide" : "New guide"}</h1><button type="button" class="btn slim ghost" data-act="guideCancel">Cancel</button></div>
+  <div class="section"><div class="panel stack">
+    <label class="f">Gear name<input type="text" id="ged_name" value="${esc(G.name)}" placeholder="e.g. Apeks XTX50"></label>
+    <label class="f">Short description<input type="text" id="ged_blurb" value="${esc(G.blurb)}" placeholder="e.g. Regulator: setup and care"></label>
+    <label class="f">Link to the maker's manual (optional)<input type="url" id="ged_url" value="${esc(G.url)}" placeholder="https://"></label>
+  </div></div>
+  <div class="section"><h3>Topics</h3>
+    ${G.topics.map((t,i)=>`<div class="panel stack" style="margin-bottom:10px">
+      <label class="f">Topic ${i+1}<input type="text" id="gt_t${i}" value="${esc(t.title)}" placeholder="e.g. Before the dive"></label>
+      <label class="f">Notes<textarea id="gt_x${i}" rows="6" style="width:100%;font:inherit;padding:10px;border-radius:9px;border:1px solid var(--line);background:var(--ground);color:var(--ink)" placeholder="Your own notes. Leave a blank line between paragraphs.">${esc(t.text)}</textarea></label>
+      <button type="button" class="btn slim ghost" data-act="guideDelTopic" data-v="${i}">Remove topic</button></div>`).join("")}
+    <button type="button" class="btn ghost" data-act="guideAddTopic">Add topic</button>
+  </div>
+  <div class="section"><div class="row"><button type="button" class="btn slim" data-act="guideSave">Save guide</button>${G.id? `<button type="button" class="btn slim ghost" data-act="guideDel">${armed==="guideDel"?"Tap again to delete":"Delete guide"}</button>`:""}</div>
+  <p class="small muted" style="margin-top:8px">Write it in your own words. Saved on this phone and searchable with the other guides.</p></div>`;
+}
 function stripTags(h){ return String(h).replace(/<[^>]*>/g," ").replace(/&nbsp;/g," ").replace(/&amp;/g,"&").replace(/\s+/g," ").trim(); }
 let GEAR_IX = null;
 function gearIndex(){
-  if(GEAR_IX) return GEAR_IX;
   GEAR_IX = [];
-  GUIDES.forEach(g=> g.secs.forEach(sec=>{
+  allGuides().forEach(g=> g.secs.forEach(sec=>{
     const text = stripTags(sec[3]);
     GEAR_IX.push({g:g.id, gname:g.name, id:sec[0], title:sec[1], blurb:sec[2], text, hay:(sec[1]+" "+sec[2]+" "+text+" "+(sec[4]||"")).toLowerCase()});
   }));
@@ -2075,14 +2117,94 @@ function viewTrip(){
   <div class="section"><p class="small muted">The SOS page has emergency numbers for Thailand and the Philippines: pick the country at the top of the Call list. For any other country, add its numbers there before your first dive.</p>
   <button type="button" class="btn ghost" data-act="sos">Open SOS contacts</button></div>`;
 }
+const GEAR_SEED = [
+  {id:"g1", type:"Dive computer", name:"Garmin Descent Mk2i", serial:"", bought:"", service:"", every:"", notes:"Primary. T1 pod takes a CR123A"},
+  {id:"g2", type:"Dive computer", name:"Shearwater Peregrine", serial:"", bought:"", service:"", every:"", notes:"Backup"},
+  {id:"g3", type:"Regulator", name:"Scubapro MK25 EVO / S620 Ti", serial:"", bought:"", service:"", every:"12", notes:""},
+  {id:"g4", type:"BCD", name:"Scubapro Hydros Pro", serial:"", bought:"", service:"", every:"12", notes:""},
+  {id:"g5", type:"Wetsuit", name:"Neosport 3 mm two-piece", serial:"", bought:"", service:"", every:"", notes:"Long-sleeve shorty plus farmer john"},
+  {id:"g6", type:"Boots", name:"Fourth Element Pelagic 6.5 mm", serial:"", bought:"", service:"", every:"", notes:""},
+  {id:"g7", type:"Fins", name:"Scubapro Seawing Supernova", serial:"", bought:"", service:"", every:"", notes:"Open heel, positive buoyancy"}
+];
+const GEAR_TYPES = [["Regulator",12],["BCD",12],["Dive computer",0],["Tank",12],["Wetsuit",0],["Mask",0],["Fins",0],["Boots",0],["Light",0],["SMB and reel",0],["Other",0]];
+let GE = null, GPROMPT = null;
+const GUIDE_TOPICS = {"Regulator":["Setup","Before the dive","After the dive","Service"],"BCD":["Fit and weights","Before the dive","Care"],"Dive computer":["Settings","Before the dive","Battery and charging","Logs and updates"],"Tank":["Pressure and inspection dates","Care"],"Light":["Battery","Care"],"SMB and reel":["Deploying","Care"]};
+const GUIDE_STOP = ["garmin","scubapro","shearwater","descent","fourth","element","dive","diving","pro","evo","the","and"];
+function gearTokens(t){ return String(t||"").toLowerCase().split(/[^a-z0-9]+/).filter(w=>w.length>=3 && !GUIDE_STOP.includes(w)); }
+function guideFor(x){
+  const name = String(x.name||"").toLowerCase();
+  const user = (S.myGuides||[]).find(u=> gearTokens(u.name).some(w=>name.includes(w)));
+  if(user) return {id:"u_"+user.id, name:user.name, hidden:false};
+  const b = GUIDES.find(g=> g.id!=="kit" && gearTokens(g.name).some(w=>name.includes(w)));
+  if(b) return {id:b.id, name:b.name, hidden:(S.hiddenGuides||[]).includes(b.id)};
+  return null;
+}
+function newGuideFrom(x){ const t = GUIDE_TOPICS[x.type] || ["Fit and sizing","Care"];
+  return {id:null, name:x.name||x.type, blurb:x.type||"", url:"", topics:t.map(title=>({id:uid(), title, text:""}))}; }
+function gearPromptHtml(){
+  const x = (S.gear||[]).find(y=>y.id===GPROMPT); if(!x) return "";
+  const g = guideFor(x);
+  if(g && !g.hidden) return "";
+  return `<div class="panel stack" style="border:2px solid var(--accent);margin-bottom:10px">
+    ${g? `<p><b>${esc(x.name)}</b> has a built-in guide that you removed. Restore it?</p>
+      <div class="row"><button type="button" class="btn slim" data-act="gpRestore" data-v="${g.id}">Restore guide</button><button type="button" class="btn slim ghost" data-act="gpNo">Not now</button></div>`
+    : `<p>No guide for <b>${esc(x.name)}</b> yet. Start one with your own notes: setup, checks, care?</p>
+      <div class="row"><button type="button" class="btn slim" data-act="gpCreate" data-v="${x.id}">Create a guide</button><button type="button" class="btn slim ghost" data-act="gpNo">Not now</button></div>`}
+  </div>`;
+}
+function gearDue(x){
+  if(!x.every || !x.service) return null;
+  const d = new Date(x.service+"T00:00:00"); if(isNaN(d)) return null;
+  d.setMonth(d.getMonth() + (+x.every)); const due = d.toISOString().slice(0,10);
+  const days = Math.round((d - new Date(today()+"T00:00:00"))/86400000);
+  return {due, days};
+}
+function gearPill(x){
+  const g = gearDue(x);
+  if(!g) return x.every && +x.every>0 ? `<span class="pill warn" style="flex:none">Add service date</span>` : "";
+  if(g.days < 0) return `<span class="pill bad" style="flex:none">Service overdue</span>`;
+  if(g.days <= 60) return `<span class="pill warn" style="flex:none">Due ${esc(fmtD(g.due))}</span>`;
+  return `<span class="pill good" style="flex:none">OK to ${esc(fmtD(g.due))}</span>`;
+}
+function gearForm(x){
+  const t = x.type || "Regulator";
+  return `<div class="panel stack" style="border:2px solid var(--deep)">
+    <div class="grid2"><label class="f">Type<select id="gf_type">${GEAR_TYPES.map(([n])=>`<option ${n===t?"selected":""}>${esc(n)}</option>`).join("")}</select></label>
+    <label class="f">Make and model<input type="text" id="gf_name" value="${esc(x.name||"")}" placeholder="e.g. Scubapro MK25"></label></div>
+    <div class="grid2"><label class="f">Serial number<input type="text" id="gf_serial" value="${esc(x.serial||"")}"></label>
+    <label class="f">Bought<input type="date" id="gf_bought" value="${esc(x.bought||"")}"></label></div>
+    <div class="grid2"><label class="f">Last service<input type="date" id="gf_service" value="${esc(x.service||"")}"></label>
+    <label class="f">Service every (months)<input type="number" inputmode="numeric" id="gf_every" value="${x.every==null||x.every===""?"":esc(x.every)}" placeholder="0 = none"></label></div>
+    <label class="f">Notes<input type="text" id="gf_notes" value="${esc(x.notes||"")}" placeholder="Size, settings, what the shop did"></label>
+    <div class="row"><button type="button" class="btn slim" data-act="gearSave">Save</button><button type="button" class="btn slim ghost" data-act="gearCancel">Cancel</button>${x.id? (()=>{ const g = guideFor(x); return g && !g.hidden ? `<button type="button" class="btn slim ghost" data-act="mkGuide" data-v="${g.id}">Open guide</button>` : `<button type="button" class="btn slim ghost" data-act="gpCreate" data-v="${x.id}">Create a guide</button>`; })() : ""}${x.id? `<button type="button" class="btn slim ghost" data-act="gearDel" data-v="${x.id}">${armed==="gd"+x.id?"Tap again to delete":"Delete"}</button>`:""}</div>
+  </div>`;
+}
+function myGearHtml(){
+  const list = (S.gear||[]).slice().sort((a,b)=> (a.type||"").localeCompare(b.type||"") || (a.name||"").localeCompare(b.name||""));
+  const due = list.filter(x=>{ const g = gearDue(x); return g && g.days <= 60; }).length;
+  const rows = list.map(x=> GE===x.id ? gearForm(x) : `<button type="button" class="cue" style="width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--line);cursor:pointer;color:inherit;font:inherit" data-act="gearEdit" data-v="${x.id}"><span style="flex:1;min-width:0"><b>${esc(x.name||x.type)}</b><br><span class="small muted">${esc(x.type)}${x.serial?` · SN ${esc(x.serial)}`:""}${x.notes?` · ${esc(x.notes)}`:""}</span></span>${gearPill(x)}</button>`).join("");
+  return `<div class="section"><div class="spread"><h3>My gear</h3>${GE===null?`<button type="button" class="btn slim ghost" data-act="gearAdd">Add gear</button>`:""}</div>
+    ${GE===null? gearPromptHtml() : ""}
+    ${GE==="new"? gearForm({}) : ""}
+    ${list.length? `<div class="panel" style="padding-top:0">${rows}</div>` : (GE==="new"? "" : `<div class="panel"><p class="small muted">Add your regulator, BCD, computer and the rest. Set the last service date and how often it needs servicing, and the app flags it when it's due.</p></div>`)}
+    ${due? `<p class="small" style="color:var(--bad);margin-top:6px">${due} item${due>1?"s":""} due for service within 60 days.</p>`:""}
+  </div>`;
+}
 function viewGear(){
   if(MKS.guide==="trip") return viewTrip();
-  const g = GUIDES.find(x=>x.id===MKS.guide);
+  if(GED) return guideEditor();
+  const g = allGuides().find(x=>x.id===MKS.guide);
   if(!g){
-    return `<div class="section"><h1>Gear guides</h1>
-      <p class="small muted">Quick references in my own words, written for how you dive. They work with no signal. The makers' own manuals are linked inside each guide and need a connection.</p></div>
+    return `<div class="section"><h1>Gear</h1></div>
+    ${myGearHtml()}
+    <div class="section"><h3>Guides</h3><p class="small muted">Quick references that work with no signal. The makers' own manuals are linked inside each guide and need a connection.</p></div>
     ${gearSearchBox()}
-    <div class="section" id="gearList"><div class="panel toc"><button type="button" data-act="mkGuide" data-v="trip"><span class="n">\u2713</span><b>Trip prep checklist</b><span class="d">Before you go, on arrival, each dive day</span></button>${GUIDES.map((x,i)=>`<button type="button" data-act="mkGuide" data-v="${x.id}"><span class="n">${String(i+1).padStart(2,"0")}</span><b>${esc(x.name)}</b><span class="d">${esc(x.blurb)} · ${x.secs.length} topics</span></button>`).join("")}</div></div>`;
+    <div class="section" id="gearList"><div class="panel toc"><button type="button" data-act="mkGuide" data-v="trip"><span class="n">\u2713</span><b>Trip prep checklist</b><span class="d">Before you go, on arrival, each dive day</span></button>${allGuides().map((x,i)=> GLE
+      ? `<div class="cue" style="border-top:1px solid var(--line)"><span style="flex:1;min-width:0"><b>${esc(x.name)}</b><br><span class="small muted">${esc(x.blurb)}</span></span><button type="button" class="btn slim ghost" style="flex:none;width:auto" data-act="${x.user?"guideEdit":"guideHide"}" data-v="${x.user?x.uid:x.id}">${x.user? "Edit" : (armed==="gh"+x.id? "Tap again" : "Remove")}</button></div>`
+      : `<button type="button" data-act="mkGuide" data-v="${x.id}"><span class="n">${x.user? "✎" : String(i+1).padStart(2,"0")}</span><b>${esc(x.name)}</b><span class="d">${esc(x.blurb)}${x.blurb?" · ":""}${x.secs.length} topic${x.secs.length===1?"":"s"}</span></button>`).join("")}</div></div>
+    <div class="section"><div class="row"><button type="button" class="btn slim" data-act="guideNew">Add a guide</button><button type="button" class="btn slim ghost" data-act="guideListEdit">${GLE? "Done" : "Edit list"}</button></div>
+    ${(S.hiddenGuides||[]).length? `<div class="panel" style="margin-top:10px"><p class="small muted">Removed guides</p>${GUIDES.filter(x=>(S.hiddenGuides||[]).includes(x.id)).map(x=>`<div class="cue" style="border-top:1px solid var(--line)"><span style="flex:1">${esc(x.name)}</span><button type="button" class="btn slim ghost" style="flex:none;width:auto" data-act="guideRestore" data-v="${x.id}">Restore</button></div>`).join("")}</div>` : ""}
+    </div>`;
   }
   if(MKS.sec){
     const i = g.secs.findIndex(x=>x[0]===MKS.sec), m = g.secs[i];
@@ -2099,10 +2221,11 @@ function viewGear(){
   <div class="section" id="gearList"><h3>Contents</h3><div class="panel toc">
     ${g.secs.map((m,i)=>`<button type="button" data-act="mkSec" data-v="${m[0]}"><span class="n">${String(i+1).padStart(2,"0")}</span><b>${esc(m[1])}</b><span class="d">${esc(m[2])}</span></button>`).join("")}
   </div></div>
-  <div class="section"><h3>The maker's own manual</h3><div class="panel stack">
-    <a class="lnk" href="${g.url}" target="_blank" rel="noopener">${esc(g.urlText)} ↗</a>
-    <p class="small muted">Their wording is theirs, so this guide does not reproduce it. Where the two disagree, the maker's manual and your training win.</p>
-  </div></div>`;
+  ${g.user? `<div class="section"><button type="button" class="btn ghost" data-act="guideEdit" data-v="${g.uid}">Edit this guide</button></div>` : ""}
+  ${g.url? `<div class="section"><h3>The maker's own manual</h3><div class="panel stack">
+    <a class="lnk" href="${esc(g.url)}" target="_blank" rel="noopener">${esc(g.urlText)} ↗</a>
+    <p class="small muted">${g.user? "Where your notes and the maker's manual disagree, the manual and your training win." : "Their wording is theirs, so this guide does not reproduce it. Where the two disagree, the maker's manual and your training win."}</p>
+  </div></div>` : ""}`;
 }
 
 /* --- Terms --- */
@@ -2379,7 +2502,8 @@ function viewMe(){
   <div class="section"><h3>Coach engine</h3><div class="panel small stack">
     <p><span class="pill info">Rules</span> Always on, works offline. One change per dive, safety-biased: it never removes weight after a rise at the 5 m check or a hard safety stop.</p>
     <p><span class="pill ${ai.sample?"good":"warn"}">Claude</span> ${ai.sample? "Available here. Used only when you tap it." : "Not available in this view."}</p>
-  </div></div>`;
+  </div></div>
+  <div class="section"><h3>About and disclaimer</h3><div class="panel stack small">${DISCLAIMER}<p class="muted">${esc(COPYRIGHT)}</p></div></div>`;
 }
 
 let CE = false;
@@ -2517,7 +2641,7 @@ document.addEventListener("click", async e=>{
   }
   const act = b.dataset.act, v = b.dataset.v; if(!act) return;
   const d = S.draft;
-  if(act!=="delDive" && act!=="reset" && act!=="discard" && act!=="skillDelLog" && act!=="tripReset" && act!=="delLearn" && act!=="certDelSpec" && act!=="certDel" && act!=="incClose" && act!=="incDelPast") armed = null;
+  if(act!=="delDive" && act!=="reset" && act!=="discard" && act!=="skillDelLog" && act!=="tripReset" && act!=="delLearn" && act!=="certDelSpec" && act!=="certDel" && act!=="guideHide" && act!=="guideDel" && act!=="gearDel" && act!=="incClose" && act!=="incDelPast") armed = null;
   switch(act){
     case "certEdit": if(CE){ document.querySelectorAll("[data-cl]").forEach(el=>{ const [id,f] = el.dataset.cl.split("|"); const x = S.certs.list.find(y=>y.id===id); if(x) x[f] = el.value.trim(); }); save(); } CE = !CE; render(); break;
     case "certSave": document.querySelectorAll("[data-cl]").forEach(el=>{ const [id,f] = el.dataset.cl.split("|"); const x = S.certs.list.find(y=>y.id===id); if(x) x[f] = el.value.trim(); }); CE = false; save(); render(); toast("Saved"); break;
@@ -2584,7 +2708,37 @@ document.addEventListener("click", async e=>{
     }
     case "tripReset": if(armed==="trip"){ S.trip = {name:S.trip.name, items:{}}; armed=null; save(); toast("Checklist cleared"); } else armed="trip"; render(); break;
     case "mkOpen": { const [gid,sid] = v.split("|"); MKS.guide = gid; MKS.sec = sid; GEARQ = ""; render(); window.scrollTo(0,0); break; }
-    case "mkGuide": MKS.guide = v || null; MKS.sec = null; render(); window.scrollTo(0,0); break;
+    case "gpNo": GPROMPT = null; render(); break;
+    case "gpRestore": S.hiddenGuides = (S.hiddenGuides||[]).filter(x=>x!==v); GPROMPT = null; save(); render(); toast("Guide restored"); break;
+    case "gpCreate": { const x = (S.gear||[]).find(y=>y.id===v); if(x){ GED = newGuideFrom(x); GPROMPT = null; GE = null; GLE = false; MKS.guide = null; MKS.sec = null; render(); window.scrollTo(0,0); } break; }
+    case "ack": S.ack = 1; save(); render(); window.scrollTo(0,0); break;
+    case "gearAdd": GE = "new"; render(); break;
+    case "gearEdit": GE = v; render(); break;
+    case "gearCancel": GE = null; render(); break;
+    case "gearSave": { const g = id=>{ const el=$("#"+id); return el? el.value.trim() : ""; };
+      const rec = {type:g("gf_type"), name:g("gf_name"), serial:g("gf_serial"), bought:g("gf_bought"), service:g("gf_service"), every:g("gf_every"), notes:g("gf_notes")};
+      if(!rec.name && !rec.serial){ toast("Add a make and model"); break; }
+      if(rec.every==="" ){ const d = GEAR_TYPES.find(t=>t[0]===rec.type); rec.every = d && d[1] ? String(d[1]) : ""; }
+      if(GE==="new"){ rec.id = uid(); S.gear.push(rec); const g = guideFor(rec); GPROMPT = (!g || g.hidden)? rec.id : null; } else { const x = S.gear.find(y=>y.id===GE); if(x) Object.assign(x, rec); }
+      GE = null; save(); render(); toast("Saved"); break; }
+    case "gearDel": if(armed==="gd"+v){ S.gear = S.gear.filter(x=>x.id!==v); GE = null; armed = null; save(); } else armed = "gd"+v; render(); break;
+    case "guideListEdit": GLE = !GLE; render(); break;
+    case "guideHide": if(armed==="gh"+v){ S.hiddenGuides = (S.hiddenGuides||[]).concat(v); armed = null; save(); } else armed = "gh"+v; render(); break;
+    case "guideRestore": S.hiddenGuides = (S.hiddenGuides||[]).filter(x=>x!==v); save(); render(); break;
+    case "guideNew": GED = {id:null, name:"", blurb:"", url:"", topics:[{id:uid(), title:"", text:""}]}; GLE = false; MKS.guide = null; MKS.sec = null; render(); window.scrollTo(0,0); break;
+    case "guideEdit": { const u = (S.myGuides||[]).find(x=>x.id===v); if(u){ GED = JSON.parse(JSON.stringify(u)); if(!GED.topics||!GED.topics.length) GED.topics = [{id:uid(), title:"", text:""}]; GLE = false; render(); window.scrollTo(0,0); } break; }
+    case "guideAddTopic": gedSync(); GED.topics.push({id:uid(), title:"", text:""}); render(); break;
+    case "guideDelTopic": gedSync(); GED.topics.splice(+v,1); if(!GED.topics.length) GED.topics.push({id:uid(), title:"", text:""}); render(); break;
+    case "guideCancel": GED = null; render(); window.scrollTo(0,0); break;
+    case "guideSave": { gedSync(); if(!GED.name){ toast("Add the gear name"); break; }
+      if(GED.url && !/^https?:\/\//i.test(GED.url)) GED.url = "https://" + GED.url;
+      GED.topics = GED.topics.filter(t=>t.title || t.text);
+      S.myGuides = S.myGuides || [];
+      if(GED.id){ const i = S.myGuides.findIndex(x=>x.id===GED.id); if(i>=0) S.myGuides[i] = GED; }
+      else { GED.id = uid(); S.myGuides.push(GED); }
+      const id = "u_"+GED.id; GED = null; MKS.guide = id; MKS.sec = null; save(); render(); window.scrollTo(0,0); toast("Guide saved"); break; }
+    case "guideDel": if(armed==="guideDel"){ S.myGuides = (S.myGuides||[]).filter(x=>x.id!==GED.id); GED = null; MKS.guide = null; MKS.sec = null; armed = null; save(); render(); window.scrollTo(0,0); } else { gedSync(); armed = "guideDel"; render(); } break;
+    case "mkGuide": GE = null; MKS.guide = v || null; MKS.sec = null; render(); window.scrollTo(0,0); break;
     case "mkSec": MKS.sec = v; render(); window.scrollTo(0,0); break;
     case "mkTop": MKS.sec = null; render(); window.scrollTo(0,0); break;
     case "rcCalm": RC.calm = v==="1"; render(); break;
