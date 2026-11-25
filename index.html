@@ -406,9 +406,24 @@ const TRIP = [
     "Check the flying-after-diving card before booking the flight home",
     "Skin check morning and evening; fresh-water rinse, dry and moisturize after the last dive",
     "Stop rule: spreading redness, warmth, swelling, red streaks or fever means no more diving and call the doctor"
+  ]],
+  ["Galápagos", [
+    "Dive insurance covers air evacuation from the islands to the mainland. Policy number in SOS > My details",
+    "Nitrox card packed. Some boats require it, or charge for a private guide without it",
+    "Large SMB with a 30 m line or longer, and practice deploying it from depth before the trip",
+    "Reef hook and gloves for holding position in current, where the guides allow it",
+    "Personal locator or marine GPS radio, if the boat doesn't issue one",
+    "Cool season (June to November): 7 mm with hood, boots and gloves. Water can be in the 60s °F, and thermoclines drop several degrees in seconds. Warm season (December to May) is milder",
+    "Seas at Wolf and Darwin can be rough, especially in the cool season: seasickness remedy that doesn't make you drowsy, tested at home first",
+    "A few weeks before the trip: recheck the SOS numbers and the boat's rules, and get the chamber number from the operator",
+    "New suit and hood: redo the weight check on the first dive",
+    "Panga entries: back-roll and descend straight away with the group. Don't wait at the surface in current",
+    "At the briefing: chamber number, the boat's satellite phone, and the evacuation plan. Add them to SOS",
+    "Wolf and Darwin are an overnight sail from help. Dive conservatively there: no deco, slow ascents, full safety stops",
+    "Flying home: Quito sits at about 2,850 m. Count it as altitude when you plan your last dive day"
   ]]
 ];
-const DEFAULT_CONTACTS = [
+const TH_CONTACTS = [
   {id:"k1", who:"Thailand ambulance (EMS)", num:"1669", sub:"National emergency medical line"},
   {id:"k2", who:"DAN emergency, within Thailand", num:"1-800-01-8092", sub:"Diving medical emergencies, 24 h. Source: DAN contact page, Sept 2026"},
   {id:"k3", who:"DAN global emergency", num:"+1-919-684-9111", sub:"Works from anywhere, 24 h. Calls from abroad may cost"},
@@ -417,6 +432,21 @@ const DEFAULT_CONTACTS = [
   {id:"k6", who:"SSS chamber, Phuket", num:"+66 81 081 9000", sub:"24 h emergency"},
   {id:"k7", who:"Dive operator / boat", num:"", sub:"Add before each trip"}
 ];
+const US_CONTACTS = [
+  {id:"u1", who:"Emergency (EMS, police, fire)", num:"911", sub:"Call first for any life-threatening emergency"},
+  {id:"u2", who:"DAN emergency hotline", num:"+1-919-684-9111", sub:"Diving medical emergencies, 24 h, worldwide. Based in Durham, NC"},
+  {id:"u3", who:"Duke Hyperbaric Center, Durham", num:"919-684-8111", sub:"24 h. Ask for the hyperbaric physician on call. Call 911 first if life-threatening"},
+  {id:"u4", who:"US Coast Guard, offshore", num:"", sub:"VHF channel 16 from the boat"},
+  {id:"u5", who:"Dive operator / boat", num:"", sub:"Add before each trip"}
+];
+const EC_CONTACTS = [
+  {id:"e1", who:"Ecuador emergency, ECU 911", num:"911", sub:"Police, fire, ambulance. Some operators speak English. The ECU 911 app can call you back with your GPS location"},
+  {id:"e2", who:"DAN emergency hotline", num:"+1-919-684-9111", sub:"24 h. Call early: DAN can coordinate evacuation from the islands"},
+  {id:"e3", who:"Protesub hyperbaric chamber, Puerto Ayora", num:"", sub:"Santa Cruz Island, 24 h. Get the current number from the liveaboard before the first dive"},
+  {id:"e4", who:"Ecuadorian Navy chamber, Guayaquil", num:"", sub:"San Eduardo Naval Base, mainland. Second option; ask DAN or the operator"},
+  {id:"e5", who:"Liveaboard / dive operator", num:"", sub:"Add the boat's satellite phone and the office number"}
+];
+const DEFAULT_CONTACTS = TH_CONTACTS;
 const PH_CONTACTS = [
   {id:"p1", who:"Philippines emergency (police, fire, ambulance)", num:"911", sub:"National hotline, from any phone"},
   {id:"p2", who:"Philippine Coast Guard", num:"+63 2 8527 8482", sub:"Sea rescue and evacuation. Also +63 2 8527 3877. Text +63 917 724 3682"},
@@ -428,8 +458,16 @@ const PH_CONTACTS = [
   {id:"p8", who:"Chamber, Coron: Sea Dive Resort", num:"+63 920 458 1360", sub:"Coron, Palawan"},
   {id:"p9", who:"Liveaboard operator / boat", num:"", sub:"Add before the trip, with their emergency plan and nearest chamber"}
 ];
-function emRegion(){ return S.emergency.region==="ph"? "ph" : "th"; }
-function emList(){ if(!Array.isArray(S.emergency.ph)) S.emergency.ph = PH_CONTACTS.map(c=>({...c})); return emRegion()==="ph"? S.emergency.ph : S.emergency.contacts; }
+const DEFAULT_REGION = "th";
+const REGIONS = [
+  {k:"th", label:"Thailand", store:"contacts", seed:()=>TH_CONTACTS, note:""},
+  {k:"ph", label:"Philippines", store:"ph", seed:()=>PH_CONTACTS, note:"Chamber numbers come from Philippine dive community lists dated 2023 to 2024. Confirm the nearest working chamber with the liveaboard before departure."},
+  {k:"us", label:"USA", store:"us", seed:()=>US_CONTACTS, note:""},
+  {k:"ec", label:"Ecuador", store:"ec", seed:()=>EC_CONTACTS, note:"Galápagos medical care is limited and evacuation to the mainland is by air. Wolf and Darwin are an overnight sail from Santa Cruz, so help can be many hours away. Get the chamber and boat numbers at the first briefing. Galápagos checklist: Gear tab, Trip prep. Numbers checked November 2026."}
+];
+function emReg(){ return REGIONS.find(r=>r.k===S.emergency.region) || REGIONS.find(r=>r.k===DEFAULT_REGION); }
+function emRegion(){ return emReg().k; }
+function emList(){ const r = emReg(); if(!Array.isArray(S.emergency[r.store])) S.emergency[r.store] = r.seed().map(c=>({...c})); return S.emergency[r.store]; }
 function defaultCond(last){ return {current:null, vis:null, temp:null, entry: last&&last.cond? last.cond.entry : null, camera: last&&last.cond? last.cond.camera : null}; }
 const CUR_T = {none:"No current", light:"Light", mod:"Moderate", strong:"Strong"};
 const VIS_T = {lt5:"Under 5 m", "5to15":"5 to 15 m", "15to30":"15 to 30 m", gt30:"Over 30 m"};
@@ -519,6 +557,11 @@ function migrate(o){
   if(o.certs.certV!==4){ o.certs.list = CERT_SEED.map(x=>Object.assign({},x)); o.certs.msd = Object.assign({},MSD_SEED); o.certs.rescue = true; o.certs.applied = true; o.certs.certV = 4; }
   if(o.emergency && o.emergency.me && (!o.emergency.me.cert || /advanced|aow/i.test(o.emergency.me.cert))) o.emergency.me.cert = "PADI Master Scuba Diver (Rescue Diver, EFR)";
   if(!o.medical) o.medical = {signed:"2026-09-28", physician:false, physDate:""};
+  if(o.emergency && !o.emergency.rv){
+    if(o.emergency.contacts && o.emergency.contacts.some(c=>/EMS, police, fire/.test(c.who||""))){ o.emergency.us = o.emergency.contacts; o.emergency.contacts = TH_CONTACTS.map(c=>({...c})); if(!o.emergency.region || o.emergency.region==="th") o.emergency.region = "us"; }
+    if(o.emergency.ph && o.emergency.ph.some(c=>/ECU 911/.test(c.who||""))){ o.emergency.ec = o.emergency.ph; delete o.emergency.ph; if(o.emergency.region==="ph") o.emergency.region = "ec"; }
+    o.emergency.rv = 2;
+  }
   if(!o.incident) o.incident = {active:null, past:[]};
   if(!Array.isArray(o.hiddenGuides)) o.hiddenGuides = [];
   if(!Array.isArray(o.myGuides)) o.myGuides = [];
@@ -1032,9 +1075,10 @@ function viewEmergency(){
   return `<div class="section spread"><h1 style="color:var(--bad)">Emergency</h1></div>
   <div class="section"><button type="button" class="btn" style="background:var(--bad);color:#fff;font-size:18px;padding:16px" data-act="wfStart">${WF? "Resume emergency workflow" : "Start emergency workflow"}</button>
     <p class="small muted" style="margin-top:6px">Step by step from scene safety to handover. Opens an accident record and logs each step with the time. A memory aid only: it does not replace training. Call local emergency services first.</p></div>
-  <div class="section"><div class="spread"><h3>Call</h3><div class="seg" style="flex:none" role="group" aria-label="Country"><button type="button" class="${R==="th"?"on":""}" data-act="emRegion" data-v="th">Thailand</button><button type="button" class="${R==="ph"?"on":""}" data-act="emRegion" data-v="ph">Philippines</button></div></div>
+  <div class="section"><h3>Call</h3>
+    <div class="seg" role="group" aria-label="Country" style="margin-bottom:10px">${REGIONS.map(r=>`<button type="button" class="${R===r.k?"on":""}" style="font-size:13px;padding-left:2px;padding-right:2px" data-act="emRegion" data-v="${r.k}">${r.label}</button>`).join("")}</div>
     <div class="panel">${contacts}</div>
-    ${R==="ph"? `<p class="small muted">Chamber numbers come from Philippine dive community lists dated 2023 to 2024. Confirm the nearest working chamber with the liveaboard before departure.</p>` : ""}
+    ${emReg().note? `<p class="small muted">${emReg().note}</p>` : ""}
     <div class="row">${EM.edit? `<button type="button" class="btn slim" data-act="ctSave">Save contacts</button><button type="button" class="btn slim ghost" data-act="ctAdd">Add contact</button>` : `<button type="button" class="btn slim ghost" data-act="ctEdit">Edit contacts</button>`}</div>
     <p class="small muted">Tap a number to call. Check the numbers before each trip.</p></div>
   <div class="section"><div class="spread"><h3>My details</h3><button type="button" class="btn slim ghost" data-act="meEdit">${EM.meEdit?"Done":"Edit"}</button></div>
@@ -2114,7 +2158,7 @@ function viewTrip(){
       const k = grp+"|"+i;
       return `<label class="cue"><input type="checkbox" data-trip="${esc(k)}" ${S.trip.items[k]?"checked":""}><span>${esc(t)}</span></label>`;
     }).join("")}</div></div>`).join("")}
-  <div class="section"><p class="small muted">The SOS page has emergency numbers for Thailand and the Philippines: pick the country at the top of the Call list. For any other country, add its numbers there before your first dive.</p>
+  <div class="section"><p class="small muted">The SOS page has emergency numbers for Thailand, the Philippines, the USA and Ecuador (Galápagos): pick one at the top of the Call list. For any other country, add its numbers there before your first dive.</p>
   <button type="button" class="btn ghost" data-act="sos">Open SOS contacts</button></div>`;
 }
 const GEAR_SEED = [
@@ -2692,8 +2736,8 @@ document.addEventListener("click", async e=>{
     case "meSave": { document.querySelectorAll("[data-me]").forEach(el=>{ S.emergency.me[el.dataset.me] = el.value.trim(); }); EM.meEdit = false; save(); render(); toast("Saved on this phone"); break; }
     case "ctEdit": EM.edit = !EM.edit; render(); break;
     case "ctAdd": emList().push({id:"k"+uid(), who:"New contact", num:"", sub:""}); EM.edit = true; save(); render(); break;
-    case "ctDel": { const k = emRegion()==="ph"? "ph" : "contacts"; S.emergency[k] = emList().filter(c=>c.id!==v); save(); render(); break; }
-    case "emRegion": S.emergency.region = v==="ph"? "ph" : "th"; EM.edit = false; save(); render(); break;
+    case "ctDel": { const k = emReg().store; S.emergency[k] = emList().filter(c=>c.id!==v); save(); render(); break; }
+    case "emRegion": S.emergency.region = REGIONS.some(r=>r.k===v)? v : DEFAULT_REGION; EM.edit = false; save(); render(); break;
     case "backupNow": tab = "me"; render(); setTimeout(()=>{ const el = $("#backupPanel"); el && el.scrollIntoView({block:"start"}); }, 30); break;
     case "copyBackup": {
       try{ await navigator.clipboard.writeText(JSON.stringify(S)); markBackup(); toast("Backup copied. Paste it into Notes"); }
